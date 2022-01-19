@@ -1,31 +1,48 @@
 package com.example.schoollifeproject
 
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.schoollifeproject.databinding.ActivityMindMapBinding
 import me.jagar.mindmappingandroidlibrary.Views.Item
 import me.jagar.mindmappingandroidlibrary.Views.ItemLocation
 import me.jagar.mindmappingandroidlibrary.Views.MindMappingView
+import android.util.DisplayMetrics
+import android.view.MotionEvent
+import me.jagar.mindmappingandroidlibrary.Zoom.ZoomLayout
+
 
 class MindMapActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMindMapBinding
     private lateinit var mindMappingView: MindMappingView
     private lateinit var rootNode: Item
+    private lateinit var freshman: Item
+    private lateinit var sophomore: Item
+    private lateinit var junior: Item
+    private lateinit var senior: Item
+    private lateinit var zoomLayout: ZoomLayout
     private var childNode = ArrayList<Item>()
     private var childNodeNum = 0
-    var nodeLocation = 0
+    // 방향별로 노드 개수 만드는게 어떨까?
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMindMapBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mindMappingView = binding.mindMappingView
+        zoomLayout = binding.zoomLayout
+
+        val displaymetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displaymetrics)
+        val screenWidth = displaymetrics.widthPixels
+        val screenHeight = displaymetrics.heightPixels
+
+        mindMappingView.layoutParams.width = (screenWidth * 2.5).toInt()
+        mindMappingView.layoutParams.height = (screenHeight * 2.5).toInt()
+
         addRoot()
         nodeEvent()
     }
@@ -34,78 +51,82 @@ class MindMapActivity : AppCompatActivity() {
         rootNode = Item(this, "Root", "Hello", true)
         mindMappingView.addCentralItem(rootNode, false)
 
-        val freshman = Item(this, "1st", "Hello", true)
-        val sophomore = Item(this, "2nd", "Hello", true)
-        val junior = Item(this, "3rd", "Hello", true)
-        val senior = Item(this, "4st", "Hello", true)
+        freshman = Item(this, "1st", "Hello", true)
+        sophomore = Item(this, "2nd", "Hello", true)
+        junior = Item(this, "3rd", "Hello", true)
+        senior = Item(this, "4st", "Hello", true)
 
         mindMappingView.addItem(
-            freshman, rootNode, 200, 15, ItemLocation.TOP, true, null)
+            freshman, rootNode, 200, 15,
+            ItemLocation.TOP, true, null)
         mindMappingView.addItem(
-            sophomore, rootNode, 200, 15, ItemLocation.LEFT, true, null)
+            sophomore, rootNode, 200, 15,
+            ItemLocation.LEFT, true, null)
         mindMappingView.addItem(
-            junior, rootNode, 200, 15, ItemLocation.RIGHT, true, null)
+            junior, rootNode, 200, 15,
+            ItemLocation.RIGHT, true, null)
         mindMappingView.addItem(
-            senior, rootNode, 200, 15, ItemLocation.BOTTOM, true, null)
+            senior, rootNode, 200, 15,
+            ItemLocation.BOTTOM, true, null)
     }
 
     private fun nodeEvent() {
         rootNode.setOnClickListener {
-            bottomEvent(rootNode, true)
             popupEventR(rootNode)
         }
         mindMappingView.setOnItemClicked { item ->
-            bottomEvent(item, false)
-            popupEventR(item)
+            if (item == freshman) {
+                bottomEvent(item, ItemLocation.TOP)
+                popupEventR(item)
+            }
+            if (item == sophomore) {
+                bottomEvent(item, ItemLocation.LEFT)
+                popupEventR(item)
+            }
+            if (item == junior) {
+                bottomEvent(item, ItemLocation.RIGHT)
+                popupEventR(item)
+            }
+            if (item == senior) {
+                bottomEvent(item, ItemLocation.BOTTOM)
+                popupEventR(item)
+            }
         }
-
     }
 
-    private fun bottomEvent(node: Item, root: Boolean) {
+    private fun bottomEvent(node: Item, position : Int) {
         binding.bottomNavigationView.visibility = View.VISIBLE
-        binding.bottomNavigationView.setOnNavigationItemSelectedListener {
-            if (root) {
-                when (it.itemId) {
+        binding.bottomNavigationView.run {
+            setOnItemSelectedListener { item ->
+                when (item.itemId) {
                     R.id.childNodeAdd -> {
-                        childNode!!.add(Item(this@MindMapActivity, "Child", "Hi", true))
-                        mindMappingView!!.addItem(
-                            childNode!![childNodeNum],
+                        childNode.add(Item(
+                            this@MindMapActivity,
+                            "Child",
+                            "Hi",
+                            true))
+                        mindMappingView.addItem(
+                            childNode[childNodeNum],
                             node,
                             150,
                             20,
-                            setLocation(),
+                            position,
                             true,
                             null
                         )
-                        childNode!![childNodeNum].x -= rootNode.x
-                        if (setLocation() == 0 || setLocation() == 3) {
+                        childNode[childNodeNum].x -= rootNode.x
+                        if (position == 0 || position == 3) {
                             childNode!![childNodeNum].y -= rootNode.y
-                        } else {
-                            childNode!![childNodeNum].y = 0F
                         }
                         childNodeNum++
-                        nodeLocation++
-                        Log.d(
-                            "XYZ",
-                            "Child${childNode!![childNodeNum - 1].x} ${childNode!![childNodeNum - 1].y}"
-                        )
                         binding.bottomNavigationView.visibility = View.INVISIBLE
+                        true
+                    }
+                    else -> {
+                        true
                     }
                 }
-            } else {
-
             }
-            true
-        }
-    }
-
-    private fun setLocation(): Int {
-        Toast.makeText(this, "$nodeLocation", Toast.LENGTH_SHORT).show()
-        return if (nodeLocation in 1..3) {
-            nodeLocation
-        } else {
-            nodeLocation = 0
-            nodeLocation
         }
     }
 
@@ -127,6 +148,7 @@ class MindMapActivity : AppCompatActivity() {
             false
         }
         popUp.show() //Popup Menu 보이기
+
     }
 
     private fun popupEvent(node: Item) {
@@ -143,7 +165,6 @@ class MindMapActivity : AppCompatActivity() {
                 R.id.popupMenuR2 -> {
                 }
                 R.id.popupMenuR3 -> {
-
                 }
                 else -> {
                 }
