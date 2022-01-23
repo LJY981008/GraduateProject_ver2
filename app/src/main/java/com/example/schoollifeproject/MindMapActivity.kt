@@ -11,9 +11,13 @@ import me.jagar.mindmappingandroidlibrary.Views.Item
 import me.jagar.mindmappingandroidlibrary.Views.ItemLocation
 import me.jagar.mindmappingandroidlibrary.Views.MindMappingView
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.MotionEvent
 import me.jagar.mindmappingandroidlibrary.Zoom.ZoomLayout
+import java.util.*
+import kotlin.collections.ArrayList
 
+// 뷰 충돌 이벤트? + 삭제 기능 구현 + onefingerscroll
 
 class MindMapActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMindMapBinding
@@ -25,8 +29,8 @@ class MindMapActivity : AppCompatActivity() {
     private lateinit var senior: Item
     private lateinit var zoomLayout: ZoomLayout
     private var childNode = ArrayList<Item>()
+    private var childInfo = HashMap<Item, Int>()
     private var childNodeNum = 0
-    // 방향별로 노드 개수 만드는게 어떨까?
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,24 +81,20 @@ class MindMapActivity : AppCompatActivity() {
         mindMappingView.setOnItemClicked { item ->
             if (item == freshman) {
                 bottomEvent(item, ItemLocation.TOP)
-                popupEventR(item)
-            }
-            if (item == sophomore) {
+            } else if (item == sophomore) {
                 bottomEvent(item, ItemLocation.LEFT)
-                popupEventR(item)
-            }
-            if (item == junior) {
+            } else if (item == junior) {
                 bottomEvent(item, ItemLocation.RIGHT)
-                popupEventR(item)
-            }
-            if (item == senior) {
+            } else if (item == senior) {
                 bottomEvent(item, ItemLocation.BOTTOM)
-                popupEventR(item)
+            } else {
+                childInfo[item]?.let { bottomEvent(item, it) }
+                popupEvent(item)
             }
         }
     }
 
-    private fun bottomEvent(node: Item, position : Int) {
+    private fun bottomEvent(node: Item, position: Int) {
         binding.bottomNavigationView.visibility = View.VISIBLE
         binding.bottomNavigationView.run {
             setOnItemSelectedListener { item ->
@@ -105,6 +105,7 @@ class MindMapActivity : AppCompatActivity() {
                             "Child",
                             "Hi",
                             true))
+                        childInfo[childNode[childNodeNum]] = position
                         mindMappingView.addItem(
                             childNode[childNodeNum],
                             node,
@@ -114,11 +115,7 @@ class MindMapActivity : AppCompatActivity() {
                             true,
                             null
                         )
-                        childNode[childNodeNum].x -= rootNode.x
-                        if (position == 0 || position == 3) {
-                            childNode!![childNodeNum].y -= rootNode.y
-                        }
-                        childNodeNum++
+                        nodePosition(node, position)
                         binding.bottomNavigationView.visibility = View.INVISIBLE
                         true
                     }
@@ -130,9 +127,26 @@ class MindMapActivity : AppCompatActivity() {
         }
     }
 
+    private fun nodePosition(parent: Item, position : Int) {
+        childNode[childNodeNum].x -= rootNode.x
+        if (position == 1 || position == 2) {
+            when {
+                parent.leftChildItems.size > 1 -> {
+                    childNode!![childNodeNum].y -= rootNode.y
+                }
+                parent.rightChildItems.size > 1 -> {
+                    childNode!![childNodeNum].y -= rootNode.y
+                }
+            }
+        } else {
+            childNode!![childNodeNum].y -= rootNode.y
+        }
+        childNodeNum++
+    }
+
     private fun popupEventR(node: Item) {
         val popUp = PopupMenu(node!!.context, node) //v는 클릭된 뷰를 의미
-        popUp.menuInflater.inflate(R.menu.popup_menu, popUp.menu)
+        popUp.menuInflater.inflate(R.menu.popup_menu_root, popUp.menu)
         popUp.setOnMenuItemClickListener { items ->
             when (items.itemId) {
                 R.id.popupMenuR1 -> { // 노드 내용 변경, Edit 버튼
