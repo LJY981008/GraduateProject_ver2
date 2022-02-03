@@ -1,18 +1,24 @@
 package com.example.schoollifeproject
 
+import android.content.ClipData
+import android.content.ClipDescription
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Point
+import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Bundle
-import android.view.KeyEvent
-import android.view.View
+import android.util.DisplayMetrics
+import android.util.Log
+import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GestureDetectorCompat
 import com.example.schoollifeproject.databinding.ActivityMindMapBinding
 import me.jagar.mindmappingandroidlibrary.Views.Item
 import me.jagar.mindmappingandroidlibrary.Views.ItemLocation
 import me.jagar.mindmappingandroidlibrary.Views.MindMappingView
-import android.util.DisplayMetrics
-import android.util.Log
-import android.view.MotionEvent
 import me.jagar.mindmappingandroidlibrary.Zoom.ZoomLayout
 import java.util.*
 import kotlin.collections.ArrayList
@@ -31,6 +37,7 @@ class MindMapActivity : AppCompatActivity() {
     private var childNode = ArrayList<Item>()
     private var childInfo = HashMap<Item, Int>()
     private var childNodeNum = 0
+    private val MAX_DURATION = 500
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +55,6 @@ class MindMapActivity : AppCompatActivity() {
         mindMappingView.layoutParams.height = (screenHeight * 2.5).toInt()
 
         addRoot()
-        nodeEvent()
     }
 
     private fun addRoot() {
@@ -62,35 +68,167 @@ class MindMapActivity : AppCompatActivity() {
 
         mindMappingView.addItem(
             freshman, rootNode, 200, 15,
-            ItemLocation.TOP, true, null)
+            ItemLocation.TOP, false, null
+        )
         mindMappingView.addItem(
             sophomore, rootNode, 200, 15,
-            ItemLocation.LEFT, true, null)
+            ItemLocation.LEFT, false, null
+        )
         mindMappingView.addItem(
             junior, rootNode, 200, 15,
-            ItemLocation.RIGHT, true, null)
+            ItemLocation.RIGHT, false, null
+        )
         mindMappingView.addItem(
             senior, rootNode, 200, 15,
-            ItemLocation.BOTTOM, true, null)
+            ItemLocation.BOTTOM, false, null
+        )
+
+        // 기본 생성 노드 클릭 이벤트
+        rootNode.setOnTouchListener(nodeRootEvent(rootNode))
+        freshman.setOnTouchListener(nodeParentEvent(freshman, ItemLocation.TOP))
+        sophomore.setOnTouchListener(nodeParentEvent(sophomore, ItemLocation.LEFT))
+        junior.setOnTouchListener(nodeParentEvent(junior, ItemLocation.RIGHT))
+        senior.setOnTouchListener(nodeParentEvent(senior, ItemLocation.BOTTOM))
     }
 
-    private fun nodeEvent() {
-        rootNode.setOnClickListener {
-            popupEventR(rootNode)
-        }
-        mindMappingView.setOnItemClicked { item ->
-            if (item == freshman) {
-                bottomEvent(item, ItemLocation.TOP)
-            } else if (item == sophomore) {
-                bottomEvent(item, ItemLocation.LEFT)
-            } else if (item == junior) {
-                bottomEvent(item, ItemLocation.RIGHT)
-            } else if (item == senior) {
-                bottomEvent(item, ItemLocation.BOTTOM)
-            } else {
-                childInfo[item]?.let { bottomEvent(item, it) }
-                popupEvent(item)
+    var startTime = 0L
+    lateinit var itemA : Item
+    lateinit var itemB : Item
+
+    private fun nodeRootEvent(item: Item): View.OnTouchListener? {
+        var clickCount = 0 // 클릭 카운트가 뷰 하나에만 적용되게
+
+        return View.OnTouchListener { _, motionEvent ->
+            when (motionEvent.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    ++clickCount
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (clickCount == 1) {
+                        itemA = item
+                        startTime = System.currentTimeMillis()
+                    } else if (clickCount == 2) {
+                        itemB = item
+                        val duration = System.currentTimeMillis() - startTime
+                        Log.d("checkTouch", "$clickCount $startTime $duration")
+                        Log.d("checkTouchItem", "$itemA $itemB")
+
+                        if (itemA == itemB && duration <= MAX_DURATION) {
+                            popupEventR(item)
+                        }
+                        clickCount = 0
+                    } else {
+                        clickCount = 0
+                    }
+                }
             }
+            true
+        }
+        false
+    }
+
+
+    private fun nodeParentEvent(item: Item, position: Int): View.OnTouchListener? {
+        var clickCount = 0 // 클릭 카운트가 뷰 하나에만 적용되게
+
+        return View.OnTouchListener { _, motionEvent ->
+            when (motionEvent.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    ++clickCount
+                }
+                MotionEvent.ACTION_UP -> {
+                    if(clickCount == 1) {
+                        itemA = item
+                        startTime = System.currentTimeMillis()
+                        bottomEvent(item, position)
+                    } else if(clickCount == 2) {
+                        itemB = item
+                        val duration = System.currentTimeMillis() - startTime
+                        Log.d("checkTouch", "$clickCount $startTime $duration")
+                        Log.d("checkTouchItem", "$itemA $itemB")
+
+                        if(itemA == itemB && duration <= MAX_DURATION) {
+                            popupEventR(item)
+                        }
+                        clickCount = 0
+                    } else {
+                        clickCount = 0
+                    }
+                }
+            }
+            true
+        }
+    }
+
+    private fun nodeChildEvent(item: Item): View.OnTouchListener? {
+        var longClick : Boolean
+        var clickCount = 0 // 클릭 카운트가 뷰 하나에만 적용되게
+
+        return View.OnTouchListener { _, motionEvent ->
+            when (motionEvent.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    longClick = false
+                    Log.d("checkDown", "${item.javaClass.name}")
+                    item.setOnLongClickListener {
+                        longClick = true
+
+                        Log.d("checkLongClick", "${item.javaClass.name}")
+                        val dragItem = ClipData.Item(item.tag as? CharSequence)
+                        val dragData = ClipData(
+                            item.tag as? CharSequence,
+                            arrayOf(ClipDescription.MIMETYPE_TEXT_INTENT),
+                            dragItem
+                        )
+                        val myShadow = MyDragShadowBuilder(item)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            item.startDragAndDrop(
+                                dragData,
+                                myShadow,
+                                null, 0
+                            )
+                        }
+                        if (longClick) {
+                            mindMappingView.setOnDragListener { view, dragEvent ->
+                                Log.d("checkDrag", "${item.javaClass.name}")
+                                when (dragEvent.action) {
+                                    DragEvent.ACTION_DRAG_STARTED -> {
+                                        Log.d("checkDragStart", "${item.javaClass.name}")
+                                    }
+                                    DragEvent.ACTION_DROP -> { // 드롭 기능 구현해보자
+                                        Log.d("checkDrop", "${item.javaClass.name} ${item.title.text}")
+                                        if(view == junior) {
+                                            Log.d("checkDrop", "YOOOOOOO")
+                                        }
+                                    }
+                                }
+                                true
+                            }
+                        } else {
+                            ++clickCount
+                        }
+                        true
+                    }
+                }
+                MotionEvent.ACTION_UP -> {
+                    if(clickCount == 1) {
+                        itemA = item
+                        startTime = System.currentTimeMillis()
+                    } else if(clickCount == 2) {
+                        itemB = item
+                        val duration = System.currentTimeMillis() - startTime
+                        Log.d("checkTouch", "$clickCount $startTime $duration")
+                        Log.d("checkTouchItem", "$itemA $itemB")
+
+                        if(itemA == itemB && duration <= MAX_DURATION) {
+                            popupEventR(item)
+                        }
+                        clickCount = 0
+                    } else {
+                        clickCount = 0
+                    }
+                }
+            }
+            false
         }
     }
 
@@ -100,11 +238,14 @@ class MindMapActivity : AppCompatActivity() {
             setOnItemSelectedListener { item ->
                 when (item.itemId) {
                     R.id.childNodeAdd -> {
-                        childNode.add(Item(
-                            this@MindMapActivity,
-                            "Child",
-                            "Hi",
-                            true))
+                        childNode.add(
+                            Item(
+                                this@MindMapActivity,
+                                "Child",
+                                "Hi",
+                                true
+                            )
+                        )
                         childInfo[childNode[childNodeNum]] = position
                         mindMappingView.addItem(
                             childNode[childNodeNum],
@@ -115,6 +256,8 @@ class MindMapActivity : AppCompatActivity() {
                             true,
                             null
                         )
+                        val tempItem = childNode[childNodeNum]
+                        childNode[childNodeNum].setOnTouchListener(nodeChildEvent(tempItem))
                         nodePosition(node, position)
                         binding.bottomNavigationView.visibility = View.INVISIBLE
                         true
@@ -127,25 +270,25 @@ class MindMapActivity : AppCompatActivity() {
         }
     }
 
-    private fun nodePosition(parent: Item, position : Int) {
+    private fun nodePosition(parent: Item, position: Int) {
         childNode[childNodeNum].x -= rootNode.x
         if (position == 1 || position == 2) {
             when {
                 parent.leftChildItems.size > 1 -> {
-                    childNode!![childNodeNum].y -= rootNode.y
+                    childNode[childNodeNum].y -= rootNode.y
                 }
                 parent.rightChildItems.size > 1 -> {
-                    childNode!![childNodeNum].y -= rootNode.y
+                    childNode[childNodeNum].y -= rootNode.y
                 }
             }
         } else {
-            childNode!![childNodeNum].y -= rootNode.y
+            childNode[childNodeNum].y -= rootNode.y
         }
         childNodeNum++
     }
 
     private fun popupEventR(node: Item) {
-        val popUp = PopupMenu(node!!.context, node) //v는 클릭된 뷰를 의미
+        val popUp = PopupMenu(node.context, node) //v는 클릭된 뷰를 의미
         popUp.menuInflater.inflate(R.menu.popup_menu_root, popUp.menu)
         popUp.setOnMenuItemClickListener { items ->
             when (items.itemId) {
@@ -166,7 +309,7 @@ class MindMapActivity : AppCompatActivity() {
     }
 
     private fun popupEvent(node: Item) {
-        val popUp = PopupMenu(node!!.context, node) //v는 클릭된 뷰를 의미
+        val popUp = PopupMenu(node.context, node) //v는 클릭된 뷰를 의미
         popUp.menuInflater.inflate(R.menu.popup_menu, popUp.menu)
         popUp.setOnMenuItemClickListener { items ->
             when (items.itemId) {
@@ -215,4 +358,41 @@ class MindMapActivity : AppCompatActivity() {
         node.removeAllViews()
     }
 
+}
+
+
+private class MyDragShadowBuilder(v: View) : View.DragShadowBuilder(v) {
+
+    private val shadow = ColorDrawable(Color.LTGRAY)
+
+    // Defines a callback that sends the drag shadow dimensions and touch point
+    // back to the system.
+    override fun onProvideShadowMetrics(size: Point, touch: Point) {
+
+        // Set the width of the shadow to half the width of the original View.
+        val width: Int = view.width
+
+        // Set the height of the shadow to half the height of the original View.
+        val height: Int = view.height
+
+        // The drag shadow is a ColorDrawable. This sets its dimensions to be the
+        // same as the Canvas that the system provides. As a result, the drag shadow
+        // fills the Canvas.
+        shadow.setBounds(0, 0, width, height)
+
+        // Set the size parameter's width and height values. These get back to
+        // the system through the size parameter.
+        size.set(width, height)
+
+        // Set the touch point's position to be in the middle of the drag shadow.
+        touch.set(width / 2, height / 2)
+    }
+
+    // Defines a callback that draws the drag shadow in a Canvas that the system
+    // constructs from the dimensions passed to onProvideShadowMetrics().
+    override fun onDrawShadow(canvas: Canvas) {
+
+        // Draw the ColorDrawable on the Canvas passed in from the system.
+        shadow.draw(canvas)
+    }
 }
