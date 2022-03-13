@@ -12,6 +12,10 @@ data class PostModel(
     var userPassword: String? = null,
     @Expose
     @SerializedName("userName")
-    var userName: String? = null
+    var userName: String? = null,
+    @Expose
+    @SerializedName("error")
+    var error: String? = null
+
 
 )

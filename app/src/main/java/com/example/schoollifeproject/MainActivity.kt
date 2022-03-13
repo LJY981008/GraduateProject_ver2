@@ -2,21 +2,14 @@ package com.example.schoollifeproject
 import androidx.appcompat.app.AlertDialog
 import android.content.DialogInterface
 
-import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import com.example.schoollifeproject.databinding.ActivityMainBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import org.json.JSONException
-
-import org.json.JSONObject
-
-
 
 
 class MainActivity : AppCompatActivity() {
@@ -27,7 +20,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
-        val api = APIS.create()
+        val api_login = APIS_login.create()
         setContentView(binding.root)
 
 
@@ -43,7 +36,7 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, MenuActivity::class.java)
 
 
-            api.post_users(
+            api_login.login_users(
                 id
             ).enqueue(object : Callback<PostModel> {
 
@@ -73,6 +66,7 @@ class MainActivity : AppCompatActivity() {
 
         btnRegister.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
+
             startActivity(intent)
 
         }
