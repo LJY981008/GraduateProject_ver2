@@ -376,7 +376,6 @@ class MindMapActivity : AppCompatActivity() {
 
     private fun deleteNode(node: Item) {
         mindMappingView.removeView(node)
-        mindMappingView.
         node.removeAllViews()
     }
 

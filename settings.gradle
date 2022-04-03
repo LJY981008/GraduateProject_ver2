@@ -8,4 +8,5 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "SchoolLifeProject"
-include ':app'
+include ':app', ':mindmappingandroidlibrary'
+project(':mindmappingandroidlibrary').projectDir = new File('libs/mindmappingandroidlibrary')
