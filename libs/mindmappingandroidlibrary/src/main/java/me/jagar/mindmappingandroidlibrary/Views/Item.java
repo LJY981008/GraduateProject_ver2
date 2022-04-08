@@ -14,30 +14,29 @@ import java.util.HashMap;
 
 public class Item extends LinearLayout {
 
-    Context context;
-    TextView title;
-    TextView content;
+    private Context context;
+    private TextView title;
+    private String itemId;
+    private int location;
     boolean defaultStyle;
-    ArrayList<Item> topChildItems = new ArrayList<>();
-    ArrayList<Item> bottomChildItems = new ArrayList<>();
-    ArrayList<Item> rightChildItems = new ArrayList<>();
-    ArrayList<Item> leftChildItems = new ArrayList<>();
-    HashMap<Connection, Integer> connections = new HashMap<>();
-    HashMap<Item, Integer>  parents = new HashMap<>();
+    private ArrayList<Item> topChildItems = new ArrayList<>();
+    private ArrayList<Item> bottomChildItems = new ArrayList<>();
+    private ArrayList<Item> rightChildItems = new ArrayList<>();
+    private ArrayList<Item> leftChildItems = new ArrayList<>();
+    private Connection connection;
+    private Item parent;
 
-    public Item(Context context, String title, String content, boolean defaultStyle){
+
+    public Item(Context context, String title, String id, boolean defaultStyle){
         super(context);
         this.context = context;
         this.defaultStyle = defaultStyle;
         this.setTitle(title);
-        this.setContent(content);
         this.addTextViews();
+        this.itemId = id;
 
         if (title == null)
             this.title.setVisibility(GONE);
-        if (content == null)
-            this.content.setVisibility(GONE);
-
     }
 
     public Item(Context context) {
@@ -53,16 +52,22 @@ public class Item extends LinearLayout {
         super(context, attrs, defStyleAttr);
     }
 
-
+    public TextView getTitle(){
+        return this.title;
+    }
+    
     public void setTitle(String title){
         this.title = new TextView(context);
         this.getTitle().setText(title);
         this.getTitle().setTypeface(Typeface.DEFAULT_BOLD);
     }
-    public void setContent(String content){
-        this.content = new TextView(context);
-        this.getContent().setText(content);
-        this.getContent().setTypeface(Typeface.DEFAULT);
+
+    public String getItemId(){
+        return this.itemId;
+    }
+    
+    public void setItemId(String id){
+        this.itemId = id;
     }
     public void setBorder(int color, int size){
         GradientDrawable drawable = (GradientDrawable)this.getBackground();
@@ -108,17 +113,10 @@ public class Item extends LinearLayout {
     public Item getLeftChildByIndex(int index){
         return leftChildItems.get(index);
     }
-    public TextView getTitle(){
-        return this.title;
-    }
-    public TextView getContent(){
-        return this.content;
-    }
 
     private void addTextViews(){
         this.setOrientation(LinearLayout.VERTICAL);
         this.addView(title);
-        this.addView(content);
 
         if (defaultStyle)
             setDefaultStyle();
@@ -132,37 +130,33 @@ public class Item extends LinearLayout {
         shape.setCornerRadius(100);
         this.setBackground(shape);
         this.setBorder(Color.BLACK, 5);
-        this.setGravity(Gravity.CENTER);
         this.title.setGravity(Gravity.CENTER);
-        this.content.setGravity(Gravity.CENTER);
 
         this.setPadding(50, 20, 50, 20);
 
     }
 
-    public void addParent(Item parent, int location){
-        parents.put(parent, location);
+    public void addParent(Item parent){
+        this.parent = parent;
     }
 
-    public HashMap<Item, Integer> getParents(){
-        return parents;
+    public Item getParents(){
+        return parent;
     }
 
-    public void addConnection(Item parent, int location, ConnectionTextMessage connectionTextMessage){
-        Connection connection = new Connection(this, parent, connectionTextMessage);
-        connections.put(connection, location);
-    }
-    public HashMap<Connection, Integer> getAllConnections(){
-        return connections;
+    public void setLocation(int location){
+        this.location = location;
     }
 
-    public Connection getConnectionByParent(Item parent){
-        if (connections.keySet().iterator().hasNext()){
-            Connection con = connections.keySet().iterator().next();
-            if (con.getParent() == parent)
-                return con;
-        }
-        return null;
+    public int getLocation(){
+        return location;
     }
 
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
 }

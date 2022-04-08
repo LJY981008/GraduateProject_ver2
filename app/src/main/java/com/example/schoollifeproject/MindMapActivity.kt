@@ -13,6 +13,8 @@ import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
+import android.widget.RelativeLayout
+import android.widget.RelativeLayout.CENTER_IN_PARENT
 import androidx.appcompat.app.AppCompatActivity
 import com.example.schoollifeproject.databinding.ActivityMindMapBinding
 import me.jagar.mindmappingandroidlibrary.Views.Item
@@ -23,7 +25,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-// 뷰 충돌 이벤트? + 삭제 기능 구현 + onefingerscroll
+// drag할 때 itemId 변경 , 상대 좌표 공부
 
 class MindMapActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMindMapBinding
@@ -37,12 +39,10 @@ class MindMapActivity : AppCompatActivity() {
 
     private lateinit var zoomLayout: ZoomLayout
 
-    private var childNodeTop = ArrayList<Item>()
-    private var childNodeLeft = ArrayList<Item>()
-    private var childNodeRight = ArrayList<Item>()
-    private var childNodeBottom = ArrayList<Item>()
+    private var childNode = ArrayList<Item>()
 
-    private var childNodeNum = Array<Int>(4, { 0 })
+    private var childNodeNum = ArrayList<Int>()
+    private var childNodeNumMax : Int = 0
     private val MAX_DURATION = 500
 
     private lateinit var detector : GestureDetector
@@ -66,7 +66,7 @@ class MindMapActivity : AppCompatActivity() {
 
         detector = GestureDetector(this,
             object : GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
-
+                
                 override fun onDown(event: MotionEvent): Boolean {
                     Log.d("DEBUG_TAG", "onDown: $event")
                     return true
@@ -76,7 +76,7 @@ class MindMapActivity : AppCompatActivity() {
                     event1: MotionEvent,
                     event2: MotionEvent,
                     velocityX: Float,
-                    velocityY: Float
+                    velocityY: Float,
                 ): Boolean {
                     Log.d("DEBUG_TAG", "onFling: $event1 $event2")
                     return true
@@ -84,13 +84,17 @@ class MindMapActivity : AppCompatActivity() {
 
                 override fun onLongPress(event: MotionEvent) {
                     Log.d("DEBUG_TAG", "onLongPress: $event")
+                    // 롱 클릭 시 드래그 이벤트
+                    if(mItem != rootNode && mItem != grade1 && mItem != grade2 && mItem != grade3 && mItem != grade4){
+                        nodeDragEvent(mItem)
+                    }
                 }
 
                 override fun onScroll(
                     event1: MotionEvent,
                     event2: MotionEvent,
                     distanceX: Float,
-                    distanceY: Float
+                    distanceY: Float,
                 ): Boolean {
                     Log.d("DEBUG_TAG", "onScroll: $event1 $event2")
                     return true
@@ -107,6 +111,7 @@ class MindMapActivity : AppCompatActivity() {
 
                 override fun onDoubleTap(event: MotionEvent): Boolean {
                     Log.d("DEBUG_TAG", "onDoubleTap: $event")
+                    // 더블 클릭 시 팝업 메뉴
                     if(mItem == rootNode || mItem == grade1 || mItem == grade2 || mItem == grade3 || mItem == grade4){
                         popupEventR(mItem)
                     } else {
@@ -121,19 +126,17 @@ class MindMapActivity : AppCompatActivity() {
                 }
 
                 override fun onSingleTapConfirmed(event: MotionEvent): Boolean {
-                    Log.d("DEBUG_TAG", "onSingleTapConfirmed: $event")
-                    if(mItem == grade1 || mItem == grade2 || mItem == grade3 || mItem == grade4){
-                        bottomEvent(mItem, 0)
-                    } else {
-                        bottomEvent(mItem, 0)
-                    }
+                    Log.d("DEBUG_TAG", "onSingleTapConfirmed: ${mItem.itemId}")
+                    Log.d("DEBUG_TAG", "grade2XY: ${grade1.x} ${grade1.y}")
+                    // 한 번 클릭 시 하단 메뉴
+                    bottomEvent(mItem)
                     return true
                 }
             })
     }
 
     private fun addRoot() {
-        rootNode = Item(this, "Root", "Hello", true)
+        rootNode = Item(this, "Root", "Root", true)
         mindMappingView.addCentralItem(rootNode, false)
         rootNode.setOnTouchListener{ _, motionEvent ->
             mItem = rootNode
@@ -141,15 +144,16 @@ class MindMapActivity : AppCompatActivity() {
             true
         }
 
-        grade1 = Item(this, "1학년", "Hello", true)
-        grade2 = Item(this, "2학년", "Hello", true)
-        grade3 = Item(this, "3학년", "Hello", true)
-        grade4 = Item(this, "4학년", "Hello", true)
+        grade1 = Item(this, "1학년", "grade1", true)
+        grade2 = Item(this, "2학년", "grade2", true)
+        grade3 = Item(this, "3학년", "grade3", true)
+        grade4 = Item(this, "4학년", "grade4", true)
 
         mindMappingView.addItem(
             grade1, rootNode, 200, 15, ItemLocation.TOP, false, null)
         mindMappingView.addItem(
             grade2, rootNode, 200, 15, ItemLocation.LEFT, false, null)
+        Log.d("DEBUG_TAG", "grade2XY: ${grade1.x} ${grade1.y}")
         mindMappingView.addItem(
             grade3, rootNode, 200, 15, ItemLocation.RIGHT, false, null)
         mindMappingView.addItem(
@@ -178,6 +182,50 @@ class MindMapActivity : AppCompatActivity() {
         }
     }
 
+    private fun nodeDragEvent(item: Item) {
+        Log.d("checkLongClick", "${item.javaClass.name}")
+        val dragItem = ClipData.Item(item.tag as? CharSequence)
+        val dragData = ClipData(
+            item.tag as? CharSequence,
+            arrayOf(ClipDescription.MIMETYPE_TEXT_INTENT),
+            dragItem
+        )
+        val myShadow = MyDragShadowBuilder(item)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            item.startDragAndDrop(
+                dragData,
+                myShadow,
+                null, 0
+            )
+        }
+        mindMappingView.setOnDragListener { view, dragEvent ->
+            Log.d("checkDrag", "${item.javaClass.name}")
+            when (dragEvent.action) {
+                DragEvent.ACTION_DRAG_STARTED -> {
+                    Log.d("checkDragStart", "${item.javaClass.name}")
+                }
+                DragEvent.ACTION_DROP -> { // 드롭 기능 구현해보자
+                    val map = view as MindMappingView
+                    for (index in 0 until map.childCount) {
+                        val i = (map.getChildAt(index) as Item)
+
+                        val x = dragEvent.x
+                        val y = dragEvent.y
+
+                        if ((x>i.x - i.width && x<i.x + i.width) && (y>i.y - i.height && y<i.y + i.height)) {
+                            if(index == 1 && item.location != 0) {
+                                val it = item
+                                mindMappingView.deleteItem(item)
+                                addItem(grade1, it)
+                            }
+                        }
+                    }
+                }
+            }
+            true
+        }
+    }
+
     private fun nodeChildEvent(item: Item): View.OnTouchListener? {
         var longClick: Boolean
         var clickCount = 0 // 클릭 카운트가 뷰 하나에만 적용되게
@@ -190,52 +238,8 @@ class MindMapActivity : AppCompatActivity() {
                     item.setOnLongClickListener {
                         longClick = true
 
-                        Log.d("checkLongClick", "${item.javaClass.name}")
-                        val dragItem = ClipData.Item(item.tag as? CharSequence)
-                        val dragData = ClipData(
-                            item.tag as? CharSequence,
-                            arrayOf(ClipDescription.MIMETYPE_TEXT_INTENT),
-                            dragItem
-                        )
-                        val myShadow = MyDragShadowBuilder(item)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            item.startDragAndDrop(
-                                dragData,
-                                myShadow,
-                                null, 0
-                            )
-                        }
                         if (longClick) {
-                            mindMappingView.setOnDragListener { view, dragEvent ->
-                                Log.d("checkDrag", "${item.javaClass.name}")
-                                when (dragEvent.action) {
-                                    DragEvent.ACTION_DRAG_STARTED -> {
-                                        Log.d("checkDragStart", "${item.javaClass.name}")
-                                    }
-                                    DragEvent.ACTION_DROP -> { // 드롭 기능 구현해보자
-                                        val it = dragEvent.javaClass
-                                        val cd = dragEvent.clipData.itemCount
 
-                                        val map = view as MindMappingView
-                                        for (index in 0 until map.childCount) {
-                                            val i = (map.getChildAt(index) as Item)
-
-                                            val x = dragEvent.x
-                                            val y = dragEvent.y
-
-                                            if ((x>i.x - i.width && x<i.x + i.width) && (y>i.y - i.height && y<i.y + i.height)) {
-                                                Log.d("checkDropppp", "${index}")
-                                            }
-                                        }
-
-                                        Log.d(
-                                            "checkDrop",
-                                            "${item.javaClass.name} ${view.javaClass.name} ${cd} ${it}"
-                                        )
-                                    }
-                                }
-                                true
-                            }
                         } else {
                             ++clickCount
                         }
@@ -247,39 +251,31 @@ class MindMapActivity : AppCompatActivity() {
         }
     }
 
-    private fun returnItem(position: Int): Item {
-        val newItem = Item(this@MindMapActivity, "Child", "Hi", true)
-        when (position) {
-            0 -> childNodeTop.add(newItem)
-            1 -> childNodeLeft.add(newItem)
-            2 -> childNodeRight.add(newItem)
-            3 -> childNodeBottom.add(newItem)
-            else -> {}
-        }
-        return newItem
-    }
-
-    private fun addItem(parent: Item, child: Item, position: Int) { // mindMappingView 아이템 추가
-        child.id // 아이디 설정 어케하지
+    private fun addItem(parent: Item, child: Item) { // mindMappingView 아이템 추가
+        Log.d("DEBUG_TAG", "grade2XY: ${grade1.x} ${grade1.y}")
+        childNode.add(child)
         mindMappingView.addItem(child, parent, 150,
-            20, position, true, null)
+            20, parent.location, true, null)
         child.setOnTouchListener{ _, motionEvent ->
             mItem = child
             detector.onTouchEvent(motionEvent)
             true
         }
-        nodePosition(parent, child, position) // item 위치 설정
+        Log.d("node4", "${mindMappingView.bottomItems.size}")
+        //nodeLocation(parent, child) // item 위치 설정
         binding.bottomNavigationView.visibility = View.INVISIBLE
     }
 
-    private fun bottomEvent(node: Item, position: Int) {
+    private fun bottomEvent(node: Item) {
         binding.bottomNavigationView.visibility = View.VISIBLE
         binding.bottomNavigationView.run {
-            val mItem = returnItem(position) // returnItem 함수 호출
             setOnItemSelectedListener { item ->
                 when (item.itemId) {
                     R.id.childNodeAdd -> {
-                        addItem(node, mItem, position)
+                        childNodeNum.add(childNodeNumMax)
+                        val child = Item(this@MindMapActivity, "Child",
+                            "${node.itemId}_item${childNodeNum[childNodeNumMax++]}", true)
+                        addItem(node, child)
                         true
                     }
                     else -> {
@@ -288,11 +284,11 @@ class MindMapActivity : AppCompatActivity() {
                 }
             }
         }
-    }
+    }/*
 
-    private fun nodePosition(parent: Item, child: Item, position: Int) { // item position 재설정
+    private fun nodeLocation(parent: Item, child: Item) { // item location 재설정
         child.x -= rootNode.x
-        if (position == 1 || position == 2) {
+        if (parent.location == 1 || parent.location == 2) {
             when {
                 parent.leftChildItems.size > 1 -> {
                     child.y -= rootNode.y
@@ -304,8 +300,7 @@ class MindMapActivity : AppCompatActivity() {
         } else {
             child.y -= rootNode.y
         }
-        childNodeNum[position]++
-    }
+    }*/
 
     private fun popupEventR(node: Item) {
         val popUp = PopupMenu(node.context, node) //v는 클릭된 뷰를 의미
@@ -337,7 +332,8 @@ class MindMapActivity : AppCompatActivity() {
                     editNode(node)
                 }
                 R.id.popupMenu2 -> { // 노드 내용 삭제, Delete 버튼
-                    deleteNode(node)
+                    // 마인드맵 아이템 삭제
+                    mindMappingView.deleteItem(node)
                 }
                 R.id.popupMenuR2 -> {
                 }
@@ -373,12 +369,6 @@ class MindMapActivity : AppCompatActivity() {
             }
         })
     }
-
-    private fun deleteNode(node: Item) {
-        mindMappingView.removeView(node)
-        node.removeAllViews()
-    }
-
 }
 
 private class MyDragShadowBuilder(v: View) : View.DragShadowBuilder(v) {
@@ -404,7 +394,7 @@ private class MyDragShadowBuilder(v: View) : View.DragShadowBuilder(v) {
         // the system through the size parameter.
         size.set(width, height)
 
-        // Set the touch point's position to be in the middle of the drag shadow.
+        // Set the touch point's location to be in the middle of the drag shadow.
         touch.set(width / 2, height / 2)
     }
 

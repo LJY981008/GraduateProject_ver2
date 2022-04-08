@@ -1,10 +1,10 @@
 package me.jagar.mindmappingandroidlibrary.Views;
 
 public class Connection {
-    public Item item, parent;
-    public ConnectionTextMessage connectionTextMessage;
-    public int width, circRadius, arrowSize, argExt;
-    public String color;
+    private Item item, parent;
+    private ConnectionTextMessage connectionTextMessage;
+    private int width, circRadius, arrowSize, argExt;
+    private String color;
 
     public Connection(Item item, Item parent) {
         this.item = item;
