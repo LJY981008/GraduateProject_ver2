@@ -29,7 +29,6 @@ class ContactsListAdapter(val itemList: List<Contacts>) :
     class ContactsViewHolder(private val binding: ItemContactsBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        //item_contacts.xml의 id를 가져온건데 안됨
         fun bind(item: Contacts) {
             binding.title.text = item.Title
             binding.writer.text = item.Writer
