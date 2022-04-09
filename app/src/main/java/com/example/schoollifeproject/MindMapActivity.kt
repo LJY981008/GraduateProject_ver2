@@ -13,19 +13,16 @@ import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
-import android.widget.RelativeLayout
-import android.widget.RelativeLayout.CENTER_IN_PARENT
 import androidx.appcompat.app.AppCompatActivity
 import com.example.schoollifeproject.databinding.ActivityMindMapBinding
+import me.jagar.mindmappingandroidlibrary.Views.Connection
 import me.jagar.mindmappingandroidlibrary.Views.Item
-import me.jagar.mindmappingandroidlibrary.Views.ItemLocation
 import me.jagar.mindmappingandroidlibrary.Views.MindMappingView
 import me.jagar.mindmappingandroidlibrary.Zoom.ZoomLayout
 import java.util.*
 import kotlin.collections.ArrayList
 
-
-// drag할 때 itemId 변경 , 상대 좌표 공부
+// itemId 설정 / parent 아이디 / item 아이디 따로 표기
 
 class MindMapActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMindMapBinding
@@ -43,7 +40,6 @@ class MindMapActivity : AppCompatActivity() {
 
     private var childNodeNum = ArrayList<Int>()
     private var childNodeNumMax : Int = 0
-    private val MAX_DURATION = 500
 
     private lateinit var detector : GestureDetector
 
@@ -64,11 +60,10 @@ class MindMapActivity : AppCompatActivity() {
 
         addRoot()
 
-        detector = GestureDetector(this,
-            object : GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
-                
+        detector = GestureDetector(this, object : GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+
                 override fun onDown(event: MotionEvent): Boolean {
-                    Log.d("DEBUG_TAG", "onDown: $event")
+                    Log.d("DEBUG_TAG", "onDown")
                     return true
                 }
 
@@ -112,7 +107,8 @@ class MindMapActivity : AppCompatActivity() {
                 override fun onDoubleTap(event: MotionEvent): Boolean {
                     Log.d("DEBUG_TAG", "onDoubleTap: $event")
                     // 더블 클릭 시 팝업 메뉴
-                    if(mItem == rootNode || mItem == grade1 || mItem == grade2 || mItem == grade3 || mItem == grade4){
+                    if(mItem == rootNode || mItem == grade1 ||
+                        mItem == grade2 || mItem == grade3 || mItem == grade4){
                         popupEventR(mItem)
                     } else {
                         popupEvent(mItem)
@@ -150,15 +146,14 @@ class MindMapActivity : AppCompatActivity() {
         grade4 = Item(this, "4학년", "grade4", true)
 
         mindMappingView.addItem(
-            grade1, rootNode, 200, 15, ItemLocation.TOP, false, null)
+            grade1, rootNode, 200, 15, 0, false, null)
         mindMappingView.addItem(
-            grade2, rootNode, 200, 15, ItemLocation.LEFT, false, null)
+            grade2, rootNode, 200, 15, 1, false, null)
         Log.d("DEBUG_TAG", "grade2XY: ${grade1.x} ${grade1.y}")
         mindMappingView.addItem(
-            grade3, rootNode, 200, 15, ItemLocation.RIGHT, false, null)
+            grade3, rootNode, 200, 15, 2, false, null)
         mindMappingView.addItem(
-            grade4, rootNode, 200, 15, ItemLocation.BOTTOM, false, null)
-
+            grade4, rootNode, 200, 15, 3, false, null)
 
         grade1.setOnTouchListener{ _, motionEvent ->
             mItem = grade1
@@ -214,9 +209,11 @@ class MindMapActivity : AppCompatActivity() {
 
                         if ((x>i.x - i.width && x<i.x + i.width) && (y>i.y - i.height && y<i.y + i.height)) {
                             if(index == 1 && item.location != 0) {
-                                val it = item
+                                val it = Item(this@MindMapActivity, "${item.title}","d",true)
+
+                                Log.d("DEBUG_TAG", "${it.title.text} ${it.itemId}")
                                 mindMappingView.deleteItem(item)
-                                addItem(grade1, it)
+                                addItem(grade1, it, true)
                             }
                         }
                     }
@@ -226,33 +223,7 @@ class MindMapActivity : AppCompatActivity() {
         }
     }
 
-    private fun nodeChildEvent(item: Item): View.OnTouchListener? {
-        var longClick: Boolean
-        var clickCount = 0 // 클릭 카운트가 뷰 하나에만 적용되게
-
-        return View.OnTouchListener { _, motionEvent ->
-            when (motionEvent.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    longClick = false
-                    Log.d("checkDown", "${item.javaClass.name}")
-                    item.setOnLongClickListener {
-                        longClick = true
-
-                        if (longClick) {
-
-                        } else {
-                            ++clickCount
-                        }
-                        true
-                    }
-                }
-            }
-            false
-        }
-    }
-
-    private fun addItem(parent: Item, child: Item) { // mindMappingView 아이템 추가
-        Log.d("DEBUG_TAG", "grade2XY: ${grade1.x} ${grade1.y}")
+    private fun addItem(parent: Item, child: Item, drag : Boolean) { // mindMappingView 아이템 추가
         childNode.add(child)
         mindMappingView.addItem(child, parent, 150,
             20, parent.location, true, null)
@@ -262,11 +233,14 @@ class MindMapActivity : AppCompatActivity() {
             true
         }
         Log.d("node4", "${mindMappingView.bottomItems.size}")
-        //nodeLocation(parent, child) // item 위치 설정
+        if (!drag) {
+            nodeLocation(parent, child) // item 위치 설정
+        }
         binding.bottomNavigationView.visibility = View.INVISIBLE
     }
 
     private fun bottomEvent(node: Item) {
+
         binding.bottomNavigationView.visibility = View.VISIBLE
         binding.bottomNavigationView.run {
             setOnItemSelectedListener { item ->
@@ -275,7 +249,7 @@ class MindMapActivity : AppCompatActivity() {
                         childNodeNum.add(childNodeNumMax)
                         val child = Item(this@MindMapActivity, "Child",
                             "${node.itemId}_item${childNodeNum[childNodeNumMax++]}", true)
-                        addItem(node, child)
+                        addItem(node, child, false)
                         true
                     }
                     else -> {
@@ -284,7 +258,7 @@ class MindMapActivity : AppCompatActivity() {
                 }
             }
         }
-    }/*
+    }
 
     private fun nodeLocation(parent: Item, child: Item) { // item location 재설정
         child.x -= rootNode.x
@@ -300,7 +274,7 @@ class MindMapActivity : AppCompatActivity() {
         } else {
             child.y -= rootNode.y
         }
-    }*/
+    }
 
     private fun popupEventR(node: Item) {
         val popUp = PopupMenu(node.context, node) //v는 클릭된 뷰를 의미

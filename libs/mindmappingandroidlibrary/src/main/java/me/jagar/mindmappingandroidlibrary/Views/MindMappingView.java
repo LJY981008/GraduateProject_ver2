@@ -5,11 +5,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,45 +19,31 @@ import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 
-import me.jagar.mindmappingandroidlibrary.Listeners.OnItemClicked;
-
 public class MindMappingView extends RelativeLayout {
 
     private Context context;
-    private Activity activity;
     private ArrayList<Connection> topItems = new ArrayList<>();
     private ArrayList<Connection> leftItems = new ArrayList<>();
     private ArrayList<Connection> rightItems = new ArrayList<>();
     private ArrayList<Connection> bottomItems = new ArrayList<>();
-    private ArrayList<CustomConnection> customConnections = new ArrayList<>();
     private int connectionWidth = 10, connectionArrowSize = 30, connectionCircRadius = 20, connectionArgSize = 30;
     private String connectionColor = "#000000";
-    private MindMappingView mindMappingView;
-    private OnItemClicked onItemClicked;
-
 
     public MindMappingView(Context context) {
         super(context);
         this.context = context;
-        this.activity = (Activity) context;
-        mindMappingView = this;
     }
 
     public MindMappingView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.activity = (Activity) context;
-        mindMappingView = this;
     }
 
     public MindMappingView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.context = context;
-        this.activity = (Activity) context;
-        mindMappingView = this;
     }
 
     //Getters & Setters
-
     public String getConnectionColor() {
         return connectionColor;
     }
@@ -110,12 +97,12 @@ public class MindMappingView extends RelativeLayout {
         }
 
         this.addView(item);
-
     }
 
     /*Make any item drag able, This will make issues with
     a simple call of OnClickListener on the Item objects so you set it off to call the normal onclicklistener
     the custom OnItemClicked*/
+
     @SuppressLint("ClickableViewAccessibility")
     private void dragItem(final Item item) {
         final float[] dX = new float[1];
@@ -129,8 +116,6 @@ public class MindMappingView extends RelativeLayout {
                     case MotionEvent.ACTION_DOWN:
                         dX[0] = view.getX() - motionEvent.getRawX();
                         dY[0] = view.getY() - motionEvent.getRawY();
-                        if (onItemClicked != null)
-                            onItemClicked.OnClick(item);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         view.animate()
@@ -155,8 +140,9 @@ public class MindMappingView extends RelativeLayout {
     public void addItem(Item item, Item parent, int distance, int spacing, int location,
                         boolean dragAble, ConnectionTextMessage connectionTextMessage) {
         item.setLocation(location);
+        item.setGravity(CENTER_IN_PARENT);
 
-        if (location == ItemLocation.TOP) {
+        if (location == 0) {
 
             this.addView(item);
 
@@ -186,7 +172,7 @@ public class MindMappingView extends RelativeLayout {
             if (dragAble)
                 dragItem(item);
 
-        } else if (location == ItemLocation.LEFT) {
+        } else if (location == 1) {
             this.addView(item);
 
             item.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
@@ -213,7 +199,7 @@ public class MindMappingView extends RelativeLayout {
             if (dragAble)
                 dragItem(item);
 
-        } else if (location == ItemLocation.RIGHT) {
+        } else if (location == 2) {
             this.addView(item);
 
             item.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
@@ -240,7 +226,7 @@ public class MindMappingView extends RelativeLayout {
             if (dragAble)
                 dragItem(item);
 
-        } else if (location == ItemLocation.BOTTOM) {
+        } else if (location == 3) {
 
             this.addView(item);
 
@@ -277,16 +263,16 @@ public class MindMappingView extends RelativeLayout {
         Item parent = item.getParents();
         int location = item.getLocation();
 
-        if (location == ItemLocation.TOP) {
+        if (location == 0) {
             this.topItems.remove(item.getConnection());
             parent.getTopChildItems().remove(item);
-        } else if (location == ItemLocation.LEFT) {
+        } else if (location == 1) {
             this.leftItems.remove(item.getConnection());
             parent.getLeftChildItems().remove(item);
-        } else if (location == ItemLocation.RIGHT) {
+        } else if (location == 2) {
             this.rightItems.remove(item.getConnection());
             parent.getRightChildItems().remove(item);
-        } else if (location == ItemLocation.BOTTOM) {
+        } else if (location == 3) {
             this.bottomItems.remove(item.getConnection());
             parent.getBottomChildItems().remove(item);
         }
@@ -302,7 +288,6 @@ public class MindMappingView extends RelativeLayout {
         drawLeftLines(canvas);
         drawRightLines(canvas);
         drawBottomLines(canvas);
-        drawCustomConnection(canvas);
     }
 
     //Draw connections (default)
@@ -733,91 +718,6 @@ public class MindMappingView extends RelativeLayout {
 
     }
 
-    //Adding custom connection (straight line with 2 circles)
-    public void addCustomConnection(Item item1, int location1, Item item2, int location2, ConnectionTextMessage connectionTextMessage,
-                                    int width, String color, int circRadius1, int circRadius2) {
-        CustomConnection customConnection = new CustomConnection(item1, item2, connectionTextMessage, width, circRadius1,
-                circRadius2, color, location1, location2);
-        customConnections.add(customConnection);
-
-    }
-
-    public void drawCustomConnection(Canvas canvas) {
-
-        for (CustomConnection customConnection : customConnections) {
-
-
-            Item item1 = customConnection.getItem1();
-            int location1 = customConnection.getPosition1();
-            Item item2 = customConnection.getItem2();
-            int location2 = customConnection.getPosition2();
-            int custom_width = customConnection.getWidth();
-            String custom_color = customConnection.getColor();
-            int custom_circRadius2 = customConnection.getCircRadius2();
-            int custom_circRadius1 = customConnection.getCircRadius1();
-
-
-            Point start_point = new Point(0, 0), end_point = new Point(0, 0);
-            if (location1 == ItemLocation.RIGHT) {
-                start_point = new Point((int) item1.getX() + item1.getWidth() + custom_circRadius1, (int) item1.getY() + item1.getHeight() / 2);
-            } else if (location1 == ItemLocation.TOP) {
-                start_point = new Point((int) item1.getX() + item1.getWidth() / 2, (int) item1.getY() - custom_circRadius1);
-            } else if (location1 == ItemLocation.LEFT) {
-                start_point = new Point((int) item1.getX() - custom_circRadius1, (int) item1.getY() + item1.getHeight() / 2);
-            } else if (location1 == ItemLocation.BOTTOM) {
-                start_point = new Point((int) item1.getX() + item1.getWidth() / 2, (int) item1.getY() + item1.getHeight() + custom_circRadius1);
-
-            }
-
-            if (location2 == ItemLocation.RIGHT) {
-                end_point = new Point((int) item2.getX() + item2.getWidth() + custom_circRadius2, (int) item2.getY() + item2.getHeight() / 2);
-            } else if (location2 == ItemLocation.TOP) {
-                end_point = new Point((int) item2.getX() + item2.getWidth() / 2, (int) item2.getY() - custom_circRadius2);
-            } else if (location2 == ItemLocation.LEFT) {
-
-
-                end_point = new Point((int) item2.getX() - custom_circRadius2, (int) item2.getY() + item2.getHeight() / 2);
-
-            } else if (location2 == ItemLocation.BOTTOM) {
-
-
-                end_point = new Point((int) item2.getX() + item2.getWidth() / 2, (int) item2.getY() + item2.getHeight() + custom_circRadius2);
-
-            }
-
-
-            Paint paint = new Paint();
-            paint.setAntiAlias(true);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(custom_width);
-            paint.setColor(Color.parseColor(custom_color));
-            paint.setStrokeCap(Paint.Cap.ROUND);
-
-            paint.setPathEffect(new DashPathEffect(new float[]{10, 20}, 0));
-
-            Path path = new Path();
-            path.moveTo(start_point.x, start_point.y);
-            path.lineTo(end_point.x, end_point.y);
-            path.close();
-            canvas.drawLine(start_point.x, start_point.y, end_point.x, end_point.y, paint);
-
-
-            paint.setStyle(Paint.Style.FILL);
-            canvas.drawCircle(start_point.x, start_point.y, custom_circRadius1, paint);
-            canvas.drawCircle(end_point.x, end_point.y, custom_circRadius2, paint);
-
-        }
-
-        invalidate();
-
-    }
-
-    //Setting the listener for the view's items
-
-    public void setOnItemClicked(OnItemClicked onItemClicked) {
-        this.onItemClicked = onItemClicked;
-    }
-
     public ArrayList<Connection> getTopItems() {
         return topItems;
     }
@@ -825,5 +725,4 @@ public class MindMappingView extends RelativeLayout {
     public ArrayList<Connection> getBottomItems() {
         return bottomItems;
     }
-
 }
