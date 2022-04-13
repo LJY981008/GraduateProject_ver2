@@ -12,4 +12,5 @@ object MyApp {
     const val notice_load_url: String = "/notice_load.php"
     const val notice_save_url: String = "/notice_insert.php"
     const val node_save_url: String = "/node_save.php"
+    const val notice_open_url: String = "/notice_open.php"
 }

@@ -52,6 +52,12 @@ interface APIS_login {
         ): Call<PostModel>
 
     @FormUrlEncoded
+    @POST(MyApp.notice_open_url)
+    fun notice_open(
+        @Field("key") key: Int
+    ):Call<PostModel>
+
+    @FormUrlEncoded
     @POST(MyApp.node_save_url)
     fun node_save(
         @Field("nodeID") nodeID: String,
