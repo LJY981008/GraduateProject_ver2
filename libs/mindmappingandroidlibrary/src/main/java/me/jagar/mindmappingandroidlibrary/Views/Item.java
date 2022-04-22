@@ -14,7 +14,6 @@ import java.util.ArrayList;
 public class Item extends LinearLayout {
 
     private Context context;
-    private TextView title;
     private String itemId;
     private int location;
     boolean defaultStyle;
@@ -25,14 +24,17 @@ public class Item extends LinearLayout {
     private Connection connection;
     private Item parent;
 
+    private TextView title;
+    private String content;
 
-    public Item(Context context, String title, String id, boolean defaultStyle){
+    public Item(Context context, String title, String id, String content, boolean defaultStyle){
         super(context);
         this.context = context;
         this.defaultStyle = defaultStyle;
         this.setTitle(title);
         this.addTextViews();
         this.itemId = id;
+        this.content = content;
 
         if (title == null)
             this.title.setVisibility(GONE);
@@ -54,11 +56,17 @@ public class Item extends LinearLayout {
     public TextView getTitle(){
         return this.title;
     }
-    
     public void setTitle(String title){
         this.title = new TextView(context);
         this.getTitle().setText(title);
         this.getTitle().setTypeface(Typeface.DEFAULT_BOLD);
+    }
+
+    public String getContent(){
+        return this.content;
+    }
+    public void setContent(String content){
+        this.content = content;
     }
 
     public String getItemId(){
@@ -72,6 +80,7 @@ public class Item extends LinearLayout {
         GradientDrawable drawable = (GradientDrawable)this.getBackground();
         drawable.setStroke(size, color);
     }
+
 
     public void addTopChild(Item item){
         topChildItems.add(item);

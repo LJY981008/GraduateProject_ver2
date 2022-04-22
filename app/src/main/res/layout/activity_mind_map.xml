@@ -40,33 +40,23 @@
     </me.jagar.mindmappingandroidlibrary.Zoom.ZoomLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:background="@android:color/white"
+        app:itemBackground="@android:color/white"
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="invisible"
-        app:itemBackground="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:menu="@menu/bottom_menu" />
 
-    <EditText
-        android:id="@+id/editNode"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:hint=""
-        android:importantForAutofill="no"
-        android:inputType="text"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView" />
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/saveNode"
+        android:id="@+id/saveItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        />
+        tools:ignore="SpeakableTextPresentCheck,ImageContrastCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
