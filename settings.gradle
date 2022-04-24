@@ -10,3 +10,4 @@ dependencyResolutionManagement {
 rootProject.name = "SchoolLifeProject"
 include ':app'
 include ':mindmaplibrary'
+include ':library'
