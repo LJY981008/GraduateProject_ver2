@@ -1,6 +1,7 @@
 package com.example.schoollifeproject
 
 import android.graphics.Color
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -19,6 +20,7 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
     private val dashLine = DashLine(Color.parseColor("#F06292"), 6)
     private lateinit var listener: OnItemClickListener
     private lateinit var longClickListener: OnItemLongClickListener
+    private lateinit var doubleClicklistener: OnItemDoubleClickListener
     fun setOnItemListener(listener: (View, NodeModel<ItemInfo>) -> Unit) {
         this.listener = object: OnItemClickListener{
             override fun onItemClick(item: View, node: NodeModel<ItemInfo>) {
@@ -30,6 +32,13 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
         this.longClickListener = object: OnItemLongClickListener{
             override fun onItemLongClick(item: View, node: NodeModel<ItemInfo>) {
                 longClickListener(item, node)
+            }
+        }
+    }
+    fun setOnItemDoubleListener(doubleClickListener: (View, NodeModel<ItemInfo>) -> Unit) {
+        this.doubleClicklistener = object: OnItemDoubleClickListener{
+            override fun onItemDoubleClick(item: View, node: NodeModel<ItemInfo>) {
+                doubleClickListener(item, node)
             }
         }
     }
@@ -50,11 +59,21 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
         val nodeBack = itemView.findViewById<ConstraintLayout>(R.id.item_back)
         val titleView = itemView.findViewById<TextView>(R.id.title)
         val item: ItemInfo = node.value
+        var i = 0
         titleView.text = item.getTitle()
 
         nodeBack.setOnClickListener { v ->
-            if (listener != null) {
+
+            i++
+            val handler = Handler()
+            val r = Runnable { i = 0 }
+
+            if (i == 1 && listener != null) {
+                handler.postDelayed(r, 250);
                 listener.onItemClick(v, node)
+            } else if(i == 2 && doubleClicklistener != null) {
+                i = 0;
+                doubleClicklistener.onItemDoubleClick(v, node)
             }
         }
 
@@ -86,6 +105,10 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
 
     interface OnItemLongClickListener {
         fun onItemLongClick(item: View, node: NodeModel<ItemInfo>)
+    }
+
+    interface OnItemDoubleClickListener {
+        fun onItemDoubleClick(item: View, node: NodeModel<ItemInfo>)
     }
 }
 

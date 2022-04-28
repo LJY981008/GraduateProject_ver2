@@ -296,6 +296,7 @@ public class TreeViewContainer extends ViewGroup implements TreeViewNotifier {
             drawDragBackGround(toHolder.getView());
             if(isDraggingNodeMode && toHolder.getView().getTag(R.id.edit_and_dragging) == IS_EDIT_DRAGGING){
                //Is editing and dragging, so not draw line.
+
                 drawTreeLine(node);
                continue;
             }
@@ -416,10 +417,14 @@ public class TreeViewContainer extends ViewGroup implements TreeViewNotifier {
                     recordAnchorLocationOnViewPort(false,false,targetHolderNode);
                 }
                 requestLayout();
+                controlListener.onDragMoveNodesEnd(releasedChildHolder.getNode(), targetHolderNode, releasedChildHolder.getView(), targetHolder.getView());
             }else{
                 //recover
                 dragBlock.smoothRecover(releasedChild);
             }
+            Log.d("Debug_Log", "onViewReleased/Drag");
+            focusMidLocation();
+            requestMoveNodeByDragging(false);
             dragBlock.setDragging(false);
             releasedChild.setElevation(Z_NOR);
             releasedChild.setTag(R.id.edit_and_dragging,null);
@@ -456,7 +461,8 @@ public class TreeViewContainer extends ViewGroup implements TreeViewNotifier {
                 if(controlListener!=null){
                     Object srcViewHolderTag = srcView.getTag(R.id.item_holder);
                     if(srcViewHolderTag instanceof TreeViewHolder){
-                        controlListener.onDragMoveNodesHit(((TreeViewHolder<?>) srcViewHolderTag).getNode(),null,srcView,null);
+                        controlListener.onDragMoveNodesHit(((TreeViewHolder<?>) srcViewHolderTag).getNode(),
+                                null,srcView,null);
                     }
                 }
             }

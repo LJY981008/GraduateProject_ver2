@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/teal_200">
+
     </com.gyso.treeview.GysoTreeView>
 
     <TextView
@@ -40,13 +41,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:menu="@menu/bottom_menu" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/saveItem"
+    <Button
+        android:id="@+id/focusMidButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:ignore="SpeakableTextPresentCheck,ImageContrastCheck" />
+        android:text="👀"
+        app:layout_constraintBottom_toBottomOf="@id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
