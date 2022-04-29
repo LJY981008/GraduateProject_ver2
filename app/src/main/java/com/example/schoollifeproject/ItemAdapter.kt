@@ -68,19 +68,17 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
             val handler = Handler()
             val r = Runnable { i = 0 }
 
-            if (i == 1 && listener != null) {
+            if (i == 1) {
                 handler.postDelayed(r, 250);
                 listener.onItemClick(v, node)
-            } else if(i == 2 && doubleClicklistener != null) {
+            } else if(i == 2) {
                 i = 0;
                 doubleClicklistener.onItemDoubleClick(v, node)
             }
         }
 
         nodeBack.setOnLongClickListener { v ->
-            if (longClickListener != null) {
-                longClickListener.onItemLongClick(v, node)
-            }
+            longClickListener.onItemLongClick(v, node)
             true
         }
     }

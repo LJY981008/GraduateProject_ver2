@@ -22,7 +22,7 @@
         android:background="@color/teal_700"
         android:padding="10dp"
         android:textColor="@android:color/white"
-        android:textSize="18sp"
+        android:textSize="16sp"
         android:textStyle="bold"
         android:typeface="serif"
         android:visibility="gone"
@@ -41,13 +41,62 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:menu="@menu/bottom_menu" />
 
-    <Button
+    <ImageButton
         android:id="@+id/focusMidButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="24dp"
-        android:text="👀"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:src="@drawable/ic_baseline_filter_center_focus_24"
         app:layout_constraintBottom_toBottomOf="@id/bottomNavigationView"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:background="#A1A1A1"
+        android:padding="6sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/viewImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            app:srcCompat="@drawable/ic_baseline_remove_red_eye_24" />
+
+        <ImageView
+            android:id="@+id/recommedImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/viewImage"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10sp"
+            app:srcCompat="@drawable/ic_baseline_thumb_up_24" />
+
+        <TextView
+            android:id="@+id/mapViews"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2sp"
+            android:layout_marginTop="10sp"
+            android:layout_toRightOf="@id/viewImage"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/mapRecommend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/recommedImage"
+            android:layout_marginLeft="2sp"
+            android:layout_marginTop="10sp"
+            android:layout_toRightOf="@id/recommedImage"
+            android:visibility="gone" />
+
+    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -148,7 +148,7 @@ class MindMapActivity : AppCompatActivity() {
                                         , "ChildNode", "", itemMaxNum++))
                                 Log.d("Debug_Log", "bottomMenu1_childNode: ${item.value.getItemID()}")
                                 editor.addChildNodes(node, item)
-                                saveDB(item, view, "add")
+                                saveDB(item, null, "insert")
                                 binding.bottomNavigationView.isVisible = false
                                 true
                             }
@@ -158,18 +158,27 @@ class MindMapActivity : AppCompatActivity() {
                                 true
                             }
                             R.id.bottomMenu3 -> {
-                                val parent = node.getParentNode()
+                                val parentNode = node.getParentNode()
+                                val parentName = node.value.getItemID().split("_")[0]
+                                val parent =
+                                    if(parentName != "grade1" &&
+                                        parentName != "grade2" &&
+                                        parentName != "grade3" &&
+                                        parentName != "grade4") node.value.getItemID().split("_")[1]
+                                    else node.value.getItemID().split("_")[0]
                                 val children = node.getChildNodes()
+                                saveDB(node, view, "delete")
                                 editor.removeNode(node)
                                 for (i in 0 until node.getChildNodes().size) {
                                     val child = children.pop().value
                                     val childID = child.getItemID().split("_")[1]
                                     val childNode: NodeModel<ItemInfo> =
                                         NodeModel<ItemInfo>(ItemInfo(
-                                            "${parent.value.getItemID().split("_")[0]}_$childID",
+                                            "${parent}_$childID",
                                             "${child.getTitle()}", "${child.getContent()}", child.getNum()))
+                                    saveDB(childNode, null, "update")
                                     Log.d("Debug_Log", "bottomMenu3_childNode: ${childNode.value.getItemID()}")
-                                    editor.addChildNodes(parent, childNode)
+                                    editor.addChildNodes(parentNode, childNode)
                                 }
                                 binding.bottomNavigationView.isVisible = false
                                 true
@@ -266,7 +275,7 @@ class MindMapActivity : AppCompatActivity() {
         })
     }
 
-    private fun saveDB(item: NodeModel<ItemInfo>, view: View, mode: String) {
+    private fun saveDB(item: NodeModel<ItemInfo>, view: View?, mode: String) {
 
         val itemID = item.value.getItemID()
         val itemNum = item.value.getNum()
@@ -281,11 +290,12 @@ class MindMapActivity : AppCompatActivity() {
             ).enqueue(object : Callback<PostModel> {
                 override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
                     Log.d("onResponse", "MindMapActivity item_save: 리스폰 성공")
-                    if(response.body()?.error.toString() == "add") {
-                        Log.d("onResponse", "MindMapActivity item_save: 저장 완료")
-                    }
-                    if(response.body()?.error.toString() == "update") {
-                        Log.d("onResponse", "MindMapActivity item_save: 저장 완료")
+                    if(response.body()?.error.toString() == "insert") {
+                        Log.d("onResponse", "MindMapActivity item_save: 삽입 완료")
+                    } else if(response.body()?.error.toString() == "update") {
+                        Log.d("onResponse", "MindMapActivity item_save: 변경 완료")
+                    } else if(response.body()?.error.toString() == "delete") {
+                        Log.d("onResponse", "MindMapActivity item_save: 삭제 완료")
                     }
                 }
 
