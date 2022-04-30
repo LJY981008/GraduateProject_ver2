@@ -68,7 +68,7 @@ class MindMapActivity : AppCompatActivity() {
         val grade3: NodeModel<ItemInfo> = NodeModel<ItemInfo>(ItemInfo("grade3", "3학년", null, null))
         val grade4: NodeModel<ItemInfo> = NodeModel<ItemInfo>(ItemInfo("grade4", "4학년", null, null))
 
-        mapView.addNode(root, grade1, grade2, grade3, grade4)
+        mapView.addNode(root, grade3, grade4, grade1, grade2)
 
         adapter.treeModel = mapView
 
