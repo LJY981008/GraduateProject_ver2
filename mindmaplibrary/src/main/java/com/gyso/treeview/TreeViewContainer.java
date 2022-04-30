@@ -233,6 +233,8 @@ public class TreeViewContainer extends ViewGroup implements TreeViewNotifier {
                 + Arrays.toString(centerM)+"\n"
                 + Arrays.toString(now));
         if(now[Matrix.MSCALE_X]>0&&now[Matrix.MSCALE_Y]>0){
+
+            Log.d("Debug_Log", "TreeViewContainer/focusMidLocation: " + Matrix.MSCALE_X + " and " + Matrix.MSCALE_Y);
             animate().scaleX(centerM[Matrix.MSCALE_X])
                     .translationX(centerM[Matrix.MTRANS_X])
                     .scaleY(centerM[Matrix.MSCALE_Y])
@@ -243,6 +245,7 @@ public class TreeViewContainer extends ViewGroup implements TreeViewNotifier {
     }
 
     public float getMinScale(){
+        Log.d("Debug_Log", "TreeViewContainer/getMinScale: " + minScale);
         return minScale;
     }
 
@@ -423,7 +426,6 @@ public class TreeViewContainer extends ViewGroup implements TreeViewNotifier {
                 dragBlock.smoothRecover(releasedChild);
             }
             Log.d("Debug_Log", "onViewReleased/Drag");
-            focusMidLocation();
             requestMoveNodeByDragging(false);
             dragBlock.setDragging(false);
             releasedChild.setElevation(Z_NOR);

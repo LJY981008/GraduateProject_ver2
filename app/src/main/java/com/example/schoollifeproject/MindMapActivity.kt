@@ -42,6 +42,7 @@ class MindMapActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         userID = intent.getStringExtra("ID").toString()
+        Log.d("Debug_Log", "MindMapActivity/userID: ${userID}")
 
         //demo init
         initWidgets()
@@ -85,7 +86,6 @@ class MindMapActivity : AppCompatActivity() {
                     }
 
                     for(i in response.body()!!) {
-                        editor.focusMidLocation()
                         Log.d("Debug_Log", "getItemID: ${i.getItemID()}")
                         val parentID = i.getItemID().split("_")[0]
                         val childID = i.getItemID().split("_")[1]
@@ -110,6 +110,7 @@ class MindMapActivity : AppCompatActivity() {
                         itemMaxNum = (if (i.getNum() != null) i.getNum()!! else throw NullPointerException("Expression 'i.getNum()' must not be null"))
                         itemMaxNum++
                         Log.d("Debug_Log", "getmapItems: ${mapItems}")
+                        editor.focusMidLocation()
                     }
                 }
             }
@@ -125,8 +126,7 @@ class MindMapActivity : AppCompatActivity() {
     }
 
     private fun itemEvent(editor: TreeViewEditor, adapter: ItemAdapter) {
-
-        editor.focusMidLocation()
+        editor.container.isAnimateAdd = true
 
         adapter.setOnItemListener { view, node ->
             val id = node.value.getItemID()
@@ -273,6 +273,23 @@ class MindMapActivity : AppCompatActivity() {
                 }
             }
         })
+
+        binding.focusMidButton.setOnClickListener {
+            editor.focusMidLocation()
+        }
+
+        binding.popularLayout.setOnClickListener {
+            val visible: Boolean = binding.mapViews.visibility == View.VISIBLE &&
+                    binding.mapRecommend.visibility == View.VISIBLE
+            Log.d("Debug_Log", "popularLayout: $visible")
+            if (!visible) {
+                binding.mapViews.visibility = View.VISIBLE
+                binding.mapRecommend.visibility = View.VISIBLE
+            } else {
+                binding.mapViews.visibility = View.GONE
+                binding.mapRecommend.visibility = View.GONE
+            }
+        }
     }
 
     private fun saveDB(item: NodeModel<ItemInfo>, view: View?, mode: String) {
