@@ -2,6 +2,7 @@ package com.example.schoollifeproject.model
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
+import com.gyso.treeview.model.NodeModel
 
 class ItemInfo(@Expose
                @SerializedName("itemID")
@@ -15,9 +16,6 @@ class ItemInfo(@Expose
                @Expose
                @SerializedName("noteContent")
                private var note: String?) {
-    val parentID: String = itemID.split("_")[0]
-    val childID: String = itemID.split("_")[0]
-
     fun getItemID(): String {
         return itemID
     }

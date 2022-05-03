@@ -48,6 +48,9 @@ class MindMapFragment : Fragment() {
     private var mapHit = 0
     private var mapRecommend = 0
 
+    private var mapPublic = true
+    private lateinit var mapPassword: String
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -90,9 +93,9 @@ class MindMapFragment : Fragment() {
                 Log.d("onResponse", "MindMapActivity item_load: 리스폰 성공")
                 if(response.body() != null) {
                     for(i in response.body()!!) {
-                        val item = NodeModel<ItemInfo>(i)
+                        val item = NodeModel(i)
                         val childID = i.getItemID().split("_")[1]
-                        mapItems.put(childID, item)
+                        mapItems[childID] = item
                     }
 
                     for(i in response.body()!!) {
@@ -134,11 +137,16 @@ class MindMapFragment : Fragment() {
             override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
                 Log.d("onResponse", "MindMapActivity map_public: 리스폰 성공 ${response.body()?.error.toString()}")
                 if(response.body()?.error.toString() == "failed") {
-                    binding.publicSwitch.isChecked = false
+                    mapPublic = true
                 } else {
-                    binding.publicSwitch.isChecked = response.body()?.public == 0
+                    if (response.body()?.public == 0) {
+                        mapPassword = response.body()?.mapPassword.toString()
+                        binding.publicButton.setImageResource(R.drawable.ic_mindmap_private)
+                        mapPublic = false
+                    } else {
+                        mapPublic = true
+                    }
                 }
-
             }
 
             override fun onFailure(call: Call<PostModel>, t: Throwable) {
@@ -147,173 +155,6 @@ class MindMapFragment : Fragment() {
         })
 
         itemEvent(editor, adapter)
-    }
-
-    private fun itemEvent(editor: TreeViewEditor, adapter: ItemAdapter) {
-        editor.container.isAnimateAdd = true
-
-        adapter.setOnItemListener { view, node ->
-            Log.d("Debug_Log", "setOnItemListener: ${node.getValue().toString()}")
-            val id = node.value.getItemID()
-            if(id != "root") {
-                val visible = id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4"
-                binding.bottomNavigationView.menu.findItem(R.id.bottomMenu2).isVisible = visible
-                binding.bottomNavigationView.menu.findItem(R.id.bottomMenu3).isVisible = visible
-                binding.bottomNavigationView.visibility = View.VISIBLE
-                binding.bottomNavigationView.run {
-                    setOnItemSelectedListener { item ->
-                        when (item.itemId) {
-                            R.id.bottomMenu1 -> {
-                                val parent =
-                                    if(visible) node.value.getItemID().split("_")[1]
-                                    else node.value.getItemID().split("_")[0]
-                                val item: NodeModel<ItemInfo> =
-                                    NodeModel<ItemInfo>(
-                                        ItemInfo(
-                                        "${parent}_item${itemMaxNum}"
-                                        , "ChildNode", itemMaxNum++, "")
-                                    )
-                                Log.d("Debug_Log", "bottomMenu1_childNode: ${item.value.getItemID()}")
-                                editor.addChildNodes(node, item)
-                                saveDB(item, null, "insert")
-                                binding.bottomNavigationView.isVisible = false
-                                true
-                            }
-                            R.id.bottomMenu2 -> {
-                                setItem(node, editor)
-                                binding.bottomNavigationView.isVisible = false
-                                true
-                            }
-                            R.id.bottomMenu3 -> {
-                                val children = node.getChildNodes()
-
-                                for (i in children) {
-                                    Log.d("Debug_Log", "bottomMenu3_childNode: ${i.value.getItemID()}")
-                                    saveDB(i, null, "delete")
-                                }
-
-                                Log.d("Debug_Log", "bottomMenu3_childNode: ${node.value.getItemID()}")
-                                saveDB(node, view, "delete")
-                                editor.removeNode(node)
-
-                                binding.bottomNavigationView.isVisible = false
-                                true
-                            }
-                            else -> {
-                                true
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        adapter.setOnItemLongListener { item, node ->
-            if(node.value.getItemID() != "root" &&
-                node.value.getItemID() != "grade1" &&
-                node.value.getItemID() != "grade2" &&
-                node.value.getItemID() != "grade3" &&
-                node.value.getItemID() != "grade4")
-                editor.requestMoveNodeByDragging(true)
-        }
-
-        adapter.setOnItemDoubleListener { item, node ->
-            val id = node.value.getItemID()
-            if(id != "root" && id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4") {
-                setItem(node, editor)
-            }
-        }
-
-        //treeView control listener
-        val token = Object()
-        val dismissRun = Runnable {
-            binding.scalePercent.visibility = View.GONE
-        }
-
-        binding.mapView.setTreeViewControlListener(object: TreeViewControlListener {
-            override fun onScaling(state: Int, percent: Int) {
-                binding.scalePercent.visibility = View.VISIBLE
-                when (state) {
-                    TreeViewControlListener.MAX_SCALE -> {
-                        binding.scalePercent.text = "MAX"
-                    }
-                    TreeViewControlListener.MIN_SCALE -> {
-                        binding.scalePercent.text = "MIN"
-                    }
-                    else -> {
-                        binding.scalePercent.text = "$percent%"
-                    }
-                }
-                handler.removeCallbacksAndMessages(token)
-                handler.postAtTime(dismissRun, token, SystemClock.uptimeMillis() + 2000)
-            }
-
-            override fun onDragMoveNodesHit(
-                draggingNode: NodeModel<*>?,
-                hittingNode: NodeModel<*>?,
-                draggingView: View?,
-                hittingView: View?
-            ) {
-                if (draggingNode !=null && hittingNode != null) {
-                    Log.d("Debug_Log",
-                        "onDragMoveNodesHit: draging[${(draggingNode.value as ItemInfo).getItemID()}]" +
-                                "hittingNode[${(hittingNode.value as ItemInfo).getItemID()}]")
-                }
-            }
-
-            override fun onDragMoveNodesEnd(
-                draggingNode: NodeModel<*>?,
-                hittingNode: NodeModel<*>?,
-                draggingView: View?,
-                hittingView: View?
-            ) {
-                if (draggingNode != null && hittingNode != null) {
-                    Log.d(
-                        "Debug_Log",
-                        "onDragMoveNodesEnd: draging[${(draggingNode.value as ItemInfo).getItemID()}]" +
-                                "hittingNode[${(hittingNode.value as ItemInfo).getItemID()}]"
-                    )
-                    val dNode = draggingNode.value as ItemInfo
-                    val hNode = hittingNode.value as ItemInfo
-                    val parent =
-                        if(hNode.getItemID() != "root" && hNode.getItemID() != "grade1" && hNode.getItemID() != "grade2" &&
-                            hNode.getItemID() != "grade3" && hNode.getItemID() != "grade4")
-                            hNode.getItemID().split("_")[1]
-                        else hNode.getItemID().split("_")[0]
-                    dNode.setItemID("${parent}_${dNode.getItemID().split("_")[1]}")
-                    if (draggingView != null) {
-                        saveDB(draggingNode as NodeModel<ItemInfo>, draggingView, "update")
-                    }
-                }
-            }
-        })
-
-        binding.focusMidButton.setOnClickListener {
-            editor.focusMidLocation()
-        }
-
-        binding.popularLayout.setOnClickListener {
-            val visible: Boolean = binding.mapViews.visibility == View.VISIBLE &&
-                    binding.mapRecommend.visibility == View.VISIBLE
-            Log.d("Debug_Log", "popularLayout: $visible")
-            if (!visible) {
-                binding.mapViews.visibility = View.VISIBLE
-                binding.mapRecommend.visibility = View.VISIBLE
-                binding.recommendButton.visibility = View.VISIBLE
-            } else {
-                binding.mapViews.visibility = View.GONE
-                binding.mapRecommend.visibility = View.GONE
-                binding.recommendButton.visibility = View.GONE
-            }
-        }
-
-        binding.publicSwitch.setOnClickListener {
-            // 마인드맵 비밀번호 설정
-        }
-
-        binding.recommendButton.setOnClickListener {
-            // 추천수 1 추가
-        }
     }
 
     private fun saveDB(item: NodeModel<ItemInfo>, view: View?, mode: String) {
@@ -348,6 +189,272 @@ class MindMapFragment : Fragment() {
 
                 }
             })
+        }
+    }
+
+    private fun itemEvent(editor: TreeViewEditor, adapter: ItemAdapter) {
+        editor.container.isAnimateAdd = true
+
+        adapter.setOnItemListener { view, node ->
+            Log.d("Debug_Log", "setOnItemListener: ${node.getValue().toString()}")
+            val id = node.value.getItemID()
+            if (id != "root") {
+                val visible = id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4"
+                binding.bottomNavigationView.menu.findItem(R.id.bottomMenu2).isVisible = visible
+                binding.bottomNavigationView.menu.findItem(R.id.bottomMenu3).isVisible = visible
+                binding.bottomNavigationView.menu.findItem(R.id.bottomMenu4).isVisible = visible
+                binding.bottomNavigationView.visibility = View.VISIBLE
+                binding.bottomNavigationView.run {
+                    setOnItemSelectedListener { item ->
+                        when (item.itemId) {
+                            R.id.bottomMenu1 -> {
+                                val parent =
+                                    if (visible) node.value.getItemID().split("_")[1]
+                                    else node.value.getItemID().split("_")[0]
+                                val item: NodeModel<ItemInfo> =
+                                    NodeModel<ItemInfo>(
+                                        ItemInfo(
+                                            "${parent}_item${itemMaxNum}",
+                                            "ChildNode",
+                                            itemMaxNum++,
+                                            ""
+                                        )
+                                    )
+                                Log.d(
+                                    "Debug_Log",
+                                    "bottomMenu1_childNode: ${item.value.getItemID()}"
+                                )
+                                editor.addChildNodes(node, item)
+                                saveDB(item, null, "insert")
+                                binding.bottomNavigationView.isVisible = false
+                                true
+                            }
+                            R.id.bottomMenu2 -> {
+                                setItem(node, editor)
+                                binding.bottomNavigationView.isVisible = false
+                                true
+                            }
+                            R.id.bottomMenu3 -> {
+                                val children = node.getChildNodes()
+
+                                for (i in children) {
+                                    Log.d(
+                                        "Debug_Log",
+                                        "bottomMenu3_childNode: ${i.value.getItemID()}"
+                                    )
+                                    saveDB(i, null, "delete")
+                                }
+
+                                Log.d(
+                                    "Debug_Log",
+                                    "bottomMenu3_childNode: ${node.value.getItemID()}"
+                                )
+                                saveDB(node, view, "delete")
+                                editor.removeNode(node)
+
+                                binding.bottomNavigationView.isVisible = false
+                                true
+                            }
+                            else -> {
+                                true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        adapter.setOnItemLongListener { item, node ->
+            if (node.value.getItemID() != "root" &&
+                node.value.getItemID() != "grade1" &&
+                node.value.getItemID() != "grade2" &&
+                node.value.getItemID() != "grade3" &&
+                node.value.getItemID() != "grade4"
+            )
+                editor.requestMoveNodeByDragging(true)
+        }
+
+        adapter.setOnItemDoubleListener { item, node ->
+            val id = node.value.getItemID()
+            if (id != "root" && id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4") {
+                setItem(node, editor)
+            }
+        }
+
+        //treeView control listener
+        val token = Object()
+        val dismissRun = Runnable {
+            binding.scalePercent.visibility = View.GONE
+        }
+
+        binding.mapView.setTreeViewControlListener(object : TreeViewControlListener {
+            override fun onScaling(state: Int, percent: Int) {
+                binding.scalePercent.visibility = View.VISIBLE
+                when (state) {
+                    TreeViewControlListener.MAX_SCALE -> {
+                        binding.scalePercent.text = "MAX"
+                    }
+                    TreeViewControlListener.MIN_SCALE -> {
+                        binding.scalePercent.text = "MIN"
+                    }
+                    else -> {
+                        binding.scalePercent.text = "$percent%"
+                    }
+                }
+                handler.removeCallbacksAndMessages(token)
+                handler.postAtTime(dismissRun, token, SystemClock.uptimeMillis() + 2000)
+            }
+
+            override fun onDragMoveNodesHit(
+                draggingNode: NodeModel<*>?,
+                hittingNode: NodeModel<*>?,
+                draggingView: View?,
+                hittingView: View?
+            ) {
+                if (draggingNode != null && hittingNode != null) {
+                    Log.d(
+                        "Debug_Log",
+                        "onDragMoveNodesHit: draging[${(draggingNode.value as ItemInfo).getItemID()}]" +
+                                "hittingNode[${(hittingNode.value as ItemInfo).getItemID()}]"
+                    )
+                }
+            }
+
+            override fun onDragMoveNodesEnd(
+                draggingNode: NodeModel<*>?,
+                hittingNode: NodeModel<*>?,
+                draggingView: View?,
+                hittingView: View?
+            ) {
+                if (draggingNode != null && hittingNode != null) {
+                    Log.d(
+                        "Debug_Log",
+                        "onDragMoveNodesEnd: draging[${(draggingNode.value as ItemInfo).getItemID()}]" +
+                                "hittingNode[${(hittingNode.value as ItemInfo).getItemID()}]"
+                    )
+                    val dNode = draggingNode.value as ItemInfo
+                    val hNode = hittingNode.value as ItemInfo
+                    val parent =
+                        if (hNode.getItemID() != "root" && hNode.getItemID() != "grade1" && hNode.getItemID() != "grade2" &&
+                            hNode.getItemID() != "grade3" && hNode.getItemID() != "grade4"
+                        )
+                            hNode.getItemID().split("_")[1]
+                        else hNode.getItemID().split("_")[0]
+                    dNode.setItemID("${parent}_${dNode.getItemID().split("_")[1]}")
+                    if (draggingView != null) {
+                        saveDB(draggingNode as NodeModel<ItemInfo>, draggingView, "update")
+                    }
+                }
+            }
+        })
+
+        binding.focusMidButton.setOnClickListener {
+            editor.focusMidLocation()
+        }
+
+        binding.popularLayout.setOnClickListener {
+            val visible: Boolean = binding.mapViews.visibility == View.VISIBLE &&
+                    binding.mapRecommend.visibility == View.VISIBLE
+            Log.d("Debug_Log", "popularLayout: $visible")
+            if (!visible) {
+                binding.mapViews.visibility = View.VISIBLE
+                binding.mapRecommend.visibility = View.VISIBLE
+                binding.recommendButton.visibility = View.VISIBLE
+            } else {
+                binding.mapViews.visibility = View.GONE
+                binding.mapRecommend.visibility = View.GONE
+                binding.recommendButton.visibility = View.GONE
+            }
+        }
+
+        binding.publicButton.setOnClickListener {
+            val setWindow: View =
+                LayoutInflater.from(mapContext).inflate(R.layout.window_map_public_set, null)
+            val publicSetWindow = PopupWindow(
+                setWindow,
+                ((requireContext().resources.displayMetrics.widthPixels) * 0.8).toInt(),
+                WindowManager.LayoutParams.WRAP_CONTENT
+            )
+
+            publicSetWindow.isFocusable = true
+            publicSetWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+            publicSetWindow.update()
+            publicSetWindow.showAtLocation(setWindow, Gravity.CENTER, 0, 0)
+
+            publicSetWindow.isOutsideTouchable = true
+            publicSetWindow.setTouchInterceptor { _, motionEvent ->
+                if (motionEvent.action == MotionEvent.ACTION_OUTSIDE) {
+                    publicSetWindow.dismiss()
+                }
+                false
+            }
+
+            val setPublicText: TextView = setWindow.findViewById(R.id.passwordText)
+            val setPublicButton: Button = setWindow.findViewById(R.id.publicSetButton)
+            val setPassword: EditText = setWindow.findViewById(R.id.setPassword)
+
+            if (mapPublic) {
+                setPublicText.text = "패스워드를 입력해주세요."
+            } else {
+                setPublicText.text = "공개로 전환하시겠습니까?\n패스워드를 입력해주세요."
+            }
+
+            fun savePublic(i: Int, password: String) {
+                api.map_update(userID, i, password).enqueue(object : Callback<PostModel> {
+                    override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
+                        Log.d("onResponse", "MindMapActivity map_update: 리스폰 성공 ")
+                    }
+
+                    override fun onFailure(call: Call<PostModel>, t: Throwable) {
+                        Log.d("onFailure", "MindMapActivity map_update: 리스폰 실패 : $t")
+                    }
+                })
+            }
+
+            // 마인드맵 비밀번호 설정
+            setPublicButton.setOnClickListener {
+                val password = setPassword.text.toString()
+                if (mapPublic) {
+                    when {
+                        password != "" -> {
+                            mapPassword = password
+                            savePublic(0, password)
+                            mapPublic = false
+                            binding.publicButton.setImageResource(R.drawable.ic_mindmap_private)
+                            publicSetWindow.dismiss()
+                        }
+                        else -> {
+                            Toast.makeText(
+                                mapContext, "패스워드가 비어있습니다.", Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                } else {
+                    when {
+                        password != mapPassword -> {
+                            Toast.makeText(
+                                mapContext, "패스워드가 다릅니다.", Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        password != "" -> {
+                            mapPassword = password
+                            savePublic(1, "")
+                            mapPublic = true
+                            binding.publicButton.setImageResource(R.drawable.ic_mindmap_public)
+                            publicSetWindow.dismiss()
+                        }
+                        else -> {
+                            Toast.makeText(
+                                mapContext, "패스워드가 비어있습니다.", Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            }
+        }
+
+        binding.recommendButton.setOnClickListener {
+            // 추천수 1 추가
         }
     }
 
