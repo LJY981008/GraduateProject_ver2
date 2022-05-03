@@ -37,7 +37,7 @@ class MenuActivity : AppCompatActivity() {
                 ) {
 
                     if (!response.body().toString().isEmpty()) {
-                        //countKey = response.body()?.countKey!!
+                        countKey = response.body()?.countKey!!
                     }
                     Log.d("키갯수", countKey.toString())
                 }
@@ -56,17 +56,25 @@ class MenuActivity : AppCompatActivity() {
 
             setOnItemSelectedListener { item ->
                 val transaction = supportFragmentManager.beginTransaction()
+                val frameLayout = supportFragmentManager.findFragmentById(R.id.frameLayout)
+
                 when (item.itemId) {
                     R.id.mainMenu1 -> {
-                        bundle.putInt("countKey", countKey)
-                        listFragment.arguments = bundle
-                        transaction.replace(R.id.frameLayout, listFragment)
-                            .commitAllowingStateLoss()
+                        if (frameLayout != null) {
+                            removeFragment()
+                        }
                         true
                     }
                     R.id.mainMenu2 -> {
                         mindMapFragment.arguments = bundle
                         transaction.replace(R.id.frameLayout, mindMapFragment)
+                            .commitAllowingStateLoss()
+                        true
+                    }
+                    R.id.mainMenu3 -> {
+                        bundle.putInt("countKey", countKey)
+                        listFragment.arguments = bundle
+                        transaction.replace(R.id.frameLayout, listFragment)
                             .commitAllowingStateLoss()
                         true
                     }

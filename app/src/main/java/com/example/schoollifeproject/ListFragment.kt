@@ -11,9 +11,11 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.schoollifeproject.databinding.FragmentListBinding
+import com.example.schoollifeproject.databinding.FragmentMindMapBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.math.log
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -27,28 +29,33 @@ private const val ARG_PARAM2 = "param2"
  */
 class ListFragment : Fragment() {
     // TODO: Rename and change types of parameters
+
+
     private var contactsList: MutableList<Contacts> = mutableListOf()
-    private val api_notice = APIS_login.create()
     private val adapter = ContactsListAdapter(contactsList)
+
     private lateinit var getResult: ActivityResultLauncher<Intent>
-    private var id: String? = "123"
-    private var countKey: Int? = null
+    private lateinit var binding: FragmentListBinding
+
+    private val api_notice = APIS_login.create()
+    private var id: String? = null
+    private var countKey: Int? = 1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val binding = FragmentListBinding.inflate(inflater, container, false)
+        binding = FragmentListBinding.inflate(inflater, container, false)
 
+        binding.recyclerView.adapter = adapter
 
         id = arguments?.getString("ID")
         countKey = arguments?.getInt("countKey", 0)
-        Log.d("argID", id.toString())
-        Log.d("argCK", countKey.toString())
-        binding.textvv.text = "bbbbb"
 
-        /*for (i in 1..countKey) {
+        Log.d("arguments", id.toString() + ": " + countKey)
+
+        for (i in 1..countKey!!) {
             Log.d("for", countKey.toString())
             api_notice.notice_load(
                 i
@@ -77,7 +84,7 @@ class ListFragment : Fragment() {
             })
         }
 
-        getResult = registerForActivityResult(
+       getResult = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
@@ -88,7 +95,7 @@ class ListFragment : Fragment() {
 
                 val contacts =
                     Contacts(
-                        ++numKey,
+                        countKey!! + 1,
                         title,
                         notice,
                         date
@@ -100,11 +107,16 @@ class ListFragment : Fragment() {
             adapter.notifyDataSetChanged()
         }
 
-*/
 
+        val addNote = binding.addNote
 
+        addNote.setOnClickListener {
 
-
+            val intent = Intent(context, WriteNoticeActivity::class.java)
+            intent.putExtra("ID", id)
+            getResult.launch(intent)
+            Log.d("addNote", "11")
+        }
         return binding.root
     }
 
