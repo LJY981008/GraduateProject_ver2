@@ -1,16 +1,15 @@
-package com.example.schoollifeproject
+package com.example.schoollifeproject.adapter
 
 import android.graphics.Color
 import android.os.Handler
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.example.schoollifeproject.model.ItemInfo
+import com.example.schoollifeproject.R
 import com.example.schoollifeproject.databinding.NodeBaseLayoutBinding
-import com.gyso.treeview.TreeViewContainer
 import com.gyso.treeview.adapter.DrawInfo
 import com.gyso.treeview.adapter.TreeViewAdapter
 import com.gyso.treeview.adapter.TreeViewHolder
@@ -25,21 +24,21 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
     private lateinit var longClickListener: OnItemLongClickListener
     private lateinit var doubleClicklistener: OnItemDoubleClickListener
     fun setOnItemListener(listener: (View, NodeModel<ItemInfo>) -> Unit) {
-        this.listener = object: OnItemClickListener{
+        this.listener = object: OnItemClickListener {
             override fun onItemClick(item: View, node: NodeModel<ItemInfo>) {
                 listener(item, node)
             }
         }
     }
     fun setOnItemLongListener(longClickListener: (View, NodeModel<ItemInfo>) -> Unit) {
-        this.longClickListener = object: OnItemLongClickListener{
+        this.longClickListener = object: OnItemLongClickListener {
             override fun onItemLongClick(item: View, node: NodeModel<ItemInfo>) {
                 longClickListener(item, node)
             }
         }
     }
     fun setOnItemDoubleListener(doubleClickListener: (View, NodeModel<ItemInfo>) -> Unit) {
-        this.doubleClicklistener = object: OnItemDoubleClickListener{
+        this.doubleClicklistener = object: OnItemDoubleClickListener {
             override fun onItemDoubleClick(item: View, node: NodeModel<ItemInfo>) {
                 doubleClickListener(item, node)
             }

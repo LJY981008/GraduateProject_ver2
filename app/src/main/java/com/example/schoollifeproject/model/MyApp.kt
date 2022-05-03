@@ -1,4 +1,4 @@
-package com.example.schoollifeproject
+package com.example.schoollifeproject.model
 
 object MyApp {
     const val TAG: String = "로그"

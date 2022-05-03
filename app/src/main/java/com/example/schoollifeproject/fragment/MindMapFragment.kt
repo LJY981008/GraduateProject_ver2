@@ -1,4 +1,4 @@
-package com.example.schoollifeproject
+package com.example.schoollifeproject.fragment
 
 import android.content.Context
 import android.graphics.Color
@@ -10,6 +10,11 @@ import android.view.*
 import android.widget.*
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.example.schoollifeproject.model.APIS_login
+import com.example.schoollifeproject.model.ItemInfo
+import com.example.schoollifeproject.model.PostModel
+import com.example.schoollifeproject.R
+import com.example.schoollifeproject.adapter.ItemAdapter
 import com.example.schoollifeproject.databinding.FragmentMindMapBinding
 import com.gyso.treeview.TreeViewEditor
 import com.gyso.treeview.layout.CompactHorizonLeftAndRightLayoutManager
@@ -163,9 +168,11 @@ class MindMapFragment : Fragment() {
                                     if(visible) node.value.getItemID().split("_")[1]
                                     else node.value.getItemID().split("_")[0]
                                 val item: NodeModel<ItemInfo> =
-                                    NodeModel<ItemInfo>(ItemInfo(
+                                    NodeModel<ItemInfo>(
+                                        ItemInfo(
                                         "${parent}_item${itemMaxNum}"
-                                        , "ChildNode", itemMaxNum++, ""))
+                                        , "ChildNode", itemMaxNum++, "")
+                                    )
                                 Log.d("Debug_Log", "bottomMenu1_childNode: ${item.value.getItemID()}")
                                 editor.addChildNodes(node, item)
                                 saveDB(item, null, "insert")

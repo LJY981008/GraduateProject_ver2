@@ -1,4 +1,4 @@
-package com.example.schoollifeproject
+package com.example.schoollifeproject.model
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
