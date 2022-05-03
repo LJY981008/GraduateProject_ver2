@@ -125,6 +125,22 @@ class MindMapFragment : Fragment() {
             }
         })
 
+        api.map_public(userID).enqueue(object : Callback<PostModel> {
+            override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
+                Log.d("onResponse", "MindMapActivity map_public: 리스폰 성공 ${response.body()?.error.toString()}")
+                if(response.body()?.error.toString() == "failed") {
+                    binding.publicSwitch.isChecked = false
+                } else {
+                    binding.publicSwitch.isChecked = response.body()?.public == 0
+                }
+
+            }
+
+            override fun onFailure(call: Call<PostModel>, t: Throwable) {
+                Log.d("onFailure", "MindMapActivity map_public: 리스폰 실패 : $t")
+            }
+        })
+
         itemEvent(editor, adapter)
     }
 

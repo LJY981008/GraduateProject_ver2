@@ -79,7 +79,7 @@ interface APIS_login {
     ): Call<List<ItemInfo>>
 
     @FormUrlEncoded
-    @POST(MyApp.item_load_url)
+    @POST(MyApp.map_public_url)
     fun map_public(
         @Field("userID") userID: String
     ): Call<PostModel>
