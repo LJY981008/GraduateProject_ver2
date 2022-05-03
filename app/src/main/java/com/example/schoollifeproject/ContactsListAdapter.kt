@@ -16,7 +16,8 @@ class ContactsListAdapter(val itemList: List<Contacts>) :
     RecyclerView.Adapter<ContactsListAdapter.ContactsViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactsViewHolder {
-        val binding = ItemContactsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding =
+            ItemContactsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ContactsViewHolder(binding)
 
     }

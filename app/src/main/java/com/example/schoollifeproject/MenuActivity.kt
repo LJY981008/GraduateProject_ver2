@@ -15,7 +15,14 @@ import retrofit2.Response
 
 
 class MenuActivity : AppCompatActivity() {
-    private var flag = 0
+    private var annoContactsList: MutableList<AnnoContacts> = mutableListOf()
+/*
+    private var contactsList: MutableList<Contacts> = mutableListOf()
+    private var contactsList: MutableList<Contacts> = mutableListOf()
+    private var contactsList: MutableList<Contacts> = mutableListOf()
+*/
+
+
     private var countKey: Int = 0
     private lateinit var userID: String
     override fun onCreate(savedInstanceState: Bundle?) {
