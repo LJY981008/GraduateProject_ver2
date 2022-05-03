@@ -1,65 +1,70 @@
 package com.example.schoollifeproject
 
-import android.graphics.*
+import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
-import androidx.appcompat.app.AppCompatActivity
-import com.example.schoollifeproject.databinding.ActivityMindMapBinding
-import com.gyso.treeview.TreeViewEditor
-import com.gyso.treeview.line.BaseLine
-import com.gyso.treeview.line.StraightLine
-import com.gyso.treeview.model.NodeModel
-import com.gyso.treeview.model.TreeModel
-import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 import android.os.SystemClock
 import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.core.view.isVisible
-import androidx.core.view.size
-import com.gyso.treeview.layout.*
-
+import androidx.fragment.app.Fragment
+import com.example.schoollifeproject.databinding.FragmentMindMapBinding
+import com.gyso.treeview.TreeViewEditor
+import com.gyso.treeview.layout.CompactHorizonLeftAndRightLayoutManager
+import com.gyso.treeview.layout.TreeLayoutManager
+import com.gyso.treeview.line.BaseLine
+import com.gyso.treeview.line.StraightLine
 import com.gyso.treeview.listener.TreeViewControlListener
-import org.json.JSONObject
+import com.gyso.treeview.model.NodeModel
+import com.gyso.treeview.model.TreeModel
+
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-
-class MindMapActivity : AppCompatActivity() {
+/**
+ * A simple [Fragment] subclass.
+ * Use the [MindMapFragment.newInstance] factory method to
+ * create an instance of this fragment.
+ */
+class MindMapFragment : Fragment() {
     val api = APIS_login.create()
+    val adapter = ItemAdapter()
 
-    private lateinit var binding: ActivityMindMapBinding
-    private val atomicInteger = AtomicInteger()
+    private lateinit var binding: FragmentMindMapBinding
     private val handler = Handler()
-    private var parentToRemoveChildren: NodeModel<ItemInfo>? = null
+    var mapContext: Context? = null
+
     private lateinit var userID : String
     private var itemMaxNum = 0
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityMindMapBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
-        userID = intent.getStringExtra("ID").toString()
+    private var mapHit = 0
+    private var mapRecommend = 0
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        super.onCreate(savedInstanceState)
+        binding = FragmentMindMapBinding.inflate(inflater, container,false)
+        mapContext = context
+
+        userID = arguments?.getString("ID").toString()
         Log.d("Debug_Log", "MindMapActivity/userID: ${userID}")
 
-        //demo init
         initWidgets()
+        return binding.root
     }
 
     private fun initWidgets() {
-        //1 customs adapter
-        val adapter = ItemAdapter()
-
-        //2 configure layout manager; unit dp
         val treeLayoutManager = getTreeLayoutManager()
 
-        //3 view setting
         binding.mapView.adapter = adapter
         binding.mapView.setTreeLayoutManager(treeLayoutManager)
 
-        //4 nodes data setting
         val root: NodeModel<ItemInfo> = NodeModel<ItemInfo>(ItemInfo("root", "root", null, null))
         val mapView: TreeModel<ItemInfo> = TreeModel(root)
 
@@ -72,11 +77,11 @@ class MindMapActivity : AppCompatActivity() {
 
         adapter.treeModel = mapView
 
-        //5 get an editor. Note: an adapter must set before get an editor.
         val editor: TreeViewEditor = binding.mapView.editor
-        val mapItems = HashMap<String, NodeModel<ItemInfo>>()
+
         api.item_load(userID).enqueue(object : Callback<List<ItemInfo>> {
             override fun onResponse(call: Call<List<ItemInfo>>, response: Response<List<ItemInfo>>) {
+                val mapItems = HashMap<String, NodeModel<ItemInfo>>()
                 Log.d("onResponse", "MindMapActivity item_load: 리스폰 성공")
                 if(response.body() != null) {
                     for(i in response.body()!!) {
@@ -117,11 +122,9 @@ class MindMapActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<List<ItemInfo>>, t: Throwable) {
                 Log.d("onFailure", "MindMapActivity item_load: 리스폰 실패 : $t")
-
             }
         })
 
-        //6 you own others jobs
         itemEvent(editor, adapter)
     }
 
@@ -129,6 +132,7 @@ class MindMapActivity : AppCompatActivity() {
         editor.container.isAnimateAdd = true
 
         adapter.setOnItemListener { view, node ->
+            Log.d("Debug_Log", "setOnItemListener: ${node.getValue().toString()}")
             val id = node.value.getItemID()
             if(id != "root") {
                 val visible = id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4"
@@ -145,7 +149,7 @@ class MindMapActivity : AppCompatActivity() {
                                 val item: NodeModel<ItemInfo> =
                                     NodeModel<ItemInfo>(ItemInfo(
                                         "${parent}_item${itemMaxNum}"
-                                        , "ChildNode", "", itemMaxNum++))
+                                        , "ChildNode", itemMaxNum++, ""))
                                 Log.d("Debug_Log", "bottomMenu1_childNode: ${item.value.getItemID()}")
                                 editor.addChildNodes(node, item)
                                 saveDB(item, null, "insert")
@@ -158,28 +162,17 @@ class MindMapActivity : AppCompatActivity() {
                                 true
                             }
                             R.id.bottomMenu3 -> {
-                                val parentNode = node.getParentNode()
-                                val parentName = node.value.getItemID().split("_")[0]
-                                val parent =
-                                    if(parentName != "grade1" &&
-                                        parentName != "grade2" &&
-                                        parentName != "grade3" &&
-                                        parentName != "grade4") node.value.getItemID().split("_")[1]
-                                    else node.value.getItemID().split("_")[0]
                                 val children = node.getChildNodes()
+
+                                for (i in children) {
+                                    Log.d("Debug_Log", "bottomMenu3_childNode: ${i.value.getItemID()}")
+                                    saveDB(i, null, "delete")
+                                }
+
+                                Log.d("Debug_Log", "bottomMenu3_childNode: ${node.value.getItemID()}")
                                 saveDB(node, view, "delete")
                                 editor.removeNode(node)
-                                for (i in 0 until node.getChildNodes().size) {
-                                    val child = children.pop().value
-                                    val childID = child.getItemID().split("_")[1]
-                                    val childNode: NodeModel<ItemInfo> =
-                                        NodeModel<ItemInfo>(ItemInfo(
-                                            "${parent}_$childID",
-                                            "${child.getTitle()}", "${child.getContent()}", child.getNum()))
-                                    saveDB(childNode, null, "update")
-                                    Log.d("Debug_Log", "bottomMenu3_childNode: ${childNode.value.getItemID()}")
-                                    editor.addChildNodes(parentNode, childNode)
-                                }
+
                                 binding.bottomNavigationView.isVisible = false
                                 true
                             }
@@ -198,14 +191,14 @@ class MindMapActivity : AppCompatActivity() {
                 node.value.getItemID() != "grade2" &&
                 node.value.getItemID() != "grade3" &&
                 node.value.getItemID() != "grade4")
-                    editor.requestMoveNodeByDragging(true)
+                editor.requestMoveNodeByDragging(true)
         }
 
         adapter.setOnItemDoubleListener { item, node ->
             val id = node.value.getItemID()
-            if(id != "root" && id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4")
-            editor.requestMoveNodeByDragging(false)
-            setItem(node, editor)
+            if(id != "root" && id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4") {
+                setItem(node, editor)
+            }
         }
 
         //treeView control listener
@@ -239,11 +232,9 @@ class MindMapActivity : AppCompatActivity() {
                 hittingView: View?
             ) {
                 if (draggingNode !=null && hittingNode != null) {
-                    Log.d(
-                        "Debug_Log",
+                    Log.d("Debug_Log",
                         "onDragMoveNodesHit: draging[${(draggingNode.value as ItemInfo).getItemID()}]" +
-                                "hittingNode[${(hittingNode.value as ItemInfo).getItemID()}]"
-                    )
+                                "hittingNode[${(hittingNode.value as ItemInfo).getItemID()}]")
                 }
             }
 
@@ -262,9 +253,9 @@ class MindMapActivity : AppCompatActivity() {
                     val dNode = draggingNode.value as ItemInfo
                     val hNode = hittingNode.value as ItemInfo
                     val parent =
-                        if(hNode.getItemID() != "grade1" && hNode.getItemID() != "grade2" &&
+                        if(hNode.getItemID() != "root" && hNode.getItemID() != "grade1" && hNode.getItemID() != "grade2" &&
                             hNode.getItemID() != "grade3" && hNode.getItemID() != "grade4")
-                                hNode.getItemID().split("_")[1]
+                            hNode.getItemID().split("_")[1]
                         else hNode.getItemID().split("_")[0]
                     dNode.setItemID("${parent}_${dNode.getItemID().split("_")[1]}")
                     if (draggingView != null) {
@@ -285,25 +276,38 @@ class MindMapActivity : AppCompatActivity() {
             if (!visible) {
                 binding.mapViews.visibility = View.VISIBLE
                 binding.mapRecommend.visibility = View.VISIBLE
+                binding.recommendButton.visibility = View.VISIBLE
             } else {
                 binding.mapViews.visibility = View.GONE
                 binding.mapRecommend.visibility = View.GONE
+                binding.recommendButton.visibility = View.GONE
             }
+        }
+
+        binding.publicSwitch.setOnClickListener {
+            // 마인드맵 비밀번호 설정
+        }
+
+        binding.recommendButton.setOnClickListener {
+            // 추천수 1 추가
         }
     }
 
     private fun saveDB(item: NodeModel<ItemInfo>, view: View?, mode: String) {
 
         val itemID = item.value.getItemID()
-        val itemNum = item.value.getNum()
-        val itemTitle = item.value.getTitle()
+        val itemTop = "asp"
+        val itemLeft = "asp"
         val itemContent = item.value.getContent()
-        // val itemX = "root 기준 디스턴스로 구하자"
-        // val itemY = "root 기준 디스턴스로 구하자"
+        val itemCount = item.value.getNum()
+        val itemWidth = "asp"
+        val itemHeight = "asp"
+        val itemNote = item.value.getNote()
 
-        if (itemNum != null) {
+        Log.d("onResponse", "MindMapActivity item_save: $mode")
+        if (itemCount != null) {
             api.item_save(
-                itemID, userID, itemNum, itemTitle, itemContent, mode
+                itemID, itemTop, itemLeft, userID, itemContent, itemCount, itemWidth, itemHeight, itemNote, mode
             ).enqueue(object : Callback<PostModel> {
                 override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
                     Log.d("onResponse", "MindMapActivity item_save: 리스폰 성공")
@@ -326,19 +330,19 @@ class MindMapActivity : AppCompatActivity() {
 
     private fun setItem(node: NodeModel<ItemInfo>, editor: TreeViewEditor) {
         val setWindow: View =
-            LayoutInflater.from(this@MindMapActivity).inflate(R.layout.window_item_set,null)
+            LayoutInflater.from(mapContext).inflate(R.layout.window_item_set,null)
         val itemSetWindow = PopupWindow(
             setWindow,
-            ((applicationContext.resources.displayMetrics.widthPixels) * 0.8).toInt(),
+            ((requireContext().resources.displayMetrics.widthPixels) * 0.8).toInt(),
             WindowManager.LayoutParams.WRAP_CONTENT
         )
 
         val setButton: Button = setWindow.findViewById(R.id.itemSetButton)
-        val setTitle: EditText = setWindow.findViewById(R.id.setTitleView)
         val setContent: EditText = setWindow.findViewById(R.id.setContentView)
+        val setNote: EditText = setWindow.findViewById(R.id.setNoteView)
 
-        setTitle.setText(node.value.getTitle())
         setContent.setText(node.value.getContent())
+        setNote.setText(node.value.getNote())
 
         itemSetWindow.isFocusable =true
         itemSetWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
@@ -354,51 +358,32 @@ class MindMapActivity : AppCompatActivity() {
         }
 
         setButton.setOnClickListener {
-            val title = setTitle.text.toString()
             val content = setContent.text.toString()
+            val note = setNote.text.toString()
 
-            if (title != "" && content != "") {
+            if (content != "" && note != "") {
                 val view = editor.container.getTreeViewHolder(node).view
-                node.value.setTitle(title)
                 node.value.setContent(content)
-                view.findViewById<TextView>(R.id.title).text = title
+                node.value.setNote(note)
+                view.findViewById<TextView>(R.id.content).text = content
                 saveDB(node, view, "update")
                 editor.focusMidLocation()
                 itemSetWindow.dismiss()
             } else {
                 Toast.makeText(
-                    this, "제목(내용)이 비어있습니다.", Toast.LENGTH_SHORT).show()
+                    mapContext, "제목(내용)이 비어있습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun getTreeLayoutManager(): TreeLayoutManager {
         val space_50dp = 30
-        val space_20dp = 80
+        val space_20dp = 20
         val line = getLine()
-        //return new RightTreeLayoutManager(this,space_50dp,space_20dp,line);
-        //return new LeftTreeLayoutManager(this,space_50dp,space_20dp,line);
-        //return new CompactRightTreeLayoutManager(this,space_50dp,space_20dp,line);
-        //return CompactLeftTreeLayoutManager(this,space_50dp,space_20dp,line);
-        return HorizonLeftAndRightLayoutManager(this,space_50dp,space_20dp,line);
-        //return CompactHorizonLeftAndRightLayoutManager(this,space_50dp,space_20dp,line);
-        //return new DownTreeLayoutManager(this,space_50dp,space_20dp,line);
-
-        //return UpTreeLayoutManager(this, space_50dp, space_20dp, line)
-        //return CompactDownTreeLayoutManager(this, space_50dp, space_20dp, line)
-        //return new CompactUpTreeLayoutManager(this,space_50dp,space_20dp,line);
-        //return new CompactVerticalUpAndDownLayoutManager(this,space_50dp,space_20dp,line);
-        //return CompactVerticalUpAndDownLayoutManager(this, space_50dp, space_20dp, line)
-        //return VerticalUpAndDownLayoutManager(this,space_50dp,space_20dp,line);
-        //return CompactRingTreeLayoutManager(this,space_50dp,space_20dp,line);
-        //return new ForceDirectedTreeLayoutManager(this,line);
+        return CompactHorizonLeftAndRightLayoutManager(mapContext,space_50dp,space_20dp,line);
     }
 
     private fun getLine(): BaseLine {
-        //return new SmoothLine();
         return StraightLine(Color.parseColor("#055287"), 2)
-        //return new PointedLine();
-        //return new DashLine(Color.parseColor("#F1286C"),3);
-        //return new AngledLine();
     }
 }

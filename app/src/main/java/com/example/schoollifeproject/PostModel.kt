@@ -36,5 +36,11 @@ data class PostModel(
     var noticeContents: String? = null,
     @Expose
     @SerializedName("itemCount")
-    var itemCount: Int? = null
+    var itemCount: Int? = null,
+    @Expose
+    @SerializedName("public")
+    var public: Int? = null,
+    @Expose
+    @SerializedName("mapPassword")
+    var mapPassword: String? = null
 )

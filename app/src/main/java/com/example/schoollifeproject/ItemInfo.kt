@@ -7,31 +7,34 @@ class ItemInfo(@Expose
                @SerializedName("itemID")
                private var itemID: String,
                @Expose
-               @SerializedName("itemTitle")
-               private var title: String,
-               @Expose
                @SerializedName("itemContent")
-               private var content: String?,
+               private var content: String,
                @Expose
-               @SerializedName("itemNum")
-               private var num: Int?) {
+               @SerializedName("itemCount")
+               private var num: Int?,
+               @Expose
+               @SerializedName("noteContent")
+               private var note: String?) {
+    val parentID: String = itemID.split("_")[0]
+    val childID: String = itemID.split("_")[0]
+
     fun getItemID(): String {
         return itemID
     }
     fun setItemID(itemID: String) {
         this.itemID = itemID
     }
-    fun getTitle(): String {
-        return title
-    }
-    fun setTitle(title: String) {
-        this.title = title
-    }
-    fun getContent(): String? {
+    fun getContent(): String {
         return content
     }
     fun setContent(content: String) {
         this.content = content
+    }
+    fun getNote(): String? {
+        return note
+    }
+    fun setNote(note: String) {
+        this.note = note
     }
     fun getNum(): Int? {
         return num

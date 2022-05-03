@@ -2,6 +2,7 @@ package com.example.schoollifeproject
 
 import android.graphics.Color
 import android.os.Handler
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -59,22 +60,13 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
         val itemView = holder.view
         val node: NodeModel<ItemInfo> = holder.node
         val nodeBack = itemView.findViewById<ConstraintLayout>(R.id.item_back)
-        val titleView = itemView.findViewById<TextView>(R.id.title)
+        val contentView = itemView.findViewById<TextView>(R.id.content)
         val item: ItemInfo = node.value
         var i = 0
-        titleView.text = item.getTitle()
-
-        //여기
-        var x = itemView.x
-        var y = itemView.y
-        container.setX(x.toInt())
-        container.setY(y.toInt())
-//까지
-
+        contentView.text = item.getContent()
 
 
         nodeBack.setOnClickListener { v ->
-
             i++
             val handler = Handler()
             val r = Runnable { i = 0 }

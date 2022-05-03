@@ -7,87 +7,33 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MenuActivity">
+
         <FrameLayout
             android:id="@+id/frameLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="@+id/btn_notice"
             app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/tv_Nick"
-            android:layout_marginTop="200dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
+            <TextView
+                android:id="@+id/tv_Nick"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="200dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         </FrameLayout>
 
-        <Button
-            android:id="@+id/btn_main"
-            android:layout_width="67dp"
-            android:layout_height="42dp"
-            android:layout_marginBottom="10dp"
-            android:text="메인"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.1"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/btn_map"
-            android:layout_width="67dp"
-            android:layout_height="42dp"
-            android:layout_marginBottom="10dp"
-            android:text="맵"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.3"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/btn_notice"
-            android:layout_width="67dp"
-            android:layout_height="42dp"
-            android:layout_marginBottom="10dp"
-            android:text="게시판"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent" />
-        <Button
-            android:id="@+id/btn_"
-            android:layout_width="67dp"
-            android:layout_height="42dp"
-            android:layout_marginBottom="10dp"
-            android:text="?"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.7"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/btn_setting"
-            android:layout_width="67dp"
-            android:layout_height="42dp"
-            android:layout_marginBottom="10dp"
-            android:text="설정"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.9"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:background="@android:color/white"
+            app:itemBackground="@android:color/white"
+            android:id="@+id/bottomNavigationView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView"
-            tools:layout_editor_absoluteX="175dp"
-            tools:layout_editor_absoluteY="152dp" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:menu="@menu/main_bottom_menu" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

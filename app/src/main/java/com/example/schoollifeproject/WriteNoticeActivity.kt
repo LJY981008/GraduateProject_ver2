@@ -28,7 +28,7 @@ class WriteNoticeActivity : AppCompatActivity() {
         val editNotice = binding.editNotice
         val addNotice = binding.addNotice
 
-        val intent = Intent(this, ListActivity::class.java)
+        val intent = Intent(this, ListFragment::class.java)
         addNotice.setOnClickListener {
             api.notice_save(
                 editTitle.text.toString(),

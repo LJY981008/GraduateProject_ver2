@@ -20,13 +20,7 @@
             android:name=".WriteNoticeActivity"
             android:exported="true" />
         <activity
-            android:name=".MindMapActivity"
-            android:exported="true" />
-        <activity
             android:name=".MenuActivity"
-            android:exported="true" />
-        <activity
-            android:name=".ListActivity"
             android:exported="true" />
         <activity
             android:name=".RegisterActivity"

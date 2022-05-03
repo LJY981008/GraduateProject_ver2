@@ -61,13 +61,15 @@ interface APIS_login {
     @POST(MyApp.item_save_url)
     fun item_save(
         @Field("itemID") itemID: String,
+        @Field("itemTop") itemTop: String,
+        @Field("itemLeft") itemLeft: String,
         @Field("userID") userID: String,
-        @Field("itemNum") itemNum: Int,
-        @Field("itemTitle") itemTitle: String,
-        @Field("itemContent") itemContent: String?,
-        //@Field("itemX") itemX: String,
-        //@Field("itemY") itemY: String,
-        @Field("mode") mode: String,
+        @Field("itemContent") itemContent: String,
+        @Field("itemCount") itemCount: Int,
+        @Field("itemWidth") itemWidth: String,
+        @Field("itemHeight") itemHeight: String,
+        @Field("noteContent") noteContent: String?,
+        @Field("mode") mode: String
     ): Call<PostModel>
 
     @FormUrlEncoded
@@ -75,6 +77,12 @@ interface APIS_login {
     fun item_load(
         @Field("userID") userID: String
     ): Call<List<ItemInfo>>
+
+    @FormUrlEncoded
+    @POST(MyApp.item_load_url)
+    fun map_public(
+        @Field("userID") userID: String
+    ): Call<PostModel>
 
     companion object { // static 처럼 공유객체로 사용가능함. 모든 인스턴스가 공유하는 객체로서 동작함.
         //서버 IP만 입력해주세요~

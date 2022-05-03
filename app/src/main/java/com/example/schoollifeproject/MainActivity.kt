@@ -23,8 +23,6 @@ class MainActivity : AppCompatActivity() {
         val api_login = APIS_login.create()
         setContentView(binding.root)
 
-
-
         val btnLogin = binding.btnLogin
         val btnRegister = binding.btnRegister
 
@@ -67,12 +65,8 @@ class MainActivity : AppCompatActivity() {
 
         btnRegister.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
-
             startActivity(intent)
-
         }
-
-
     }
 
     fun failDialog(){
