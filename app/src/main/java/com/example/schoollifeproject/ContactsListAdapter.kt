@@ -1,18 +1,14 @@
 package com.example.schoollifeproject
 
-import android.content.DialogInterface
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.databinding.ItemContactsBinding
 
-class ContactsListAdapter(val itemList: List<Contacts>) :
+class ContactsListAdapter(private val itemList: MutableList<Contacts>) :
     RecyclerView.Adapter<ContactsListAdapter.ContactsViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactsViewHolder {

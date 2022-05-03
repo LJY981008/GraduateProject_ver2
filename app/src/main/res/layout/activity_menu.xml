@@ -37,59 +37,47 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:menu="@menu/main_bottom_menu" />
 
-        <TableLayout
+        <LinearLayout
             android:id="@+id/tableLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:stretchColumns="0,1"
-            >
+            android:orientation="vertical">
 
-            <TableRow
-                android:layout_marginTop="70dp"
-                >
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/annoRecycler"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/echo"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="3" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:background="@drawable/echo"
-                    android:id="@+id/annoRecycler"
-                    android:layout_marginLeft="30dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:background="@drawable/echo"
-                    android:id="@+id/sub"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="30dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-            </TableRow>
-            <TableRow
-                android:layout_marginTop="70dp"
-                >
-                <androidx.recyclerview.widget.RecyclerView
-                    android:background="@drawable/echo"
-                    android:id="@+id/sub2"
-                    android:layout_marginLeft="30dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:background="@drawable/echo"
-                    android:id="@+id/sub3"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="30dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/echo"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="3" />
 
 
-            </TableRow>
-        </TableLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/sub2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/echo"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="3" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/sub3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/echo"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="3" />
+
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

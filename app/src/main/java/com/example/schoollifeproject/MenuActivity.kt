@@ -1,35 +1,39 @@
 package com.example.schoollifeproject
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.MenuItem
 import com.example.schoollifeproject.databinding.ActivityMenuBinding
-import androidx.annotation.NonNull
-import androidx.fragment.app.FragmentTransaction
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 
 class MenuActivity : AppCompatActivity() {
-    private var annoContactsList: MutableList<AnnoContacts> = mutableListOf()
+    private val annoContactslist : List<AnnoContacts> = listOf(
+        AnnoContacts("공지사항1"),
+        AnnoContacts("공지사항2"),
+        AnnoContacts("공지사항3")
+    )
 /*
+    private var annoContactsList: MutableList<AnnoContacts> = mutableListOf()
     private var contactsList: MutableList<Contacts> = mutableListOf()
     private var contactsList: MutableList<Contacts> = mutableListOf()
     private var contactsList: MutableList<Contacts> = mutableListOf()
 */
-
+    private val adapter = AnnoListAdapter(annoContactslist)
 
     private var countKey: Int = 0
     private lateinit var userID: String
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val api = APIS_login.create()
+
+        binding.annoRecycler.adapter = adapter
+
 
         userID = intent.getStringExtra("ID").toString()
         val tvNick = binding.tvNick
