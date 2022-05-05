@@ -39,7 +39,7 @@ class ListFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         binding = FragmentListBinding.inflate(inflater, container, false)
 
@@ -52,6 +52,7 @@ class ListFragment : Fragment() {
             0
         ).enqueue(object : Callback<List<Bbs>> {
             override fun onResponse(call: Call<List<Bbs>>, response: Response<List<Bbs>>) {
+                val list = mutableListOf<Contacts>()
                 for (i in response.body()!!) {
                     val contacts = (
                             Contacts(
@@ -63,10 +64,13 @@ class ListFragment : Fragment() {
                                 i.getBbsAvailable()
                             )
                             )
-                    contactsList.add(contacts)
-                    adapter.notifyDataSetChanged()
+                    list.add(contacts)
 
                 }
+                contactsList.clear()
+                contactsList.addAll(list)
+                adapter.notifyDataSetChanged()
+
             }
 
             override fun onFailure(call: Call<List<Bbs>>, t: Throwable) {
