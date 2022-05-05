@@ -89,14 +89,9 @@ class MenuActivity : AppCompatActivity() {
                         true
                     }
                     R.id.mainMenu2 -> {
-                        if (loginCK != 1) {
-                            mindMapFragment.arguments = bundle
-                            transaction.replace(R.id.frameLayout, mindMapFragment)
-                                .commitAllowingStateLoss()
-                        }
-                        else{
-                            failDialog()
-                        }
+                        mindMapFragment.arguments = bundle
+                        transaction.replace(R.id.frameLayout, mindMapFragment)
+                            .commitAllowingStateLoss()
                         true
                     }
                     R.id.mainMenu3 -> {
