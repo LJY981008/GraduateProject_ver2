@@ -27,20 +27,21 @@ interface APIS_login {
     fun register_users(
         @Field("createID") createID: String,
         @Field("createPassword") createPassword: String,
-        @Field("createName") createName: String
+        @Field("createName") createName: String,
+        @Field("createEmail") createEmail: String
     ): Call<PostModel>
 
     @FormUrlEncoded
     @POST(MyApp.notice_key_search_url)
-    fun notice_key_search(
-        @Field("dum") dum: Int
-    ): Call<PostModel>
+    fun notice_load(
+        @Field("type") type: Int
+    ): Call<List<Notice>>
 
     @FormUrlEncoded
-    @POST(MyApp.notice_load_url)
-    fun notice_load(
-        @Field("countKey") countKey: Int
-    ): Call<PostModel>
+    @POST(MyApp.notice_key_search_url)
+    fun bbs_load(
+        @Field("type") type: Int
+    ): Call<List<Bbs>>
 
     @FormUrlEncoded
     @POST(MyApp.notice_save_url)
@@ -54,8 +55,9 @@ interface APIS_login {
     @FormUrlEncoded
     @POST(MyApp.notice_open_url)
     fun notice_open(
-        @Field("key") key: Int
-    ):Call<PostModel>
+        @Field("key") key: Int,
+        @Field("type") type: Int
+    ):Call<List<Notice>>
 
     @FormUrlEncoded
     @POST(MyApp.item_save_url)

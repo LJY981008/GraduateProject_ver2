@@ -40,9 +40,9 @@ class RegisterActivity : AppCompatActivity() {
             val pw = binding.editPw.text.toString()
             val pw_re = binding.editPwRe.text.toString()
             val name = binding.editName.text.toString()
-
+            val email = binding.editEmail.text.toString()
             //텍스트를 채우지 않았을 때
-            if (id.isEmpty() || pw.isEmpty() || pw_re.isEmpty() || name.isEmpty()) {
+            if (id.isBlank() || pw.isBlank() || pw_re.isBlank() || name.isBlank() || email.isBlank() ) {
                 isExistBlank = true
             } else {
                 if (pw == pw_re) isPWSame = true
@@ -53,7 +53,7 @@ class RegisterActivity : AppCompatActivity() {
 
                 //쉐어드에 저장(이 부분에 회원가입 정보 서버전송 코드 작성)
                 api_register.register_users(
-                    id, pw, name
+                    id, pw, name, email
                 ).enqueue(object : Callback<PostModel> {
                     override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
                         Log.d("onRespon","리스폰 성공")
@@ -87,7 +87,7 @@ class RegisterActivity : AppCompatActivity() {
 
         if(type.equals("blank")){
             dialog.setTitle("회원가입 실패")
-            dialog.setMessage("입력란을 모두 작성해주세요.")
+            dialog.setMessage("입력란을 모두 작성해주세요.(공백을 제외해주세요)")
         } else if(type.equals("not same")){
             dialog.setTitle("회원가입 실패")
             dialog.setMessage("비밀번호를 정확히 입력해주세요.")

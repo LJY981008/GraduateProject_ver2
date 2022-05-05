@@ -1,4 +1,5 @@
 package com.example.schoollifeproject
+
 import androidx.appcompat.app.AlertDialog
 import android.content.DialogInterface
 
@@ -46,23 +47,24 @@ class MainActivity : AppCompatActivity() {
                     call: Call<PostModel>,
                     response: Response<PostModel>
                 ) {
-                    Log.d("dbTestNoBody",response.toString())
-                    Log.d("dbTestBody",response.body().toString())
-                    if(!response.body().toString().isEmpty()) {
-                        if(pw.equals( response.body()?.userPassword.toString())) {
+                    Log.d("dbTestNoBody", response.toString())
+                    Log.d("dbTestBody", response.body().toString())
+                    if (!response.body().toString().isEmpty()) {
+                        if (response.body()?.error.toString() == "error") {
+                            failDialog("isLogin")
+                        } else if (pw == response.body()?.userPassword.toString()) {
                             intent.putExtra("ID", response.body()?.userID.toString())
                             intent.putExtra("name", response.body()?.userName.toString())
                             startActivity(intent)
-                        }
-                        else{
-                            failDialog()
+                        } else {
+                            failDialog("fail")
                         }
                     }
                 }
 
                 override fun onFailure(p0: Call<PostModel>, t: Throwable) {
                     Log.d("failedDBopen", t.message.toString())
-                    failDialog()
+                    failDialog("fail")
                 }
             })
         }
@@ -81,22 +83,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun failDialog(){
+    fun failDialog(error: String) {
         var dialog = AlertDialog.Builder(this)
 
-         dialog.setTitle("로그인 실패")
-         dialog.setMessage("아이디와 비밀번호를 확인해주세요")
+        dialog.setTitle("로그인실패")
+        if (error == "isLogin") {
+            dialog.setMessage("다른 브라우저에서 로그아웃해주세요")
+        } else {
+            dialog.setMessage("아이디와 비밀번호를 확인해주세요")
+        }
+        val dialog_listener = object : DialogInterface.OnClickListener {
+            override fun onClick(dialog: DialogInterface?, which: Int) {
+                when (which) {
+                    DialogInterface.BUTTON_POSITIVE ->
+                        Log.d(TAG, "확인 버튼 클릭")
+                }
+            }
+        }
 
-         val dialog_listener = object: DialogInterface.OnClickListener{
-           override fun onClick(dialog: DialogInterface?, which: Int) {
-             when(which){
-               DialogInterface.BUTTON_POSITIVE ->
-               Log.d(TAG, "확인 버튼 클릭")
-             }
-           }
-         }
-
-         dialog.setPositiveButton("확인", dialog_listener)
-         dialog.show()
+        dialog.setPositiveButton("확인", dialog_listener)
+        dialog.show()
     }
 }
