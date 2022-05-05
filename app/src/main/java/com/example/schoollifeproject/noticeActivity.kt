@@ -3,14 +3,10 @@ package com.example.schoollifeproject
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.schoollifeproject.adapter.NoteReadListAdapter
 import com.example.schoollifeproject.databinding.ActivityNoticeBinding
 import com.example.schoollifeproject.model.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class noticeActivity : AppCompatActivity() {
     private var readList: MutableList<NoteReadContacts> = mutableListOf()
@@ -29,7 +25,7 @@ class noticeActivity : AppCompatActivity() {
         val formatter = DateTimeFormatter.ofPattern("HH시 mm분")
         val formatted = current.format(formatter)
 */
-        val api = APIS_login.create()
+        val api = APIS.create()
         binding.noteReadRecyclerView.adapter = readAdapter
         //binding.commentRecyclerView.adapter = commentAdapter
 

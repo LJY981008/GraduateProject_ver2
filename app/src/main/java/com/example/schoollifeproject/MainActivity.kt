@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.example.schoollifeproject.databinding.ActivityMainBinding
-import com.example.schoollifeproject.model.APIS_login
+import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.PostModel
 import retrofit2.Call
 import retrofit2.Callback
@@ -19,11 +19,10 @@ class MainActivity : AppCompatActivity() {
 
     val TAG: String = "MainActivity"
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
-        val api_login = APIS_login.create()
+        val api = APIS.create()
         setContentView(binding.root)
 
         val btnLogin = binding.btnLogin
@@ -39,7 +38,7 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, MenuActivity::class.java)
 
 
-            api_login.login_users(
+            api.login_users(
                 id
             ).enqueue(object : Callback<PostModel> {
 
