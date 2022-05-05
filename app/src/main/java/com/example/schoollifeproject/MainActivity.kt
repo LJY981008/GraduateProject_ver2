@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         btnNonLogin.setOnClickListener {
             val intent = Intent(this, MenuActivity::class.java)
             intent.putExtra("ID", "비회원")
-            intent.putExtra("loginChack", 1)
+            intent.putExtra("loginCheck", 1)
             startActivity(intent)
 
         }

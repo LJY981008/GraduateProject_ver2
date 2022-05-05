@@ -52,7 +52,7 @@ class MenuActivity : AppCompatActivity() {
         binding.sugRecycvler.adapter = sugAdapter
 
         userID = intent.getStringExtra("ID").toString()
-        loginCK = intent.getIntExtra("loginChack", 0)
+        loginCK = intent.getIntExtra("loginCheck", 0)
         api.notice_key_search(1)
             .enqueue(object : Callback<PostModel> {
                 override fun onResponse(
