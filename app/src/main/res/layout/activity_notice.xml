@@ -6,16 +6,15 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:gravity="top"
-        >
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/infoLiner"
-            app:layout_constraintTop_toTopOf="parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/noteReadRecyclerView"
@@ -24,46 +23,54 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:itemCount="1" />
 
+
         </LinearLayout>
 
         <LinearLayout
-            app:layout_constraintBottom_toTopOf="@+id/inbtnLinear"
+            android:id="@+id/commentliner"
+            android:layout_marginTop="200dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@+id/infoLiner"
+            app:layout_constraintBottom_toTopOf="@+id/inbtnLinear">
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="댓글"
                 android:background="@drawable/textunderline"
-                />
+                android:text="댓글" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/commentRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+
+                android:layout_height="wrap_content"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:itemCount="1" />
 
-            <EditText
-                android:id="@+id/commentEdit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="내용을 입력해주세요" />\
 
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/inbtnLinear"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
             android:layout_width="match_parent"
-            android:gravity="right"
-            android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/commentBtn"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:text="작성" />
+            android:gravity="right"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent">
+            <EditText
+                android:id="@+id/commentEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="15"
+                android:hint="내용을 입력해주세요" />
+            <Button
+                android:id="@+id/commentBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:text="작성" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

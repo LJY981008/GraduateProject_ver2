@@ -1,8 +1,10 @@
 package com.example.schoollifeproject
 
+import android.content.DialogInterface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AlertDialog
 import com.example.schoollifeproject.adapter.AnnoListAdapter
 import com.example.schoollifeproject.adapter.SugListAdapter
 import com.example.schoollifeproject.databinding.ActivityMenuBinding
@@ -38,6 +40,8 @@ class MenuActivity : AppCompatActivity() {
     private var countKey: Int = 0
     private lateinit var userID: String
 
+    private var loginCK: Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityMenuBinding.inflate(layoutInflater)
@@ -48,7 +52,7 @@ class MenuActivity : AppCompatActivity() {
         binding.sugRecycvler.adapter = sugAdapter
 
         userID = intent.getStringExtra("ID").toString()
-
+        loginCK = intent.getIntExtra("loginChack", 0)
         api.notice_key_search(1)
             .enqueue(object : Callback<PostModel> {
                 override fun onResponse(
@@ -85,9 +89,14 @@ class MenuActivity : AppCompatActivity() {
                         true
                     }
                     R.id.mainMenu2 -> {
-                        mindMapFragment.arguments = bundle
-                        transaction.replace(R.id.frameLayout, mindMapFragment)
-                            .commitAllowingStateLoss()
+                        if (loginCK != 1) {
+                            mindMapFragment.arguments = bundle
+                            transaction.replace(R.id.frameLayout, mindMapFragment)
+                                .commitAllowingStateLoss()
+                        }
+                        else{
+                            failDialog()
+                        }
                         true
                     }
                     R.id.mainMenu3 -> {
@@ -112,4 +121,18 @@ class MenuActivity : AppCompatActivity() {
         transaction.commit()
     }
 
+    fun failDialog(){
+        var dialog = AlertDialog.Builder(this)
+
+        dialog.setTitle("오류")
+        dialog.setMessage("비회원은 이용할 수 없는 기능입니다.")
+
+        val dialog_listener = object: DialogInterface.OnClickListener{
+            override fun onClick(dialog: DialogInterface?, which: Int) {
+            }
+        }
+
+        dialog.setPositiveButton("확인", dialog_listener)
+        dialog.show()
+    }
 }

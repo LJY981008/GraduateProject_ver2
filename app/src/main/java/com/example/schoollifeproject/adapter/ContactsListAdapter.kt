@@ -42,6 +42,7 @@ class ContactsListAdapter(private val itemList: MutableList<Contacts>) :
                 val intent = Intent(itemView.context, noticeActivity::class.java)
                 intent.putExtra("key", item.num)
                 intent.putExtra("title", item.Title)
+                intent.putExtra("writer", item.Writer)
                 startActivity(itemView.context, intent, null)
 
             }
