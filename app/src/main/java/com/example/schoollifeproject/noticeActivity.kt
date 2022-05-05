@@ -39,6 +39,7 @@ class noticeActivity : AppCompatActivity() {
         val key = intent.getIntExtra("key", 0)
         val title = intent.getStringExtra("title")
         val writer = intent.getStringExtra("writer")
+        val views = 100
 
         //해당 글의 키를 가져와 표시
         api.notice_open(
@@ -51,6 +52,7 @@ class noticeActivity : AppCompatActivity() {
                 val contacts =
                     NoteReadContacts(
                         title,
+                        "조회수: $views",
                         response.body()?.noticeName,
                         response.body()?.noticeContents
                     )
@@ -90,8 +92,15 @@ class noticeActivity : AppCompatActivity() {
                 commentContactsList.add(contacts)
                 commentAdapter.notifyDataSetChanged()
             }
+        }
 
+        val btn_good = binding.btnGood
 
+        btn_good.setOnClickListener{
+            val goodtv = binding.goodtv
+            //db에서 추천수 가져오기 기본값 0
+            //누를 때마다 1증가한 값 저장
+            //저장한 값을 tv에 set
         }
 
     }
