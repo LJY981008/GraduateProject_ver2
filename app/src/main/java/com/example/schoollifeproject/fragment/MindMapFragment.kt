@@ -1,6 +1,12 @@
 package com.example.schoollifeproject.fragment
 
+import android.app.Activity.RESULT_OK
+import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
+import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -8,7 +14,10 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.*
 import android.widget.*
-import androidx.core.view.isVisible
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toFile
 import androidx.fragment.app.Fragment
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.adapter.ItemAdapter
@@ -16,7 +25,6 @@ import com.example.schoollifeproject.databinding.FragmentMindMapBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.ItemInfo
 import com.example.schoollifeproject.model.PostModel
-import com.gyso.treeview.TreeViewContainer
 import com.gyso.treeview.TreeViewEditor
 import com.gyso.treeview.layout.CompactHorizonLeftAndRightLayoutManager
 import com.gyso.treeview.layout.TreeLayoutManager
@@ -25,10 +33,26 @@ import com.gyso.treeview.line.StraightLine
 import com.gyso.treeview.listener.TreeViewControlListener
 import com.gyso.treeview.model.NodeModel
 import com.gyso.treeview.model.TreeModel
+import okhttp3.MediaType
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import android.net.Uri
+import android.webkit.MimeTypeMap
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import java.io.FileOutputStream
+import android.provider.MediaStore
+
+import android.provider.DocumentsContract
+
+
+
 
 
 class MindMapFragment : Fragment() {
@@ -49,6 +73,8 @@ class MindMapFragment : Fragment() {
 
     private var mapPublic = true
     private lateinit var mapPassword: String
+
+    private lateinit var resultLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -270,6 +296,7 @@ class MindMapFragment : Fragment() {
     }
 
     private fun saveFileDB() {
+
         val setWindow: View =
             LayoutInflater.from(mapContext).inflate(R.layout.window_item_file, null)
         val FileSetWindow = PopupWindow(
@@ -291,11 +318,16 @@ class MindMapFragment : Fragment() {
             false
         }
 
-        val folder = File("${mapContext?.getExternalFilesDir("/uninote")?.absolutePath}")
-        if (!folder.exists()) {
-            folder.mkdir()
-        }
+        val fileAddButton = setWindow.findViewById<Button>(R.id.fileAddButton)
+        val fileSetButton = setWindow.findViewById<Button>(R.id.fileSetButton)
 
+        fileAddButton.setOnClickListener {
+
+            resultLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
+
+            })
+        }
+    }
         //파일 생성
         //img_url은 이미지의 경로
         //파일 생성
@@ -313,11 +345,41 @@ class MindMapFragment : Fragment() {
 
             }
         })*/
-    }
 
     private fun itemEvent(editor: TreeViewEditor, adapter: ItemAdapter) {
+        lateinit var formId: MultipartBody.Part
+        lateinit var formFile: MultipartBody.Part
+        lateinit var formType: MultipartBody.Part
 
         editor.container.isAnimateAdd = true
+
+        /**
+         * file intent 설정 초기화
+         */
+        resultLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+            ActivityResultCallback { result ->
+                if (result.resultCode == RESULT_OK) {
+                    val intent = result.data
+                    val uri = intent!!.data
+                    val imagePath = getRealPathFromURI(uri!!)
+                    val file = File(imagePath)
+                    formFile = FormDataUtil.getImageBody("media", file)
+
+                        api.map_files(formFile).enqueue(object : Callback<String?> {
+                            override fun onResponse(
+                                call: Call<String?>,
+                                response: Response<String?>
+                            ) {
+                                Log.e("uploadChat()", "성공 : ${response.body()}")
+                            }
+
+                            override fun onFailure(call: Call<String?>, t: Throwable) {
+                                Log.e("uploadChat()", "에러 : " + t.message)
+                            }
+                        })
+                }
+            })
 
         /**
          * 노드 클릭 시 이벤트 실행
@@ -360,13 +422,13 @@ class MindMapFragment : Fragment() {
                                 )
                                 editor.addChildNodes(node, item)
                                 saveDB(item, null, "insert")
-                                binding.bottomNavigationView.isVisible = false
+                                binding.bottomNavigationView.visibility = View.INVISIBLE
                                 true
                             }
                             R.id.bottomMenu2 -> {
-                                setItem(node, editor)
+                                setItem(node, editor, true)
                                 "setOnItemListener/bottomMenu2: ${node.value.getItemID()}"
-                                binding.bottomNavigationView.isVisible = false
+                                binding.bottomNavigationView.visibility = View.INVISIBLE
                                 true
                             }
                             R.id.bottomMenu3 -> {
@@ -410,7 +472,7 @@ class MindMapFragment : Fragment() {
                                     saveDB(node, view, "delete")
                                     editor.removeNode(node)
 
-                                    binding.bottomNavigationView.isVisible = false
+                                    binding.bottomNavigationView.visibility = View.INVISIBLE
                                     warnSetWindow.dismiss()
                                 }
                                 cancelButton.setOnClickListener {
@@ -419,7 +481,9 @@ class MindMapFragment : Fragment() {
                                 true
                             }
                             R.id.bottomMenu4 -> {
-                                // 하단 메뉴 4 : 노드 파일 설정
+                                resultLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
+                                    type ="image/*"
+                                })
                                 true
                             }
                             else -> {
@@ -449,10 +513,10 @@ class MindMapFragment : Fragment() {
          * 노드 더블클릭 시 이벤트 실행
          * 노드 제목/내용 설정
          */
-        adapter.setOnItemDoubleListener { item, node ->
+        adapter.setOnItemDoubleListener { item, node, b ->
             val id = node.value.getItemID()
             if (id != "root" && id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4") {
-                setItem(node, editor)
+                setItem(node, editor, b)
             }
         }
 
@@ -656,7 +720,7 @@ class MindMapFragment : Fragment() {
         }
     }
 
-    private fun setItem(node: NodeModel<ItemInfo>, editor: TreeViewEditor) {
+    private fun setItem(node: NodeModel<ItemInfo>, editor: TreeViewEditor, b: Boolean) {
 
         val setWindow: View =
             LayoutInflater.from(mapContext).inflate(R.layout.window_item_set, null)
@@ -669,6 +733,11 @@ class MindMapFragment : Fragment() {
         val setButton: Button = setWindow.findViewById(R.id.itemSetButton)
         val setContent: EditText = setWindow.findViewById(R.id.setContentView)
         val setNote: EditText = setWindow.findViewById(R.id.setNoteView)
+
+        if (!b) {
+            setContent.isEnabled = false
+            setNote.isEnabled = false
+        }
 
         setContent.setText(node.value.getContent())
         setNote.setText(node.value.getNote())
@@ -687,21 +756,25 @@ class MindMapFragment : Fragment() {
         }
 
         setButton.setOnClickListener {
-            val content = setContent.text.toString()
-            val note = setNote.text.toString()
+            if (b) {
+                val content = setContent.text.toString()
+                val note = setNote.text.toString()
 
-            if (content != "") {
-                val view = editor.container.getTreeViewHolder(node).view
-                node.value.setContent(content)
-                node.value.setNote(note)
-                view.findViewById<TextView>(R.id.content).text = content
-                saveDB(node, view, "update")
-                editor.focusMidLocation()
-                itemSetWindow.dismiss()
+                if (content != "") {
+                    val view = editor.container.getTreeViewHolder(node).view
+                    node.value.setContent(content)
+                    node.value.setNote(note)
+                    view.findViewById<TextView>(R.id.content).text = content
+                    saveDB(node, view, "update")
+                    editor.focusMidLocation()
+                    itemSetWindow.dismiss()
+                } else {
+                    Toast.makeText(
+                        mapContext, "제목(내용)이 비어있습니다.", Toast.LENGTH_SHORT
+                    ).show()
+                }
             } else {
-                Toast.makeText(
-                    mapContext, "제목(내용)이 비어있습니다.", Toast.LENGTH_SHORT
-                ).show()
+                itemSetWindow.dismiss()
             }
         }
     }
@@ -715,5 +788,52 @@ class MindMapFragment : Fragment() {
 
     private fun getLine(): BaseLine {
         return StraightLine(Color.parseColor("#055287"), 2)
+    }
+    private fun getRealPathFromURI(contentUri: Uri): String? {
+        if (contentUri.path!!.startsWith("/storage")) {
+            return contentUri.path
+        }
+        val id = DocumentsContract.getDocumentId(contentUri).split(":").toTypedArray()[1]
+        val columns = arrayOf(MediaStore.Files.FileColumns.DATA)
+        val selection = MediaStore.Files.FileColumns._ID + " = " + id
+        val cursor: Cursor? = activity!!.contentResolver.query(
+            MediaStore.Files.getContentUri("external"),
+            columns,
+            selection,
+            null,
+            null
+        )
+        try {
+            val columnIndex: Int = cursor!!.getColumnIndex(columns[0])
+            if (cursor.moveToFirst()) {
+                return cursor.getString(columnIndex)
+            }
+        } finally {
+            cursor!!.close()
+        }
+        return null
+    }
+}
+
+object FormDataUtil {
+
+    fun getBody(key: String, value: Any): MultipartBody.Part {
+        return MultipartBody.Part.createFormData(key, value.toString())
+    }
+
+    fun getImageBody(key: String, file: File): MultipartBody.Part {
+        return MultipartBody.Part.createFormData(
+            key,
+            filename = file.name,
+            body = file.asRequestBody("image/*".toMediaType())
+        )
+    }
+
+    fun getVideoBody(key: String, file: File): MultipartBody.Part {
+        return MultipartBody.Part.createFormData(
+            name = key,
+            filename = file.name,
+            body = file.asRequestBody("video/*".toMediaType())
+        )
     }
 }

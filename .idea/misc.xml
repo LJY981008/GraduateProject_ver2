@@ -9,6 +9,9 @@
         <entry key="..\:/Users/Laeti/AndroidStudioProjects/GraduateProject2022/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.12864583333333332" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.15885416666666666" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/drawable/background_splash.xml" value="0.265625" />
+        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/drawable/bg_board.xml" value="0.165625" />
+        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/drawable/bg_button.xml" value="0.165625" />
+        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/drawable/bg_node.xml" value="0.165625" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/drawable/bg_popup.xml" value="0.14270833333333333" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/drawable/bg_popup_background.xml" value="0.264" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/drawable/echo.xml" value="0.265625" />
@@ -27,6 +30,9 @@
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/drawable/ic_public.xml" value="0.265625" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/drawable/textunderline.xml" value="0.265625" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/drawable/underline.xml" value="0.15885416666666666" />
+        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/font-v26/title_font2.xml" value="0.1796875" />
+        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/font/title_font1.xml" value="0.1796875" />
+        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/font/title_font2.xml" value="0.1796875" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/activity_main.xml" value="0.1234375" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/activity_main2.xml" value="0.1403985507246377" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/activity_menu.xml" value="0.2701998262380539" />
@@ -41,7 +47,7 @@
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/item_contacts.xml" value="0.1265625" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/item_edit_window.xml" value="0.1265625" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/node_add_window.xml" value="0.1265625" />
-        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/node_base_layout.xml" value="0.12708333333333333" />
+        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/node_base_layout.xml" value="0.72" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/notice_comment_contacts.xml" value="0.14947916666666666" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/notice_read_contacts.xml" value="0.14947916666666666" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/sug_contacts.xml" value="0.14270833333333333" />

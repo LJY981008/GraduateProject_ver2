@@ -40,10 +40,10 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
         }
     }
 
-    fun setOnItemDoubleListener(doubleClickListener: (View, NodeModel<ItemInfo>) -> Unit) {
+    fun setOnItemDoubleListener(doubleClickListener: (View, NodeModel<ItemInfo>, b: Boolean) -> Unit) {
         this.doubleClicklistener = object : OnItemDoubleClickListener {
-            override fun onItemDoubleClick(item: View, node: NodeModel<ItemInfo>) {
-                doubleClickListener(item, node)
+            override fun onItemDoubleClick(item: View, node: NodeModel<ItemInfo>, b: Boolean) {
+                doubleClickListener(item, node, b)
             }
         }
     }
@@ -67,7 +67,6 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
         var i = 0
         contentView.text = item.getContent()
 
-        if (mapEditable) {
             nodeBack.setOnClickListener { v ->
                 i++
                 val handler = Handler()
@@ -75,18 +74,25 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
 
                 if (i == 1) {
                     handler.postDelayed(r, 250);
-                    listener.onItemClick(v, node)
+                    if (mapEditable) {
+                        listener.onItemClick(v, node)
+                    }
                 } else if (i == 2) {
                     i = 0;
-                    doubleClicklistener.onItemDoubleClick(v, node)
+                    if (mapEditable) {
+                        doubleClicklistener.onItemDoubleClick(v, node, true)
+                    } else {
+                        doubleClicklistener.onItemDoubleClick(v, node, false)
+                    }
                 }
             }
 
             nodeBack.setOnLongClickListener { v ->
-                longClickListener.onItemLongClick(v, node)
+                if(mapEditable) {
+                    longClickListener.onItemLongClick(v, node)
+                }
                 true
             }
-        }
     }
 
     override fun onDrawLine(drawInfo: DrawInfo): BaseLine? {
@@ -112,7 +118,7 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
     }
 
     interface OnItemDoubleClickListener {
-        fun onItemDoubleClick(item: View, node: NodeModel<ItemInfo>)
+        fun onItemDoubleClick(item: View, node: NodeModel<ItemInfo>, b: Boolean)
     }
 }
 
