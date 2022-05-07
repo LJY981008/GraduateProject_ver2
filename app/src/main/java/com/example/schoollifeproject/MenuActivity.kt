@@ -3,7 +3,6 @@ package com.example.schoollifeproject
 import android.content.DialogInterface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import com.example.schoollifeproject.adapter.AnnoListAdapter
@@ -11,7 +10,7 @@ import com.example.schoollifeproject.adapter.SugListAdapter
 import com.example.schoollifeproject.databinding.ActivityMenuBinding
 import com.example.schoollifeproject.fragment.ListFragment
 import com.example.schoollifeproject.fragment.MindMapFragment
-import com.example.schoollifeproject.fragment.SettingFragment
+import com.example.schoollifeproject.fragment.MapListFragment
 import com.example.schoollifeproject.model.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -74,8 +73,7 @@ class MenuActivity : AppCompatActivity() {
                                 i.getNoticeTitle(),
                                 i.getNoticeWriter(),
                                 i.getNoticeDate(),
-                                i.getNoticeContent(),
-                                i.getNoticeAvailable()
+                                i.getNoticeContent()
                             )
                             )
                     annoContactslist.add(contacts)
@@ -96,7 +94,7 @@ class MenuActivity : AppCompatActivity() {
         binding.bottomNavigationView.run {
             val listFragment = ListFragment()
             val mindMapFragment = MindMapFragment()
-            val settingFragment = SettingFragment()
+            val settingFragment = MapListFragment()
             var bundle = Bundle()
 
             bundle.putString("ID", userID)

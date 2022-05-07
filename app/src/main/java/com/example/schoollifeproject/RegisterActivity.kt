@@ -4,7 +4,6 @@ import android.content.DialogInterface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.example.schoollifeproject.databinding.ActivityRegisterBinding
 import com.example.schoollifeproject.model.APIS

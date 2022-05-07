@@ -1,12 +1,9 @@
 package com.example.schoollifeproject.fragment
 
 import android.app.Activity.RESULT_OK
-import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -17,14 +14,12 @@ import android.widget.*
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.net.toFile
 import androidx.fragment.app.Fragment
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.adapter.ItemAdapter
 import com.example.schoollifeproject.databinding.FragmentMindMapBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.ItemInfo
-import com.example.schoollifeproject.model.PostModel
 import com.gyso.treeview.TreeViewEditor
 import com.gyso.treeview.layout.CompactHorizonLeftAndRightLayoutManager
 import com.gyso.treeview.layout.TreeLayoutManager
@@ -38,14 +33,13 @@ import retrofit2.Callback
 import retrofit2.Response
 
 import android.net.Uri
-import android.webkit.MimeTypeMap
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
-import java.io.FileOutputStream
 import android.provider.MediaStore
 
 import android.provider.DocumentsContract
+import com.example.schoollifeproject.model.PostModel
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 

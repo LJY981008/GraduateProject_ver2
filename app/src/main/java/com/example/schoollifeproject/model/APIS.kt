@@ -59,8 +59,7 @@ interface APIS {
         @Field("noticeTitle") noticeTitle: String,
         @Field("userID") userID: String,
         @Field("date") date: String,
-        @Field("noticeContents") noticeContents: String,
-        @Field("available") available: Int
+        @Field("noticeContents") noticeContents: String
     ): Call<PostModel>
 
     @FormUrlEncoded
@@ -116,6 +115,13 @@ interface APIS {
     fun map_files(
         @Part file: MultipartBody.Part?
     ): Call<PostModel>
+
+    @FormUrlEncoded
+    @POST(MyApp.map_list_url)
+    fun map_list(
+        @Field("dum") dum: Int
+    ): Call<List<MapModel>>
+
 
     companion object { // static 처럼 공유객체로 사용가능함. 모든 인스턴스가 공유하는 객체로서 동작함.
 

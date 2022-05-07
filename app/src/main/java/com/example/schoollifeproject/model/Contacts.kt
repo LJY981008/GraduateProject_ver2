@@ -8,8 +8,7 @@ class Contacts(
     val title: String,
     val writer: String,
     val date: String,
-    val content: String,
-    val available: Int
+    val content: String
 ) {
 
 

@@ -50,7 +50,6 @@ class ContactsListAdapter(private val itemList: MutableList<Contacts>) :
                     putExtra("writer", item.writer)
                     putExtra("date", item.date)
                     putExtra("content", item.content)
-                    putExtra("available", item.available)
 
                 }
                 startActivity(itemView.context, intent, null)

@@ -92,19 +92,16 @@ class ListFragment : Fragment() {
                 val list = mutableListOf<Contacts>()
                 //아이템 개수만큼 호출, 연결
                 for (i in response.body()!!) {
-                    if (i.getBbsAvailable() == 0 || id == i.getBbsWriter()) {
-                        val contacts = (
-                                Contacts(
-                                    i.getBbsKey(),
-                                    i.getBbsTitle(),
-                                    i.getBbsWriter(),
-                                    i.getBbsDate(),
-                                    i.getBbsContent(),
-                                    i.getBbsAvailable()
-                                )
-                                )
-                        list.add(contacts)
-                    }
+                    val contacts = (
+                            Contacts(
+                                i.getBbsKey(),
+                                i.getBbsTitle(),
+                                i.getBbsWriter(),
+                                i.getBbsDate(),
+                                i.getBbsContent()
+                            )
+                            )
+                    list.add(contacts)
                     countKey++
 
                 }

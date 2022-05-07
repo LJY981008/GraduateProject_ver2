@@ -1,14 +1,12 @@
 package com.example.schoollifeproject
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.schoollifeproject.databinding.ActivityWriteNoticeBinding
-import com.example.schoollifeproject.fragment.ListFragment
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.PostModel
 import retrofit2.Call
@@ -38,8 +36,7 @@ class WriteNoticeActivity : AppCompatActivity() {
                 editTitle,
                 intent.getStringExtra("ID").toString(),
                 date,
-                editContents,
-                available
+                editContents
             ).enqueue(object : Callback<PostModel> {
                 override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
                     Log.d("dbTestNoBody", response.toString())
