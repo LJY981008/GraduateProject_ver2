@@ -110,11 +110,20 @@ interface APIS {
         @Field("mapID") mapID: String
     ): Call<PostModel>
 
-    @Multipart
-    @POST(MyApp.map_files_url)
-    fun map_files(
-        @Part file: MultipartBody.Part?
-    ): Call<PostModel>
+    @Multipart // @Multipart 사용 시 @Part로 보내줘야 한다.
+    @POST(MyApp.item_file_save_url)
+    fun item_file_save(
+        @Part file: MultipartBody.Part?,
+        @Part("userID") userID: String,
+        @Part("itemID") itemID: String
+    ): Call<String>
+
+    @FormUrlEncoded
+    @POST(MyApp.item_file_load_url)
+    fun item_file_load(
+        @Field("userID") userID: String,
+        @Field("itemID") itemID: String
+    ): Call<List<FileModel>>
 
     @FormUrlEncoded
     @POST(MyApp.map_list_url)
