@@ -3,7 +3,9 @@ package com.example.schoollifeproject
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import androidx.annotation.RequiresApi
+import androidx.core.view.isGone
 import com.example.schoollifeproject.adapter.NoteReadListAdapter
 import com.example.schoollifeproject.databinding.ActivityNoticeBinding
 import com.example.schoollifeproject.model.*
@@ -29,6 +31,7 @@ class noticeActivity : AppCompatActivity() {
         binding.noteReadRecyclerView.adapter = readAdapter
         //binding.commentRecyclerView.adapter = commentAdapter
 
+        val btn_switch = binding.switchAvail
 
         val key = intent.getIntExtra("key", 0)
         val title = intent.getStringExtra("title").toString()
@@ -36,6 +39,13 @@ class noticeActivity : AppCompatActivity() {
         val date = intent.getStringExtra("date").toString()
         val content = intent.getStringExtra("content").toString()
         val available = intent.getIntExtra("available", 0)
+        if (writer == intent.getStringExtra("ID")) {
+            btn_switch.visibility = View.VISIBLE
+            btn_switch.isChecked = available == 1
+
+        } else {
+            btn_switch.visibility = View.GONE
+        }
 
         val contact = (
                 NoteReadContacts(
@@ -48,6 +58,18 @@ class noticeActivity : AppCompatActivity() {
                 )
         readList.add(contact)
         readAdapter.notifyDataSetChanged()
+
+        /*btn_switch.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (!isChecked) {
+                btn_switch.isChecked = true
+                available = 1
+            } else {
+                available = 0
+                btn_switch.isChecked = false
+            }
+        }*/
+        //여기에 api로 db수정
+
 
         //val views = 100
         //해당 글의 키를 가져와 표시

@@ -52,4 +52,7 @@ data class PostModel(
     @Expose
     @SerializedName("countNoticeKey")
     var countNoticeKey: Int? = null,
+    @Expose
+    @SerializedName("key")
+    var key: Int? = null,
 )

@@ -26,33 +26,31 @@ class WriteNoticeActivity : AppCompatActivity() {
         val date: String = LocalDate.now().toString()
 
 
-        val editTitle = binding.editTitle
-        val editNotice = binding.editNotice
+        val editTitle = binding.editTitle.text.toString()
+        val editContents = binding.editNotice.text.toString()
         val addNotice = binding.addNotice
-
+        val available = 1
         val intent = Intent(this, ListFragment::class.java)
         addNotice.setOnClickListener {
             api.notice_save(
-                editTitle.text.toString(),
+                editTitle,
                 intent.getStringExtra("ID").toString(),
                 date,
-                editNotice.toString()
+                editContents,
+                available
             ).enqueue(object : Callback<PostModel> {
-                override fun onResponse(p0: Call<PostModel>, p1: Response<PostModel>) {
-                    Log.d("onResponse","저장성공")
+                override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
+                    Log.d("onResponse", "저장성공")
                     intent.apply {
-                        putExtra("Title", editTitle.toString())
-                    }
-                    intent.apply {
-                        putExtra("Notice", editNotice.toString())
-                    }
-                    intent.apply {
+                        putExtra("Key", response.body()?.key)
+                        putExtra("Title", editTitle)
+                        putExtra("Contents", editContents)
                         putExtra("Date", date)
                     }
                 }
 
                 override fun onFailure(p0: Call<PostModel>, t: Throwable) {
-                    Log.d("onFailure","저장실패 : " + t.message.toString())
+                    Log.d("onFailure", "저장실패 : " + t.message.toString())
                 }
 
             })

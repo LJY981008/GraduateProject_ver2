@@ -2,11 +2,15 @@ package com.example.schoollifeproject.fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import com.example.schoollifeproject.WriteNoticeActivity
 import com.example.schoollifeproject.adapter.ContactsListAdapter
 import com.example.schoollifeproject.databinding.FragmentListBinding
 import com.example.schoollifeproject.model.*
@@ -34,7 +38,7 @@ class ListFragment : Fragment() {
 
     private val api = APIS.create()
     private var id: String? = null
-    private var countKey: Int? = 1
+    private var countKey: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,7 +49,7 @@ class ListFragment : Fragment() {
 
         binding.recyclerView.adapter = adapter
 
-        id = arguments?.getString("ID")
+        id = arguments?.getString("ID").toString()
 
 
         api.bbs_load(
@@ -54,17 +58,21 @@ class ListFragment : Fragment() {
             override fun onResponse(call: Call<List<Bbs>>, response: Response<List<Bbs>>) {
                 val list = mutableListOf<Contacts>()
                 for (i in response.body()!!) {
-                    val contacts = (
-                            Contacts(
-                                i.getBbsKey(),
-                                i.getBbsTitle(),
-                                i.getBbsWriter(),
-                                i.getBbsDate(),
-                                i.getBbsContent(),
-                                i.getBbsAvailable()
-                            )
-                            )
-                    list.add(contacts)
+                    if (i.getBbsAvailable() == 0 || id == i.getBbsWriter()) {
+                        val contacts = (
+                                Contacts(
+                                    i.getBbsKey(),
+                                    i.getBbsTitle(),
+                                    i.getBbsWriter(),
+                                    i.getBbsDate(),
+                                    i.getBbsContent(),
+                                    i.getBbsAvailable(),
+                                    id!!
+                                )
+                                )
+                        list.add(contacts)
+                    }
+                    countKey++
 
                 }
                 contactsList.clear()
@@ -81,22 +89,24 @@ class ListFragment : Fragment() {
         })
 
 
-        /*getResult = registerForActivityResult(
+        getResult = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
                 Log.d("리절트", "111")
-                val title = it.data?.getStringExtra("Title")
-                val notice = it.data?.getStringExtra("Notice")
-                val date = it.data?.getStringExtra("Date")
-
+                val title = it.data?.getStringExtra("Title").toString()
+                val contents = it.data?.getStringExtra("Contents").toString()
+                val date = it.data?.getStringExtra("Date").toString()
+                val key = it.data?.getIntExtra("key", 999999999)
                 val contacts =
                     Contacts(
-                        countKey!! + 1,
+                        key!!,
                         title,
-                        notice,
+                        id!!,
+                        contents,
                         date,
-                        ,
+                        0,
+                        id!!
                     )
                 contactsList.add(contacts)
 
@@ -111,10 +121,12 @@ class ListFragment : Fragment() {
         addNote.setOnClickListener {
 
             val intent = Intent(context, WriteNoticeActivity::class.java)
-            intent.putExtra("ID", id)
+            intent.apply {
+                putExtra("ID", id)
+            }
             getResult.launch(intent)
             Log.d("addNote", "11")
-        }*/
+        }
 
         return binding.root
     }

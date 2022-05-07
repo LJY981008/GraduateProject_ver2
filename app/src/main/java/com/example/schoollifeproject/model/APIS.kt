@@ -2,6 +2,7 @@ package com.example.schoollifeproject.model
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -49,15 +50,22 @@ interface APIS {
         @Field("noticeTitle") noticeTitle: String,
         @Field("userID") userID: String,
         @Field("date") date: String,
-        @Field("noticeContents") noticeContents: String
-        ): Call<PostModel>
+        @Field("noticeContents") noticeContents: String,
+        @Field("available") available: Int
+    ): Call<PostModel>
 
     @FormUrlEncoded
     @POST(MyApp.notice_open_url)
     fun notice_open(
         @Field("key") key: Int,
         @Field("type") type: Int
-    ):Call<List<Notice>>
+    ): Call<List<Notice>>
+
+    @Multipart
+    @POST(MyApp.map_files_url)
+    fun map_files(
+        @Part file: MultipartBody.Part?
+    ): Call<String>
 
     @FormUrlEncoded
     @POST(MyApp.item_save_url)

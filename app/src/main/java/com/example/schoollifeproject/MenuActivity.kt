@@ -11,6 +11,7 @@ import com.example.schoollifeproject.adapter.SugListAdapter
 import com.example.schoollifeproject.databinding.ActivityMenuBinding
 import com.example.schoollifeproject.fragment.ListFragment
 import com.example.schoollifeproject.fragment.MindMapFragment
+import com.example.schoollifeproject.fragment.SettingFragment
 import com.example.schoollifeproject.model.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -85,6 +86,7 @@ class MenuActivity : AppCompatActivity() {
 
             val listFragment = ListFragment()
             val mindMapFragment = MindMapFragment()
+            val settingFragment = SettingFragment()
             var bundle = Bundle()
             bundle.putString("ID", userID)
 
@@ -115,6 +117,10 @@ class MenuActivity : AppCompatActivity() {
                         true
                     }
                     else -> {
+                        listFragment.arguments = bundle
+                        transaction.replace(R.id.frameLayout, settingFragment)
+                            .commitAllowingStateLoss()
+                        menuMainVisible(false)
                         true
                     }
                 }

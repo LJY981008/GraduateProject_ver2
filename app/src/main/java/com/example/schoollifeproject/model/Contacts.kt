@@ -6,7 +6,8 @@ class Contacts(
     val writer: String,
     val date: String,
     val content: String,
-    val available: Int
+    val available: Int,
+    val loginID: String
 ) {
 
 

@@ -32,7 +32,6 @@ class ContactsListAdapter(private val itemList: MutableList<Contacts>) :
     }
 
 
-
     class ContactsViewHolder(private val binding: ItemContactsBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
@@ -48,10 +47,12 @@ class ContactsListAdapter(private val itemList: MutableList<Contacts>) :
                     putExtra("date", item.date)
                     putExtra("content", item.content)
                     putExtra("available", item.available)
+                    putExtra("loginID", item.loginID)
                 }
                 startActivity(itemView.context, intent, null)
 
             }
+
         }
     }
 }
