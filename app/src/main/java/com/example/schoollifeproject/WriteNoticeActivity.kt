@@ -16,6 +16,10 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.time.LocalDate
 
+/**
+ * 글작성 Fab 클릭 실행 Activity
+ * */
+
 class WriteNoticeActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {

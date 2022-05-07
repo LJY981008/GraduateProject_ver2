@@ -13,8 +13,11 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+/**
+ * 회원가입 실행 Activity
+ * */
+
 class RegisterActivity : AppCompatActivity() {
-    val TAG: String = "Register"
     var isExistBlank = false
     var isPWSame = false
 
@@ -22,21 +25,21 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val api = APIS.create()
 
+        val api = APIS.create()
         val btnRegister = binding.btnRegister
 
-
+        /**
+         * 회원가입 버튼 클릭리스너
+         * */
         btnRegister.setOnClickListener {
-            Log.d(TAG, "회원가입 버튼 클릭")
-
             val id = binding.editId.text.toString()
             val pw = binding.editPw.text.toString()
             val rePw = binding.editPwRe.text.toString()
             val name = binding.editName.text.toString()
             val email = binding.editEmail.text.toString()
             //텍스트를 채우지 않았을 때
-            if (id.isBlank() || pw.isBlank() || rePw.isBlank() || name.isBlank() || email.isBlank() ) {
+            if (id.isBlank() || pw.isBlank() || rePw.isBlank() || name.isBlank() || email.isBlank()) {
                 isExistBlank = true
             } else {
                 if (pw == rePw) isPWSame = true
@@ -48,20 +51,15 @@ class RegisterActivity : AppCompatActivity() {
                     id, pw, name, email
                 ).enqueue(object : Callback<PostModel> {
                     override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
-                        Log.d("onReaspon","리스폰 성공")
-                        if(response.body()?.error.toString().equals("ok")) {
+                        Log.d("onReaspon", "리스폰 성공")
+                        if (response.body()?.error.toString() == "ok")
                             dialog("success")
-                        } else{
-                           dialog("id same")
-                        }
+                        else
+                            dialog("id same")
                     }
-                    override fun onFailure(call: Call<PostModel>, t: Throwable) {
-                        Log.d("onFailure", "리스폰 실패 : ${t.message}")
 
-                   }
+                    override fun onFailure(call: Call<PostModel>, t: Throwable) {}
                 })
-
-
             } else {
                 if (isExistBlank) {
                     dialog("blank")
@@ -77,22 +75,22 @@ class RegisterActivity : AppCompatActivity() {
     fun dialog(type: String) {
         val dialog = AlertDialog.Builder(this)
 
-        if(type == "blank"){
+        if (type == "blank") {
             dialog.setTitle("회원가입 실패")
             dialog.setMessage("입력란을 모두 작성해주세요.(공백을 제외해주세요)")
-        } else if(type == "not same"){
+        } else if (type == "not same") {
             dialog.setTitle("회원가입 실패")
             dialog.setMessage("비밀번호를 정확히 입력해주세요.")
-        } else if(type == "id same"){
+        } else if (type == "id same") {
             dialog.setTitle("회원가입 실패")
             dialog.setMessage("중복된 아이디가 존재합니다.")
-        } else if(type == "success"){
+        } else if (type == "success") {
             dialog.setTitle("회원가입 성공")
             dialog.setMessage("환영합니다.")
         }
 
         val dialog_litener = DialogInterface.OnClickListener { _, _ ->
-            if(type == "success"){
+            if (type == "success") {
                 finish()
             }
         }

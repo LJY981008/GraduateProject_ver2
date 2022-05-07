@@ -1,5 +1,9 @@
 package com.example.schoollifeproject.model
 
+/**
+ * 서버연결을 위한 PHP path object
+ * */
+
 object MyApp {
     const val TAG: String = "로그"
 
@@ -17,6 +21,4 @@ object MyApp {
     const val map_popular_url: String = "/map_popular.php"
     const val map_like_url: String = "/map_like.php"
     const val map_files_url: String = "/map_files.php"
-    const val notice_open_url: String = "/notice_open.php"
-    const val notice_update_url: String = "/notice_update.php"
 }

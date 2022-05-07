@@ -15,11 +15,13 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+/**
+ * 게시물 선택 실행 Activity
+ * */
+
 class noticeActivity : AppCompatActivity() {
     private var readList: MutableList<NoteReadContacts> = mutableListOf()
-
     private val readAdapter = NoteReadListAdapter(readList)
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,20 +35,17 @@ class noticeActivity : AppCompatActivity() {
         val writer = intent.getStringExtra("writer").toString()
         val date = intent.getStringExtra("date").toString()
         val content = intent.getStringExtra("content").toString()
-        var available = intent.getIntExtra("available", 0)
 
         val contact = (
                 NoteReadContacts(
                     title,
                     writer,
                     date,
-                    content,
-                    available
+                    content
                 )
                 )
         readList.add(contact)
         readAdapter.notifyDataSetChanged()
-
 
 
         //val views = 100
