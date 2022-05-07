@@ -55,4 +55,7 @@ data class PostModel(
     @Expose
     @SerializedName("key")
     var key: Int? = null,
+    @Expose
+    @SerializedName("filePath")
+    var filePath: String? = null
 )

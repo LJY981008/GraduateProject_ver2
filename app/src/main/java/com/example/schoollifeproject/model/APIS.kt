@@ -8,6 +8,11 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 
+import retrofit2.http.POST
+import retrofit2.http.Multipart
+
+
+
 
 interface APIS {
     @FormUrlEncoded
@@ -61,12 +66,6 @@ interface APIS {
         @Field("type") type: Int
     ): Call<List<Notice>>
 
-    @Multipart
-    @POST(MyApp.map_files_url)
-    fun map_files(
-        @Part file: MultipartBody.Part?
-    ): Call<String>
-
     @FormUrlEncoded
     @POST(MyApp.item_save_url)
     fun item_save(
@@ -113,6 +112,13 @@ interface APIS {
     fun map_like(
         @Field("userID") userID: String,
         @Field("mapID") mapID: String
+    ): Call<PostModel>
+
+    //api를 관리해주는 인터페이스
+    @Multipart
+    @POST(MyApp.map_files_url)
+    fun map_files(
+        @Part file: MultipartBody.Part?
     ): Call<PostModel>
 
     companion object { // static 처럼 공유객체로 사용가능함. 모든 인스턴스가 공유하는 객체로서 동작함.

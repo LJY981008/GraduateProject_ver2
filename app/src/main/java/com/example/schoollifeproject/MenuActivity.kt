@@ -81,7 +81,6 @@ class MenuActivity : AppCompatActivity() {
                 }
 
             })
-
         binding.bottomNavigationView.run {
 
             val listFragment = ListFragment()
