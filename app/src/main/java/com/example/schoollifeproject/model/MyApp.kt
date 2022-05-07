@@ -9,7 +9,6 @@ object MyApp {
     const val Select_url: String = "/login_select.php"
     const val Register_url: String = "/register_insert.php"
     const val notice_key_search_url: String = "/notice_key_search.php"
-    const val notice_load_url: String = "/notice_load.php"
     const val notice_save_url: String = "/notice_insert.php"
     const val item_save_url: String = "/item_save.php"
     const val item_load_url: String = "/item_load.php"
@@ -19,4 +18,5 @@ object MyApp {
     const val map_like_url: String = "/map_like.php"
     const val map_files_url: String = "/map_files.php"
     const val notice_open_url: String = "/notice_open.php"
+    const val notice_update_url: String = "/notice_update.php"
 }

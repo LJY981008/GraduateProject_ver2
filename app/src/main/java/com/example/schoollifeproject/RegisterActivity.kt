@@ -43,12 +43,12 @@ class RegisterActivity : AppCompatActivity() {
             }
 
             if (!isExistBlank && isPWSame) {
-                Toast.makeText(this, "가입성공", Toast.LENGTH_SHORT).show()
+
                 api.register_users(
                     id, pw, name, email
                 ).enqueue(object : Callback<PostModel> {
                     override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
-                        Log.d("onRespon","리스폰 성공")
+                        Log.d("onReaspon","리스폰 성공")
                         if(response.body()?.error.toString().equals("ok")) {
                             dialog("success")
                         } else{
@@ -56,11 +56,11 @@ class RegisterActivity : AppCompatActivity() {
                         }
                     }
                     override fun onFailure(call: Call<PostModel>, t: Throwable) {
-                        Log.d("onFailure", "리스폰 실패 : " + t)
+                        Log.d("onFailure", "리스폰 실패 : ${t.message}")
 
                    }
                 })
-                Log.d("endapi","api끝")
+
 
             } else {
                 if (isExistBlank) {
@@ -77,25 +77,23 @@ class RegisterActivity : AppCompatActivity() {
     fun dialog(type: String) {
         val dialog = AlertDialog.Builder(this)
 
-        if(type.equals("blank")){
+        if(type == "blank"){
             dialog.setTitle("회원가입 실패")
             dialog.setMessage("입력란을 모두 작성해주세요.(공백을 제외해주세요)")
-        } else if(type.equals("not same")){
+        } else if(type == "not same"){
             dialog.setTitle("회원가입 실패")
             dialog.setMessage("비밀번호를 정확히 입력해주세요.")
-        } else if(type.equals("id same")){
+        } else if(type == "id same"){
             dialog.setTitle("회원가입 실패")
             dialog.setMessage("중복된 아이디가 존재합니다.")
-        } else if(type.equals("success")){
+        } else if(type == "success"){
             dialog.setTitle("회원가입 성공")
             dialog.setMessage("환영합니다.")
         }
 
-        val dialog_litener = object: DialogInterface.OnClickListener{
-            override fun onClick(p0: DialogInterface?, p1: Int) {
-                if(type.equals("success")){
-                    finish()
-                }
+        val dialog_litener = DialogInterface.OnClickListener { _, _ ->
+            if(type == "success"){
+                finish()
             }
         }
 

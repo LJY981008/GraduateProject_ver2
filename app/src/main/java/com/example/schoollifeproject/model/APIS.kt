@@ -121,6 +121,13 @@ interface APIS {
         @Part file: MultipartBody.Part?
     ): Call<PostModel>
 
+    @FormUrlEncoded
+    @POST(MyApp.notice_update_url)
+    fun notice_avail_change(
+        @Field("key") key:Int,
+        @Field("avail") avail:Int
+    ): Call<PostModel>
+
     companion object { // static 처럼 공유객체로 사용가능함. 모든 인스턴스가 공유하는 객체로서 동작함.
         //서버 IP만 입력해주세요~
         private const val BASE_URL = "http://220.118.54.17"

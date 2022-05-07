@@ -24,14 +24,12 @@ class WriteNoticeActivity : AppCompatActivity() {
         setContentView(binding.root)
         val api = APIS.create()
         val date: String = LocalDate.now().toString()
-
-
-        val editTitle = binding.editTitle.text.toString()
-        val editContents = binding.editNotice.text.toString()
         val addNotice = binding.addNotice
-        val available = 1
-        val intent = Intent(this, ListFragment::class.java)
         addNotice.setOnClickListener {
+            val editTitle = binding.editTitle.text.toString()
+            val editContents = binding.editNotice.text.toString()
+            val available = 0
+
             api.notice_save(
                 editTitle,
                 intent.getStringExtra("ID").toString(),
@@ -40,13 +38,11 @@ class WriteNoticeActivity : AppCompatActivity() {
                 available
             ).enqueue(object : Callback<PostModel> {
                 override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
-                    Log.d("onResponse", "저장성공")
-                    intent.apply {
-                        putExtra("Key", response.body()?.key)
-                        putExtra("Title", editTitle)
-                        putExtra("Contents", editContents)
-                        putExtra("Date", date)
-                    }
+                    Log.d("dbTestNoBody", response.toString())
+                    Log.d(
+                        "onResponse",
+                        "저장성공: ${response.body()?.key}, ${intent.getStringExtra("ID")},$editTitle, $editContents, $date, $available"
+                    )
                 }
 
                 override fun onFailure(p0: Call<PostModel>, t: Throwable) {

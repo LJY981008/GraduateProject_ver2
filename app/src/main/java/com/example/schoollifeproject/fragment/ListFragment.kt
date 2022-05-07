@@ -10,6 +10,10 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.WriteNoticeActivity
 import com.example.schoollifeproject.adapter.ContactsListAdapter
 import com.example.schoollifeproject.databinding.FragmentListBinding
@@ -37,21 +41,10 @@ class ListFragment : Fragment() {
     private lateinit var binding: FragmentListBinding
 
     private val api = APIS.create()
-    private var id: String? = null
+    private var id: String? = arguments?.getString("ID").toString()
     private var countKey: Int = 0
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        // Inflate the layout for this fragment
-        binding = FragmentListBinding.inflate(inflater, container, false)
-
-        binding.recyclerView.adapter = adapter
-
-        id = arguments?.getString("ID").toString()
-
-
+    private fun posting() {
         api.bbs_load(
             0
         ).enqueue(object : Callback<List<Bbs>> {
@@ -66,8 +59,7 @@ class ListFragment : Fragment() {
                                     i.getBbsWriter(),
                                     i.getBbsDate(),
                                     i.getBbsContent(),
-                                    i.getBbsAvailable(),
-                                    id!!
+                                    i.getBbsAvailable()
                                 )
                                 )
                         list.add(contacts)
@@ -85,32 +77,27 @@ class ListFragment : Fragment() {
 
             }
 
-
         })
+    }
 
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        // Inflate the layout for this fragment
+        binding = FragmentListBinding.inflate(inflater, container, false)
+        binding.recyclerView.adapter = adapter
+
+
+
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {})
+        posting()
 
         getResult = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
-                Log.d("리절트", "111")
-                val title = it.data?.getStringExtra("Title").toString()
-                val contents = it.data?.getStringExtra("Contents").toString()
-                val date = it.data?.getStringExtra("Date").toString()
-                val key = it.data?.getIntExtra("key", 999999999)
-                val contacts =
-                    Contacts(
-                        key!!,
-                        title,
-                        id!!,
-                        contents,
-                        date,
-                        0,
-                        id!!
-                    )
-                contactsList.add(contacts)
-
-
+                posting()
             }
             adapter.notifyDataSetChanged()
         }
@@ -124,6 +111,7 @@ class ListFragment : Fragment() {
             intent.apply {
                 putExtra("ID", id)
             }
+            onDestroyView()
             getResult.launch(intent)
             Log.d("addNote", "11")
         }
