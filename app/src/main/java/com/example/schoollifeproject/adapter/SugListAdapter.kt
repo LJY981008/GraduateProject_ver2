@@ -3,7 +3,7 @@ package com.example.schoollifeproject.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.schoollifeproject.databinding.SugContactsBinding
+import com.example.schoollifeproject.databinding.ContactsSugBinding
 import com.example.schoollifeproject.model.SugContacts
 
 /**
@@ -18,7 +18,7 @@ class SugListAdapter(private val itemList: List<SugContacts>) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SugViewHolder {
         val binding =
-            SugContactsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            ContactsSugBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return SugViewHolder(binding)
     }
 
@@ -30,7 +30,7 @@ class SugListAdapter(private val itemList: List<SugContacts>) :
     }
 
 
-    class SugViewHolder(private val binding: SugContactsBinding) :
+    class SugViewHolder(private val binding: ContactsSugBinding) :
         RecyclerView.ViewHolder(binding.root) {
         //추천맵에 등록될 text, listener
         fun bind(item: SugContacts) {

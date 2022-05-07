@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.example.schoollifeproject.databinding.ItemContactsBinding
+import com.example.schoollifeproject.databinding.ContactsListItemBinding
 import com.example.schoollifeproject.model.MapContacts
 import com.example.schoollifeproject.noticeActivity
 
@@ -15,7 +15,7 @@ class MapListAdapter(private val itemList: MutableList<MapContacts>) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactsMapViewHolder {
         val binding =
-            ItemContactsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            ContactsListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ContactsMapViewHolder(binding)
     }
 
@@ -30,7 +30,7 @@ class MapListAdapter(private val itemList: MutableList<MapContacts>) :
         return itemList.size
     }
 
-    class ContactsMapViewHolder(private val binding: ItemContactsBinding) :
+    class ContactsMapViewHolder(private val binding: ContactsListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         //게시판에 등록될 text, listener
         fun bind(item: MapContacts) {

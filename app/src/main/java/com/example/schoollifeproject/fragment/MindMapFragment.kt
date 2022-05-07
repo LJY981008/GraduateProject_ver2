@@ -1,25 +1,32 @@
 package com.example.schoollifeproject.fragment
 
 import android.app.Activity.RESULT_OK
+import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.SystemClock
+import android.provider.DocumentsContract
+import android.provider.MediaStore
 import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.adapter.ItemAdapter
+import com.example.schoollifeproject.adapter.ItemFileAdapter
 import com.example.schoollifeproject.databinding.FragmentMindMapBinding
-import com.example.schoollifeproject.model.APIS
-import com.example.schoollifeproject.model.ItemInfo
+import com.example.schoollifeproject.model.*
 import com.gyso.treeview.TreeViewEditor
 import com.gyso.treeview.layout.CompactHorizonLeftAndRightLayoutManager
 import com.gyso.treeview.layout.TreeLayoutManager
@@ -28,20 +35,14 @@ import com.gyso.treeview.line.StraightLine
 import com.gyso.treeview.listener.TreeViewControlListener
 import com.gyso.treeview.model.NodeModel
 import com.gyso.treeview.model.TreeModel
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-
-import android.net.Uri
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
-import android.provider.MediaStore
-
-import android.provider.DocumentsContract
-import com.example.schoollifeproject.model.PostModel
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 
 
 class MindMapFragment : Fragment() {
@@ -64,6 +65,7 @@ class MindMapFragment : Fragment() {
     private lateinit var mapPassword: String
 
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
+    private lateinit var targetItemID: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -186,7 +188,8 @@ class MindMapFragment : Fragment() {
                                 editor.addChildNodes(mapItems.get(parentID), mapItems.get(childID))
                             }
                         }
-                        itemMaxNum = (if (i.getNum() != null) i.getNum()!! else throw NullPointerException("Expression 'i.getNum()' must not be null"))
+                        itemMaxNum =
+                            (if (i.getNum() != null) i.getNum()!! else throw NullPointerException("Expression 'i.getNum()' must not be null"))
                         itemMaxNum++
                         Log.d("$TAG", "item_load/itemMaxNum: ${itemMaxNum}")
                         editor.focusMidLocation()
@@ -294,36 +297,68 @@ class MindMapFragment : Fragment() {
             WindowManager.LayoutParams.WRAP_CONTENT
         )
 
-        FileSetWindow.isFocusable = true
-        FileSetWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-        FileSetWindow.update()
-        FileSetWindow.showAtLocation(setWindow, Gravity.CENTER, 0, 0)
-
-        FileSetWindow.isOutsideTouchable = true
-        FileSetWindow.setTouchInterceptor { _, motionEvent ->
-            if (motionEvent.action == MotionEvent.ACTION_OUTSIDE) {
-                FileSetWindow.dismiss()
-            }
-            false
-        }
-
-        val fileAddButton = setWindow.findViewById<Button>(R.id.fileAddButton)
+        val fileListView = setWindow.findViewById<RecyclerView>(R.id.fileListView)
         val fileSetButton = setWindow.findViewById<Button>(R.id.fileSetButton)
+        fileListView.addOnScrollListener(object : RecyclerView.OnScrollListener() {})
 
-        fileAddButton.setOnClickListener {
+        val fileList: MutableList<FileContacts> = mutableListOf()
+        val fileAdapter = ItemFileAdapter(fileList)
 
-            resultLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
+        fileListView.adapter = fileAdapter
 
-            })
-        }
+        api.item_file_load(userID, targetItemID).enqueue(object : Callback<List<FileModel>> {
+            override fun onResponse(
+                call: Call<List<FileModel>>,
+                response: Response<List<FileModel>>
+            ) {
+                Log.d(
+                    "$TAG",
+                    "item_file_load: 리스폰 완료 ${response.body()!!.size}"
+                )
+                val list = mutableListOf<FileContacts>()
+                for (i in response.body()!!) {
+                    Log.d("$TAG", "item_file_load/fileName: ${i.getFileName()}, ${i.getFileRealName()}")
+                    val ar: List<String> = i.getFileName().split('.')
+                    val ext = ar[ar.size - 1]
+                    val fileModel = FileContacts(i.getFileName())
+
+                    val contacts = (
+                            FileContacts(
+                                i.getFileName()
+                            )
+                            )
+                    fileList.add(contacts)
+                    Log.d("$TAG", "item_file_load/fileList: ${i.getFileName()}, ${i.getFileRealName()}")
+                    fileAdapter.notifyDataSetChanged()
+                }
+
+            }
+
+            override fun onFailure(call: Call<List<FileModel>>, t: Throwable) {
+                Log.d("$TAG", "item_file_load: 리스폰 실패")
+            }
+        })
+
+
+            FileSetWindow.isFocusable = true
+            FileSetWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+            FileSetWindow.update()
+            FileSetWindow.showAtLocation(setWindow, Gravity.CENTER, 0, 0)
+
+            FileSetWindow.isOutsideTouchable = true
+            FileSetWindow.setTouchInterceptor { _, motionEvent ->
+                if (motionEvent.action == MotionEvent.ACTION_OUTSIDE) {
+                    FileSetWindow.dismiss()
+                }
+                false
+            }
     }
 
     private fun itemEvent(editor: TreeViewEditor, adapter: ItemAdapter) {
-        lateinit var formId: MultipartBody.Part
-        lateinit var formFile: MultipartBody.Part
-        lateinit var formType: MultipartBody.Part
 
         editor.container.isAnimateAdd = true
+
+        lateinit var formFile: MultipartBody.Part
 
         /**
          * file intent 설정 초기화
@@ -334,24 +369,37 @@ class MindMapFragment : Fragment() {
                 if (result.resultCode == RESULT_OK) {
                     val intent = result.data
                     val uri = intent!!.data
-                    val imagePath = getRealPathFromURI(uri!!)
-                    val file = File(imagePath)
-                    formFile = FormDataUtil.getImageBody("media", file)
-                    Log.d("$TAG", "resultLauncher: ${imagePath}")
-                    Log.d("$TAG", "resultLauncher: ${formFile}")
+                    Log.d("$TAG", "resultLauncher?: ${uri}")
+                    val path = getRealPathFromURI(uri!!)
+                    Log.d("$TAG", "resultLauncher: ${path}")
+                    if (path != "notsupport") {
+                        val file = File(path)
+                        formFile = FormDataUtil.getImageBody("media", file)
+                        val ar: List<String> = path!!.split('.')
+                        val ext = ar[ar.size - 1]
 
-                        api.map_files(formFile).enqueue(object : Callback<PostModel> {
-                            override fun onResponse(
-                                call: Call<PostModel>,
-                                response: Response<PostModel>
-                            ) {
-                                Log.e("uploadChat()", "성공 : ${response.body()}")
-                            }
+                        // zip jpg png hwp pptx ppt
+                        if (ext == "zip" || ext == "jpg" || ext == "png"
+                            || ext == "hwp" || ext == "ppt" || ext == "pptx") {
+                            Log.d("$TAG", "resultlauncher: $ext")
+                            api.item_file_save(formFile, userID, targetItemID).enqueue(object : Callback<String> {
+                                override fun onResponse(
+                                    call: Call<String>,
+                                    response: Response<String>
+                                ) {
+                                    Log.d(
+                                        "$TAG",
+                                        "item_file_save: 리스폰 완료 ${response.body()}"
+                                    )
+                                }
 
-                            override fun onFailure(call: Call<PostModel>, t: Throwable) {
-                                Log.e("uploadChat()", "에러 : " + t.message)
-                            }
-                        })
+                                override fun onFailure(call: Call<String>, t: Throwable) {
+                                    Log.d("$TAG", "item_file_save: 리스폰 실패")
+                                }
+                            })
+                        }
+                        saveFileDB()
+                    }
                 }
             })
 
@@ -455,9 +503,8 @@ class MindMapFragment : Fragment() {
                                 true
                             }
                             R.id.bottomMenu4 -> {
-                                resultLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
-                                    type ="image/*"
-                                })
+                                targetItemID = node.value.getItemID()
+                                saveFileDB()
                                 true
                             }
                             else -> {
@@ -763,29 +810,121 @@ class MindMapFragment : Fragment() {
     private fun getLine(): BaseLine {
         return StraightLine(Color.parseColor("#055287"), 2)
     }
-    private fun getRealPathFromURI(contentUri: Uri): String? {
-        if (contentUri.path!!.startsWith("/storage")) {
-            return contentUri.path
-        }
-        val id = DocumentsContract.getDocumentId(contentUri).split(":").toTypedArray()[1]
-        val columns = arrayOf(MediaStore.Files.FileColumns.DATA)
-        val selection = MediaStore.Files.FileColumns._ID + " = " + id
-        val cursor: Cursor? = activity!!.contentResolver.query(
-            MediaStore.Files.getContentUri("external"),
-            columns,
-            selection,
-            null,
-            null
-        )
+
+    private fun getRealPathFromURI(uri: Uri): String? {
+        // DocumentProvider
+        val con = mapContext
         try {
-            val columnIndex: Int = cursor!!.getColumnIndex(columns[0])
-            if (cursor.moveToFirst()) {
-                return cursor.getString(columnIndex)
+            if (DocumentsContract.isDocumentUri(con, uri)) {
+                // ExternalStorageProvider
+
+                if (isExternalStorageDocument(uri)) {
+                    val docId = DocumentsContract.getDocumentId(uri)
+                    val split: Array<String?> = docId.split(":".toRegex()).toTypedArray()
+                    val type = split[0]
+                    return if ("primary".equals(type, ignoreCase = true)) {
+                        (Environment.getExternalStorageDirectory().toString() + "/"
+                                + split[1])
+                    } else {
+                        val SDcardpath =
+                            getRemovableSDCardPath(con)?.split("/Android".toRegex())!!
+                                .toTypedArray()[0]
+                        SDcardpath + "/" + split[1]
+                    }
+                } else if (isDownloadsDocument(uri)) {
+                    val id = DocumentsContract.getDocumentId(uri)
+                    val contentUri = ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"),
+                        java.lang.Long.valueOf(id)
+                    )
+                    return getDataColumn(con!!, contentUri, null, null)
+                } else if (isMediaDocument(uri)) {
+                    val docId = DocumentsContract.getDocumentId(uri)
+                    val split: Array<String?> = docId.split(":".toRegex()).toTypedArray()
+                    val type = split[0]
+                    var contentUri: Uri? = null
+                    if ("image" == type) {
+                        contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    } else if ("video" == type) {
+                        contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                    } else if ("audio" == type) {
+                        contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                    }
+                    val selection = "_id=?"
+                    val selectionArgs = arrayOf(split[1])
+                    return getDataColumn(
+                        con!!, contentUri, selection,
+                        selectionArgs
+                    )
+                }
+            } else if (uri != null) {
+                if ("content".equals(uri.getScheme(), ignoreCase = true)) {
+                    // Return the remote address
+                    return if (isGooglePhotosUri(uri)) uri.getLastPathSegment() else getDataColumn(
+                        con!!,
+                        uri,
+                        null,
+                        null
+                    )
+                } else if ("file".equals(uri.getScheme(), ignoreCase = true)) {
+                    return uri.getPath()
+                }
             }
-        } finally {
-            cursor!!.close()
+        } catch (e: IllegalArgumentException) {
+            return "notsupport"
+            throw RuntimeException(e)
         }
         return null
+    }
+
+    fun getRemovableSDCardPath(context: Context?): String? {
+        val storages = ContextCompat.getExternalFilesDirs(context!!, null)
+        return if (storages.size > 1 && storages[0] != null && storages[1] != null) storages[1].toString() else ""
+    }
+
+    fun getDataColumn(
+        context: Context, uri: Uri?,
+        selection: String?, selectionArgs: Array<String?>?
+    ): String? {
+        var cursor: Cursor? = null
+        val column = "_data"
+        val projection = arrayOf(column)
+        try {
+            cursor = context.contentResolver.query(
+                uri!!, projection,
+                selection, selectionArgs, null
+            )
+            if (cursor != null && cursor.moveToFirst()) {
+                val index = cursor.getColumnIndexOrThrow(column)
+                return cursor.getString(index)
+            }
+        } finally {
+            cursor?.close()
+        }
+        return null
+    }
+
+    fun isExternalStorageDocument(uri: Uri): Boolean {
+        return "com.android.externalstorage.documents" == uri
+            .authority
+    }
+
+
+    fun isDownloadsDocument(uri: Uri): Boolean {
+        return "com.android.providers.downloads.documents" == uri
+            .authority
+    }
+
+
+    fun isMediaDocument(uri: Uri): Boolean {
+        return "com.android.providers.media.documents" == uri
+            .authority
+    }
+
+
+    fun isGooglePhotosUri(uri: Uri): Boolean {
+        return "com.google.android.apps.photos.content" == uri
+            .authority
     }
 }
 
@@ -796,19 +935,18 @@ object FormDataUtil {
     }
 
     fun getImageBody(key: String, file: File): MultipartBody.Part {
-        Log.d("ah", "map_public: 리스폰 실패 : ${key}, ${file.name} ${file.asRequestBody("image/*".toMediaType())}")
         return MultipartBody.Part.createFormData(
             key,
             filename = file.name,
-            body = file.asRequestBody("image/*".toMediaTypeOrNull())
+            body = file.asRequestBody("image/*".toMediaType())
         )
     }
 
-    fun getVideoBody(key: String, file: File): MultipartBody.Part {
+    fun getDocsBody(key: String, file: File): MultipartBody.Part {
         return MultipartBody.Part.createFormData(
             name = key,
             filename = file.name,
-            body = file.asRequestBody("video/*".toMediaType())
+            body = file.asRequestBody("application/*".toMediaTypeOrNull())
         )
     }
 }

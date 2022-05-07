@@ -56,8 +56,5 @@ data class PostModel(
     var countNoticeKey: Int? = null,
     @Expose
     @SerializedName("key")
-    var key: Int? = null,
-    @Expose
-    @SerializedName("filePath")
-    var filePath: String? = null
+    var key: Int? = null
 )
