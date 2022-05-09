@@ -12,39 +12,15 @@
 
         <ImageView
             android:id="@+id/fileTypeImage"
-            android:layout_width="30sp"
-            android:layout_height="30sp" />
+            android:layout_width="40sp"
+            android:layout_height="40sp" />
 
         <TextView
             android:id="@+id/fileNameText"
-            android:layout_width="200sp"
-            android:layout_height="30sp"
+            android:layout_width="240sp"
+            android:layout_height="40sp"
             android:layout_marginLeft="20sp"
             android:layout_marginRight="20sp" />
-
-        <Button
-            android:id="@+id/fileUpButton"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="60sp"
-            android:layout_height="30sp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:text="업로드"
-            android:textColor="#000000"
-            android:textSize="12sp" />
-
-        <ImageButton
-            android:id="@+id/fileDeleteButton"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="20sp"
-            android:layout_height="20sp"
-            android:layout_marginLeft="10sp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:text="업로드"
-            android:textColor="#000000"
-            android:textSize="12sp"
-            android:visibility="invisible" />
 
         <Button
             android:id="@+id/fileDownButton"

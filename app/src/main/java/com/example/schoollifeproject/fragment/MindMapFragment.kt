@@ -1,6 +1,7 @@
 package com.example.schoollifeproject.fragment
 
 import android.app.Activity.RESULT_OK
+import android.app.DownloadManager
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
@@ -21,12 +22,16 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.adapter.ItemAdapter
 import com.example.schoollifeproject.adapter.ItemFileAdapter
 import com.example.schoollifeproject.databinding.FragmentMindMapBinding
-import com.example.schoollifeproject.model.*
+import com.example.schoollifeproject.model.APIS
+import com.example.schoollifeproject.model.FileModel
+import com.example.schoollifeproject.model.ItemInfo
+import com.example.schoollifeproject.model.PostModel
 import com.gyso.treeview.TreeViewEditor
 import com.gyso.treeview.layout.CompactHorizonLeftAndRightLayoutManager
 import com.gyso.treeview.layout.TreeLayoutManager
@@ -39,10 +44,11 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.File
+import java.io.*
 
 
 class MindMapFragment : Fragment() {
@@ -66,7 +72,18 @@ class MindMapFragment : Fragment() {
 
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var targetItemID: String
+    private var downloadId: Long = -1L
+    private lateinit var downloadManager: DownloadManager
+    fun newInstance(userID: String, mapID: String): MindMapFragment {
+        val args = Bundle()
+        args.putString("userID", userID)
+        args.putString("mapID", mapID)
 
+        val mindMapFragment = MindMapFragment()
+        mindMapFragment.arguments = args
+
+        return mindMapFragment
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -238,8 +255,8 @@ class MindMapFragment : Fragment() {
      * DB에서 마인드맵 노드 삽입/삭제/변경
      */
     private fun saveDB(item: NodeModel<ItemInfo>, view: View?, mode: String) {
-
         // TODO: TOP이랑 LEFT값이 있는 경우 APP으로 설정하게 수정
+        // TODO: item에 해당하는 파일 DB와 파일 삭제?
         val itemID = item.value.getItemID()
         val itemTop = "APP"
         val itemLeft = "APP"
@@ -248,6 +265,7 @@ class MindMapFragment : Fragment() {
         var itemWidth = "150px"
         var itemHeight = "50px"
         val itemNote = item.value.getNote()
+
         if (view != null) {
             view.addOnLayoutChangeListener { _, i, i2, i3, i4, _, _, _, _ ->
                 itemWidth = "${i3 - i}px"
@@ -258,6 +276,7 @@ class MindMapFragment : Fragment() {
         if (itemCount != null) {
             api.item_save(
                 itemID,
+                targetItemID,
                 itemTop,
                 itemLeft,
                 userID,
@@ -288,23 +307,9 @@ class MindMapFragment : Fragment() {
     }
 
     private fun saveFileDB() {
-
-        val setWindow: View =
-            LayoutInflater.from(mapContext).inflate(R.layout.window_item_file, null)
-        val FileSetWindow = PopupWindow(
-            setWindow,
-            ((requireContext().resources.displayMetrics.widthPixels) * 0.8).toInt(),
-            WindowManager.LayoutParams.WRAP_CONTENT
-        )
-
-        val fileListView = setWindow.findViewById<RecyclerView>(R.id.fileListView)
-        val fileSetButton = setWindow.findViewById<Button>(R.id.fileSetButton)
-        fileListView.addOnScrollListener(object : RecyclerView.OnScrollListener() {})
-
-        val fileList: MutableList<FileContacts> = mutableListOf()
+        // TODO : 파일 업로드 시 새로고침
+        val fileList: MutableList<FileModel> = mutableListOf()
         val fileAdapter = ItemFileAdapter(fileList)
-
-        fileListView.adapter = fileAdapter
 
         api.item_file_load(userID, targetItemID).enqueue(object : Callback<List<FileModel>> {
             override fun onResponse(
@@ -315,23 +320,27 @@ class MindMapFragment : Fragment() {
                     "$TAG",
                     "item_file_load: 리스폰 완료 ${response.body()!!.size}"
                 )
-                val list = mutableListOf<FileContacts>()
-                for (i in response.body()!!) {
-                    Log.d("$TAG", "item_file_load/fileName: ${i.getFileName()}, ${i.getFileRealName()}")
-                    val ar: List<String> = i.getFileName().split('.')
+                val list = mutableListOf<FileModel>()
+                for (i in 0 until response.body()!!.size) {
+                    Log.d(
+                        "$TAG",
+                        "item_file_load/fileName: ${response.body()!![i].getFileName()}, ${response.body()!![i].getFileRealName()}"
+                    )
+                    val ar: List<String> = response.body()!![i].getFileName().split('.')
                     val ext = ar[ar.size - 1]
-                    val fileModel = FileContacts(i.getFileName())
 
                     val contacts = (
-                            FileContacts(
-                                i.getFileName()
+                            FileModel(
+                                response.body()!![i].getFileName(),
+                                response.body()!![i].getFileRealName(),
+                                ext
                             )
                             )
-                    fileList.add(contacts)
-                    Log.d("$TAG", "item_file_load/fileList: ${i.getFileName()}, ${i.getFileRealName()}")
-                    fileAdapter.notifyDataSetChanged()
+                    list.add(contacts)
                 }
-
+                fileList.clear()
+                fileList.addAll(list)
+                fileAdapter.notifyDataSetChanged()
             }
 
             override fun onFailure(call: Call<List<FileModel>>, t: Throwable) {
@@ -339,19 +348,105 @@ class MindMapFragment : Fragment() {
             }
         })
 
+        val setWindow: View =
+            LayoutInflater.from(mapContext).inflate(R.layout.window_item_file, null)
+        val fileSetWindow = PopupWindow(
+            setWindow,
+            ((requireContext().resources.displayMetrics.widthPixels) * 0.9).toInt(),
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
 
-            FileSetWindow.isFocusable = true
-            FileSetWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-            FileSetWindow.update()
-            FileSetWindow.showAtLocation(setWindow, Gravity.CENTER, 0, 0)
+        val fileListView = setWindow.findViewById<RecyclerView>(R.id.fileListView)
+        val fileAddButton = setWindow.findViewById<ImageButton>(R.id.fileAddButton)
+        val fileSetButton = setWindow.findViewById<ImageButton>(R.id.fileSetButton)
 
-            FileSetWindow.isOutsideTouchable = true
-            FileSetWindow.setTouchInterceptor { _, motionEvent ->
-                if (motionEvent.action == MotionEvent.ACTION_OUTSIDE) {
-                    FileSetWindow.dismiss()
-                }
-                false
+        val mLayoutManager: RecyclerView.LayoutManager =
+            LinearLayoutManager(mapContext)
+        fileListView.setLayoutManager(mLayoutManager)
+
+        fileListView.adapter = fileAdapter
+
+        fileSetWindow.update()
+        fileSetWindow.showAtLocation(setWindow, Gravity.CENTER, 0, 0)
+
+        fileSetWindow.isOutsideTouchable = true
+        fileSetWindow.setTouchInterceptor { _, motionEvent ->
+            if (motionEvent.action == MotionEvent.ACTION_OUTSIDE) {
+                fileSetWindow.dismiss()
             }
+            false
+        }
+
+        fileAddButton.setOnClickListener {
+            fileSetWindow.dismiss()
+            resultLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "*/*"
+            })
+        }
+
+        fileSetButton.setOnClickListener {
+            fileSetWindow.dismiss()
+        }
+
+        fileAdapter.setOnFileListener { view, fileModel ->
+            Log.d("$TAG", "fileClickListener: ${fileModel.getFileRealName()}")
+
+            val uri = "/uninote/$mapID/${targetItemID}/${fileModel.getFileRealName()}"
+            api.item_file_down(uri).enqueue(object : Callback<ResponseBody> {
+                override fun onResponse(
+                    call: Call<ResponseBody>,
+                    response: Response<ResponseBody>
+                ) {
+                    Log.d("$TAG", "item_file_down: 리스폰 성공")
+                    val file = File(
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                        "${fileModel.getFileRealName()}"
+                    )
+
+                    var inputStream: InputStream = response.body()!!.byteStream()
+                    var outputStream: OutputStream = FileOutputStream(file)
+
+                    try {
+                        val fileReader = ByteArray(4096)
+                        var fileSizeDownloaded: Long = 0
+
+
+                        while (true) {
+                            val read = inputStream.read(fileReader)
+
+                            if (read == -1) {
+                                break
+                            }
+
+                            outputStream.write(fileReader, 0, read)
+
+                            fileSizeDownloaded += read
+                        }
+
+                        outputStream.flush()
+
+                    } catch (e: IOException) {
+                    } finally {
+                        if (inputStream != null) {
+                            inputStream.close()
+                        }
+                        if (outputStream != null) {
+                            outputStream.close()
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    Log.d("$TAG", "item_file_down: 리스폰 실패 $t")
+                }
+
+            })
+            Toast.makeText(
+                mapContext,
+                "다운로드가 시작되었습니다.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     private fun itemEvent(editor: TreeViewEditor, adapter: ItemAdapter) {
@@ -394,9 +489,15 @@ class MindMapFragment : Fragment() {
                                 }
 
                                 override fun onFailure(call: Call<String>, t: Throwable) {
-                                    Log.d("$TAG", "item_file_save: 리스폰 실패")
+                                    Log.d("$TAG", "item_file_save: 리스폰 실패 $t")
                                 }
                             })
+                        } else {
+                            Toast.makeText(
+                                mapContext,
+                                "지원하지 않는 파일 형식입니다.\n지원하는 확장명 : .zip .jpg .png .hwp .pptx .ppt",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                         saveFileDB()
                     }
@@ -411,9 +512,10 @@ class MindMapFragment : Fragment() {
          * 하단 메뉴 4 : 노드 파일 설정
          */
         adapter.setOnItemListener { view, node ->
-            Log.d("$TAG", "setOnItemListener: ${node.getValue().getItemID()}")
+            val d = Log.d("$TAG", "setOnItemListener: ${node.value.getItemID()}")
             val id = node.value.getItemID()
             if (id != "root") {
+                targetItemID = node.value.getItemID()
                 val visible =
                     id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4"
                 binding.bottomNavigationView.menu.findItem(R.id.bottomMenu2).isVisible = visible
@@ -503,7 +605,6 @@ class MindMapFragment : Fragment() {
                                 true
                             }
                             R.id.bottomMenu4 -> {
-                                targetItemID = node.value.getItemID()
                                 saveFileDB()
                                 true
                             }
@@ -546,6 +647,7 @@ class MindMapFragment : Fragment() {
          * 공개/비공개 전환 가능, 비공개인 경우 패스워드 입력/설정
          */
         binding.publicButton.setOnClickListener {
+            // TODO : public 버튼 오류
             val setWindow: View =
                 LayoutInflater.from(mapContext).inflate(R.layout.window_map_public_set, null)
             val publicSetWindow = PopupWindow(
@@ -678,8 +780,8 @@ class MindMapFragment : Fragment() {
                     val dNode = draggingNode.value as ItemInfo
                     val hNode = hittingNode.value as ItemInfo
 
-                    val dLast = if ((draggingNode.value as ItemInfo).getPosition()) "L" else "R"
                     val hLast = if ((hittingNode.value as ItemInfo).getPosition()) "L" else "R"
+                    targetItemID = dNode.getItemID()
                     val parent =
                         if (hNode.getItemID() != "root" && hNode.getItemID() != "grade1" && hNode.getItemID() != "grade2" &&
                             hNode.getItemID() != "grade3" && hNode.getItemID() != "grade4"
@@ -688,10 +790,15 @@ class MindMapFragment : Fragment() {
                         else hNode.getItemID().split("_")[0]
                     dNode.setItemID(
                         "${parent}_${
-                            dNode.getItemID().split("_")[1].split("$dLast")[0]
+                            dNode.getItemID().split("_")[1].substring(
+                                0,
+                                dNode.getItemID().split("_")[1].length - 1
+                            )
                         }$hLast"
                     )
+                    Log.d("$TAG", "dNodeItemID: ${dNode.getItemID()}")
                     if (draggingView != null) {
+                        Log.d("$TAG", "dNodeItemID/targetItemID: ${targetItemID}")
                         saveDB(draggingNode as NodeModel<ItemInfo>, draggingView, "update")
                     }
                 }
