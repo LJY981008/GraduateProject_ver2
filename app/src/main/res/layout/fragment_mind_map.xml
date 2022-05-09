@@ -29,11 +29,14 @@
         tools:text="100%"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:background="@android:color/white"
-        app:itemBackground="@android:color/white"
+        android:minHeight="50sp"
+        app:itemIconSize="22sp"
+        app:itemBackground="@color/uninote2"
+        app:itemIconTint="@color/black"
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:labelVisibilityMode="unlabeled"
         android:visibility="invisible"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

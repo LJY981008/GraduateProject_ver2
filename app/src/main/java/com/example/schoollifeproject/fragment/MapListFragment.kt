@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.adapter.MapListAdapter
-import com.example.schoollifeproject.databinding.FragmentSettingBinding
+import com.example.schoollifeproject.databinding.FragmentMapListBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.MapContacts
 import com.example.schoollifeproject.model.MapModel
@@ -24,7 +24,7 @@ class MapListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
     private var contactsList: MutableList<MapContacts> = mutableListOf()
     private val adapter = MapListAdapter(contactsList)
-    private lateinit var binding: FragmentSettingBinding
+    private lateinit var binding: FragmentMapListBinding
     private lateinit var userID: String
     val api = APIS.create()
 
@@ -45,7 +45,7 @@ class MapListFragment : Fragment() {
 
         userID = arguments?.getString("userID").toString()
 
-        binding = FragmentSettingBinding.inflate(inflater, container, false)
+        binding = FragmentMapListBinding.inflate(inflater, container, false)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {})
 
@@ -53,13 +53,16 @@ class MapListFragment : Fragment() {
         api.map_list(
             1
         ).enqueue(object : Callback<List<MapModel>> {
-            override fun onResponse(call: Call<List<MapModel>>, response: Response<List<MapModel>>) {
+            override fun onResponse(
+                call: Call<List<MapModel>>,
+                response: Response<List<MapModel>>
+            ) {
                 val list = mutableListOf<MapContacts>()
                 for (i in response.body()!!) {
                     val contacts = (
-                                MapContacts(
-                                    i.getMapID()
-                                )
+                            MapContacts(
+                                i.getMapID()
+                            )
                             )
                     list.add(contacts)
                     contactsList.add(contacts)
@@ -79,7 +82,8 @@ class MapListFragment : Fragment() {
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             Log.d("$TAG", "userIDSend: ${userID}, ${mapID}")
 
-            transaction?.replace(R.id.frameLayout, mindMapFragment.newInstance(userID, mapID))?.commitAllowingStateLoss()
+            transaction?.replace(R.id.frameLayout, mindMapFragment.newInstance(userID, mapID))
+                ?.commitAllowingStateLoss()
         }
 
         return binding.root

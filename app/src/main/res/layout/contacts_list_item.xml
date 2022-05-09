@@ -5,7 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/underline"
+        android:background="@drawable/bg_post"
         android:padding="50dp">
         <TextView
             android:id="@+id/title"
