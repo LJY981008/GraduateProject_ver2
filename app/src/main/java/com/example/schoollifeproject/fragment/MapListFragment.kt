@@ -25,13 +25,26 @@ class MapListFragment : Fragment() {
     private var contactsList: MutableList<MapContacts> = mutableListOf()
     private val adapter = MapListAdapter(contactsList)
     private lateinit var binding: FragmentSettingBinding
-    private var id: String? = arguments?.getString("ID").toString()
+    private lateinit var userID: String
     val api = APIS.create()
+
+    fun newInstance(userID: String): MapListFragment {
+        val args = Bundle()
+        args.putString("userID", userID)
+
+        val mapListFragment = MapListFragment()
+        mapListFragment.arguments = args
+
+        return mapListFragment
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        userID = arguments?.getString("userID").toString()
+
         binding = FragmentSettingBinding.inflate(inflater, container, false)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {})
@@ -62,16 +75,11 @@ class MapListFragment : Fragment() {
         })
 
         adapter.setOnMapListener { view, mapID ->
-            val bundle = Bundle()
             val mindMapFragment = MindMapFragment()
-            bundle.putString("ID", id)
-            bundle.putString("mapID", mapID)
             val transaction = activity?.supportFragmentManager?.beginTransaction()
+            Log.d("$TAG", "userIDSend: ${userID}, ${mapID}")
 
-            mindMapFragment.arguments = bundle
-            Log.d("$TAG", "userIDSend: ${id}, ${mapID}")
-
-            transaction?.replace(R.id.frameLayout, mindMapFragment.newInstance(id.toString(), mapID))?.commitAllowingStateLoss()
+            transaction?.replace(R.id.frameLayout, mindMapFragment.newInstance(userID, mapID))?.commitAllowingStateLoss()
         }
 
         return binding.root

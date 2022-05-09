@@ -74,6 +74,7 @@ class MindMapFragment : Fragment() {
     private lateinit var targetItemID: String
     private var downloadId: Long = -1L
     private lateinit var downloadManager: DownloadManager
+
     fun newInstance(userID: String, mapID: String): MindMapFragment {
         val args = Bundle()
         args.putString("userID", userID)
@@ -84,6 +85,7 @@ class MindMapFragment : Fragment() {
 
         return mindMapFragment
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -92,7 +94,7 @@ class MindMapFragment : Fragment() {
         binding = FragmentMindMapBinding.inflate(inflater, container, false)
         mapContext = context
 
-        userID = arguments?.getString("ID").toString() // menuActivity를 통해 받은 userID
+        userID = arguments?.getString("userID").toString() // menuActivity를 통해 받은 userID
         mapID = arguments?.getString("mapID").toString() // menuActivity를 통해 받은 userID
         Log.d("$TAG", "userID: ${userID}, ${mapID}")
         if (userID != mapID) {
@@ -255,8 +257,7 @@ class MindMapFragment : Fragment() {
      * DB에서 마인드맵 노드 삽입/삭제/변경
      */
     private fun saveDB(item: NodeModel<ItemInfo>, view: View?, mode: String) {
-        // TODO: TOP이랑 LEFT값이 있는 경우 APP으로 설정하게 수정
-        // TODO: item에 해당하는 파일 DB와 파일 삭제?
+
         val itemID = item.value.getItemID()
         val itemTop = "APP"
         val itemLeft = "APP"

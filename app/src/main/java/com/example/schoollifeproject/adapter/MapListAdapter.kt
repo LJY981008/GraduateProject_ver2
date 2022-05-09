@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.databinding.ContactsListItemBinding
 import com.example.schoollifeproject.model.MapContacts
 
-
 class MapListAdapter(private val itemList: MutableList<MapContacts>) :
     RecyclerView.Adapter<MapListAdapter.ContactsMapViewHolder>() {
 
@@ -48,13 +47,6 @@ class MapListAdapter(private val itemList: MutableList<MapContacts>) :
         //게시판에 등록될 text, listener
         fun bind(item: MapContacts) {
             binding.title.text = "${item.mapID} 님의 로드맵"
-                //게시글 눌렀을 때 엑티비티 출현 (new박동훈) 새 액티비티 만들어서 맵만 나오게
-                /*val intent = Intent(itemView.context, ::class.java).apply{
-                    putExtra("mapID", item.mapID)
-                }
-                startActivity(itemView.context, intent, null)
-                */
-
         }
     }
 

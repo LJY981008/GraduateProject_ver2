@@ -24,11 +24,6 @@ class MenuActivity : AppCompatActivity() {
     private val annoContactslist: MutableList<AnnoContacts> = mutableListOf()
     private val sugContactslist: MutableList<MapContacts> = mutableListOf()
 
-    /*
-        private var contactsList: MutableList<Contacts> = mutableListOf()
-        private var contactsList: MutableList<Contacts> = mutableListOf()
-        private var contactsList: MutableList<Contacts> = mutableListOf()
-    */
     private val annoAdapter = AnnoListAdapter(annoContactslist)
     private val sugAdapter = SugListAdapter(sugContactslist)
 
@@ -81,8 +76,6 @@ class MenuActivity : AppCompatActivity() {
 
         })
 
-
-
         api.map_list(1).enqueue(object : Callback<List<MapModel>> {
             override fun onResponse(call: Call<List<MapModel>>, response: Response<List<MapModel>>) {
                 for (i in response.body()!!) {
@@ -108,12 +101,9 @@ class MenuActivity : AppCompatActivity() {
          * 메뉴4 - 로드맵게시판
          * */
         binding.bottomNavigationView.run {
-            val listFragment = ListFragment()
             val mindMapFragment = MindMapFragment()
-            val settingFragment = MapListFragment()
-            var bundle = Bundle()
-
-            bundle.putString("ID", userID)
+            val listFragment = ListFragment()
+            val mapListFragment = MapListFragment()
 
             setOnItemSelectedListener { item ->
                 val transaction = supportFragmentManager.beginTransaction()
@@ -130,24 +120,20 @@ class MenuActivity : AppCompatActivity() {
                         if (userID == "비회원")
                             failDialog()
                         else {
-                            bundle.putString("mapID", userID)
-                            mindMapFragment.arguments = bundle
-                            transaction.replace(R.id.frameLayout, mindMapFragment)
+                            transaction.replace(R.id.frameLayout, mindMapFragment.newInstance(userID, userID))
                                 .commitAllowingStateLoss()
                             menuMainVisible(false)
                         }
                         true
                     }
                     R.id.mainMenu3 -> {
-                        listFragment.arguments = bundle
-                        transaction.replace(R.id.frameLayout, listFragment)
+                        transaction.replace(R.id.frameLayout, listFragment.newInstance(userID))
                             .commitAllowingStateLoss()
                         menuMainVisible(false)
                         true
                     }
                     else -> {
-                        listFragment.arguments = bundle
-                        transaction.replace(R.id.frameLayout, settingFragment)
+                        transaction.replace(R.id.frameLayout, mapListFragment.newInstance(userID))
                             .commitAllowingStateLoss()
                         menuMainVisible(false)
                         true

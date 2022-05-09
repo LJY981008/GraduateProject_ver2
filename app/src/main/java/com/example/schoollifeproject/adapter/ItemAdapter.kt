@@ -58,7 +58,6 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
     }
 
     override fun onBindViewHolder(holder: TreeViewHolder<ItemInfo>) {
-        //todo get view and node from holder, and then show by you
         val itemView = holder.view
         val node: NodeModel<ItemInfo> = holder.node
         val nodeBack = itemView.findViewById<ConstraintLayout>(R.id.item_back)
@@ -97,15 +96,6 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
 
     override fun onDrawLine(drawInfo: DrawInfo): BaseLine? {
         // TODO If you return an BaseLine, line will be draw by the return one instead of TreeViewLayoutManager's
-//        TreeViewHolder<?> toHolder = drawInfo.getToHolder();
-//        NodeModel<?> node = toHolder.getNode();
-//        Object value = node.getValue();
-//        if(value instanceof Animal){
-//            Animal animal = (Animal) value;
-//            if("sub4".compareToIgnoreCase(animal.name)<=0){
-//                return dashLine;
-//            }
-//        }
         return null
     }
 
