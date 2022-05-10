@@ -12,7 +12,8 @@ object MyApp {
     // ex) /파일명.php
     const val login_url: String = "/php/user/login.php"
     const val Register_url: String = "/php/user/register.php"
-    const val note_load_url: String = "/php/note/note_load.php"
+    const val bbs_load_url: String = "/php/note/bbs_load.php"
+    const val notice_load_url: String = "/php/note/notice_load.php"
     const val note_write_url: String = "/php/note/note_write.php"
     const val item_save_url: String = "/php/item/item_save.php"
     const val item_load_url: String = "/php/item/item_load.php"

@@ -126,7 +126,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/subPost"
+                    android:id="@+id/sugPost"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10sp"

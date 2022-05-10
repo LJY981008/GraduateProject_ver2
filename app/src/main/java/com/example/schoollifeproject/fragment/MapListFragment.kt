@@ -58,8 +58,7 @@ class MapListFragment : Fragment() {
             1
         ).enqueue(object : Callback<List<MapModel>> {
             override fun onResponse(
-                call: Call<List<MapModel>>,
-                response: Response<List<MapModel>>
+                call: Call<List<MapModel>>, response: Response<List<MapModel>>
             ) {
                 val list = mutableListOf<MapModel>()
                 for (i in response.body()!!) {

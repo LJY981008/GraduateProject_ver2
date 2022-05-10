@@ -8,12 +8,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.model.AnnoContacts
 import com.example.schoollifeproject.databinding.ContactsAnnoBinding
 import com.example.schoollifeproject.NoticeActivity
+import com.example.schoollifeproject.model.Notice
 
 /**
  * 메인메뉴 공지 RecyclerView Adapter
  * */
 
-class AnnoListAdapter(private val itemList: List<AnnoContacts>) :
+class AnnoListAdapter(private val itemList: List<Notice>) :
     RecyclerView.Adapter<AnnoListAdapter.AnnoViewHolder>() {
     override fun getItemCount(): Int {
         return itemList.size
@@ -35,16 +36,16 @@ class AnnoListAdapter(private val itemList: List<AnnoContacts>) :
     class AnnoViewHolder(private val binding: ContactsAnnoBinding) :
         RecyclerView.ViewHolder(binding.root) {
         //메인 메뉴 공지사항에 등록될 text, listener
-        fun bind(item: AnnoContacts) {
-            binding.title.text = item.title
+        fun bind(item: Notice) {
+            binding.title.text = item.getNoticeTitle()
             //공지사항 내용 확인 클릭 리스너
             binding.rView.setOnClickListener {
                 val intent = Intent(itemView.context, NoticeActivity::class.java).apply {
-                    putExtra("key", item.key)
-                    putExtra("title", item.title)
-                    putExtra("writer", item.writer)
-                    putExtra("date", item.date)
-                    putExtra("content", item.content)
+                    putExtra("key", item.getNoticeKey())
+                    putExtra("title", item.getNoticeTitle())
+                    putExtra("writer", item.getNoticeWriter())
+                    putExtra("date", item.getNoticeDate())
+                    putExtra("content", item.getNoticeContent())
                 }
                 startActivity(itemView.context, intent, null)
             }

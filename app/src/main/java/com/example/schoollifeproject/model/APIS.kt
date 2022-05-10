@@ -38,16 +38,16 @@ interface APIS {
 
     //공지사항 호출
     @FormUrlEncoded
-    @POST(MyApp.note_load_url)
+    @POST(MyApp.notice_load_url)
     fun notice_load(
-        @Field("type") type: Int
+        @Field("dum") dum: Int
     ): Call<List<Notice>>
 
     //게시글 호출
     @FormUrlEncoded
-    @POST(MyApp.note_load_url)
+    @POST(MyApp.bbs_load_url)
     fun bbs_load(
-        @Field("type") type: Int
+        @Field("dum") dum: Int
     ): Call<List<Bbs>>
 
     //글작성

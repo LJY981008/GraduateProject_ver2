@@ -2,7 +2,9 @@ package com.example.schoollifeproject
 
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -10,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.adapter.AnnoListAdapter
 import com.example.schoollifeproject.adapter.SugListAdapter
 import com.example.schoollifeproject.databinding.ActivityMenuBinding
+import com.example.schoollifeproject.fragment.AnnoListFragment
 import com.example.schoollifeproject.fragment.FreeListFragment
 import com.example.schoollifeproject.fragment.MapListFragment
 import com.example.schoollifeproject.fragment.MindMapFragment
@@ -23,7 +26,7 @@ import retrofit2.Response
  * 작성자 : 이준영, 박동훈
  */
 class MenuActivity : AppCompatActivity() {
-    private val annoContactslist: MutableList<AnnoContacts> = mutableListOf()
+    private val annoContactslist: MutableList<Notice> = mutableListOf()
     private val sugContactslist: MutableList<MapModel> = mutableListOf()
 
     private val annoAdapter = AnnoListAdapter(annoContactslist)
@@ -54,12 +57,30 @@ class MenuActivity : AppCompatActivity() {
         userID = intent.getStringExtra("ID").toString()
         userName = intent.getStringExtra("name").toString()
         loginCK = intent.getIntExtra("loginCheck", 0)
+
+        val annoText = binding.annoPost
+        val sugText = binding.sugPost
+        annoText.setOnClickListener {
+            val transaction = supportFragmentManager.beginTransaction()
+            val AnnoListFragment = AnnoListFragment()
+            transaction.replace(R.id.frameLayout, AnnoListFragment.newInstance(userID))
+                .commitAllowingStateLoss()
+            menuMainVisible(false)
+        }
+        sugText.setOnClickListener {
+            val transaction = supportFragmentManager.beginTransaction()
+            val MapListFragment = MapListFragment()
+            transaction.replace(R.id.frameLayout, MapListFragment.newInstance(userID))
+                .commitAllowingStateLoss()
+            menuMainVisible(false)
+        }
+
         /**
          * 메인메뉴의 공지사항 DB 불러오기
          * */
-        api.notice_load(
-            1       //type 0 = 일반 포스팅, type 1 = 공지 포스팅
-        ).enqueue(object : Callback<List<Notice>> {
+        //type 0 = 일반 포스팅, type 1 = 공지 포스팅
+        api.notice_load(1).enqueue(
+            object : Callback<List<Notice>> {
             override fun onResponse(
                 call: Call<List<Notice>>,
                 response: Response<List<Notice>>
@@ -67,12 +88,13 @@ class MenuActivity : AppCompatActivity() {
                 //공지사항의 개수만큼 호출, 연결
                 for (i in response.body()!!) {
                     val contacts = (
-                            AnnoContacts(
+                            Notice(
                                 i.getNoticeKey(),
                                 i.getNoticeTitle(),
                                 i.getNoticeWriter(),
                                 i.getNoticeDate(),
-                                i.getNoticeContent()
+                                i.getNoticeContent(),
+                                i.getNoticeAvailable()
                             )
                             )
                     annoContactslist.add(contacts)
@@ -84,25 +106,29 @@ class MenuActivity : AppCompatActivity() {
 
         })
 
-        api.map_list(1).enqueue(object : Callback<List<MapModel>> {
-            override fun onResponse(call: Call<List<MapModel>>, response: Response<List<MapModel>>) {
-                for (i in response.body()!!) {
-                    val contacts = (
-                            MapModel(
-                                i.getMapID(),
-                                i.getMapHits(),
-                                i.getMapRecommend()
-                            )
-                            )
-                    sugContactslist.add(contacts)
-                    sugAdapter.notifyDataSetChanged()
+        api.map_list(1).enqueue(
+            object : Callback<List<MapModel>> {
+                override fun onResponse(
+                    call: Call<List<MapModel>>,
+                    response: Response<List<MapModel>>
+                ) {
+                    for (i in response.body()!!) {
+                        val contacts = (
+                                MapModel(
+                                    i.getMapID(),
+                                    i.getMapHits(),
+                                    i.getMapRecommend()
+                                )
+                                )
+                        sugContactslist.add(contacts)
+                        sugAdapter.notifyDataSetChanged()
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<List<MapModel>>, t: Throwable) {
-            }
+                override fun onFailure(call: Call<List<MapModel>>, t: Throwable) {
+                }
 
-        })
+            })
 
         /**
          * 프래그먼트 하단바
@@ -131,7 +157,10 @@ class MenuActivity : AppCompatActivity() {
                         if (userID == "비회원")
                             failDialog()
                         else {
-                            transaction.replace(R.id.frameLayout, mindMapFragment.newInstance(userID, userID))
+                            transaction.replace(
+                                R.id.frameLayout,
+                                mindMapFragment.newInstance(userID, userID)
+                            )
                                 .commitAllowingStateLoss()
                             menuMainVisible(false)
                         }

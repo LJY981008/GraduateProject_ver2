@@ -29,7 +29,7 @@ import retrofit2.Response
  */
 class InfoListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
-    private var contactsList: MutableList<Contacts> = mutableListOf()
+    private var contactsList: MutableList<Bbs> = mutableListOf()
     private val adapter = ContactsListAdapter(contactsList)
 
     private lateinit var getResult: ActivityResultLauncher<Intent>
@@ -128,16 +128,17 @@ class InfoListFragment : Fragment() {
             0   //type 0 = 일반 포스팅, type 1 = 공지 포스팅
         ).enqueue(object : Callback<List<Bbs>> {
             override fun onResponse(call: Call<List<Bbs>>, response: Response<List<Bbs>>) {
-                val list = mutableListOf<Contacts>()
+                val list = mutableListOf<Bbs>()
                 //아이템 개수만큼 호출, 연결
                 for (i in response.body()!!) {
                     val contacts = (
-                            Contacts(
+                            Bbs(
                                 i.getBbsKey(),
                                 i.getBbsTitle(),
                                 i.getBbsWriter(),
                                 i.getBbsDate(),
-                                i.getBbsContent()
+                                i.getBbsContent(),
+                                i.getBbsAvailable()
                             )
                             )
                     list.add(contacts)

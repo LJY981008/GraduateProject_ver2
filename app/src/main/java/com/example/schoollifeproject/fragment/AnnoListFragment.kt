@@ -24,7 +24,7 @@ import retrofit2.Response
  */
 class AnnoListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
-    private var annoList: MutableList<AnnoContacts> = mutableListOf()
+    private var annoList: MutableList<Notice> = mutableListOf()
     private val adapter = AnnoListAdapter(annoList)
 
     private lateinit var getResult: ActivityResultLauncher<Intent>
@@ -58,7 +58,37 @@ class AnnoListFragment : Fragment() {
         userID = arguments?.getString("ID").toString()
 
         //게시글 목록 호출
-        posting()
+        api.notice_load(
+            1       //type 0 = 일반 포스팅, type 1 = 공지 포스팅
+        ).enqueue(object : Callback<List<Notice>> {
+            override fun onResponse(
+                call: Call<List<Notice>>,
+                response: Response<List<Notice>>
+            ) {
+                val list = mutableListOf<Notice>()
+                //공지사항의 개수만큼 호출, 연결
+                for (i in response.body()!!) {
+                    val contacts = (
+                            Notice(
+                                i.getNoticeKey(),
+                                i.getNoticeTitle(),
+                                i.getNoticeWriter(),
+                                i.getNoticeDate(),
+                                i.getNoticeContent(),
+                                i.getNoticeAvailable()
+                            )
+                            )
+                    list.add(contacts)
+                    countKey++
+                }
+                annoList.clear()
+                annoList.addAll(list)
+                adapter.notifyDataSetChanged()
+            }
+
+            override fun onFailure(call: Call<List<Notice>>, t: Throwable) {}
+
+        })
 
         binding.annoView.setOnClickListener {
             val annoListFragment = AnnoListFragment()
@@ -94,31 +124,6 @@ class AnnoListFragment : Fragment() {
      * RecyclerView에 포스팅할 아이템들 DB에서 호출
      * */
     private fun posting() {
-        api.notice_load(
-            1       //type 0 = 일반 포스팅, type 1 = 공지 포스팅
-        ).enqueue(object : Callback<List<Notice>> {
-            override fun onResponse(
-                call: Call<List<Notice>>,
-                response: Response<List<Notice>>
-            ) {
-                //공지사항의 개수만큼 호출, 연결
-                for (i in response.body()!!) {
-                    val contacts = (
-                            AnnoContacts(
-                                i.getNoticeKey(),
-                                i.getNoticeTitle(),
-                                i.getNoticeWriter(),
-                                i.getNoticeDate(),
-                                i.getNoticeContent()
-                            )
-                            )
-                    annoList.add(contacts)
-                    adapter.notifyDataSetChanged()
-                }
-            }
 
-            override fun onFailure(call: Call<List<Notice>>, t: Throwable) {}
-
-        })
     }
 }
