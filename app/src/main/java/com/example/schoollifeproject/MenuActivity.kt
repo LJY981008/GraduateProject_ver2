@@ -1,16 +1,18 @@
 package com.example.schoollifeproject
 
 import android.content.DialogInterface
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.adapter.AnnoListAdapter
 import com.example.schoollifeproject.adapter.SugListAdapter
 import com.example.schoollifeproject.databinding.ActivityMenuBinding
-import com.example.schoollifeproject.fragment.ListFragment
-import com.example.schoollifeproject.fragment.MindMapFragment
+import com.example.schoollifeproject.fragment.FreeListFragment
 import com.example.schoollifeproject.fragment.MapListFragment
+import com.example.schoollifeproject.fragment.MindMapFragment
 import com.example.schoollifeproject.model.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -18,11 +20,11 @@ import retrofit2.Response
 
 /**
  * 로그인 후 메뉴 Activity
- * */
-
+ * 작성자 : 이준영, 박동훈
+ */
 class MenuActivity : AppCompatActivity() {
     private val annoContactslist: MutableList<AnnoContacts> = mutableListOf()
-    private val sugContactslist: MutableList<MapContacts> = mutableListOf()
+    private val sugContactslist: MutableList<MapModel> = mutableListOf()
 
     private val annoAdapter = AnnoListAdapter(annoContactslist)
     private val sugAdapter = SugListAdapter(sugContactslist)
@@ -39,6 +41,12 @@ class MenuActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val api = APIS.create()
+
+        val dividerItemDecoration = DividerItemDecoration(applicationContext, RecyclerView.VERTICAL)
+        binding.annoRecycler.addItemDecoration(dividerItemDecoration)
+        binding.sugRecycler.addItemDecoration(dividerItemDecoration)
+        binding.freeRecycler.addItemDecoration(dividerItemDecoration)
+        binding.infoRecycler.addItemDecoration(dividerItemDecoration)
 
         binding.annoRecycler.adapter = annoAdapter
         binding.sugRecycler.adapter = sugAdapter
@@ -80,8 +88,10 @@ class MenuActivity : AppCompatActivity() {
             override fun onResponse(call: Call<List<MapModel>>, response: Response<List<MapModel>>) {
                 for (i in response.body()!!) {
                     val contacts = (
-                            MapContacts(
-                                i.getMapID()
+                            MapModel(
+                                i.getMapID(),
+                                i.getMapHits(),
+                                i.getMapRecommend()
                             )
                             )
                     sugContactslist.add(contacts)
@@ -93,6 +103,7 @@ class MenuActivity : AppCompatActivity() {
             }
 
         })
+
         /**
          * 프래그먼트 하단바
          * 메뉴1 - 메인화면
@@ -102,7 +113,7 @@ class MenuActivity : AppCompatActivity() {
          * */
         binding.bottomNavigationView.run {
             val mindMapFragment = MindMapFragment()
-            val listFragment = ListFragment()
+            val freeListFragment = FreeListFragment()
             val mapListFragment = MapListFragment()
 
             setOnItemSelectedListener { item ->
@@ -127,7 +138,7 @@ class MenuActivity : AppCompatActivity() {
                         true
                     }
                     R.id.mainMenu3 -> {
-                        transaction.replace(R.id.frameLayout, listFragment.newInstance(userID))
+                        transaction.replace(R.id.frameLayout, freeListFragment.newInstance(userID))
                             .commitAllowingStateLoss()
                         menuMainVisible(false)
                         true

@@ -4,14 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.databinding.ContactsSugBinding
-import com.example.schoollifeproject.model.MapContacts
-import com.example.schoollifeproject.model.SugContacts
+import com.example.schoollifeproject.model.MapModel
 
 /**
  * 메인메뉴 추천맵 RecyclerView Adapter
  * */
 
-class SugListAdapter(private val itemList: List<MapContacts>) :
+class SugListAdapter(private val itemList: List<MapModel>) :
     RecyclerView.Adapter<SugListAdapter.SugViewHolder>() {
     override fun getItemCount(): Int {
         return itemList.size
@@ -34,9 +33,8 @@ class SugListAdapter(private val itemList: List<MapContacts>) :
     class SugViewHolder(private val binding: ContactsSugBinding) :
         RecyclerView.ViewHolder(binding.root) {
         //추천맵에 등록될 text, listener
-        fun bind(item: MapContacts) {
-            binding.title.text = "${item.mapID}님의 로드맵"
-            //추천맵 내용 확인 클릭 리스너(미완)
+        fun bind(item: MapModel) {
+            binding.title.text = "${item.getMapID()}님의 로드맵"
         }
     }
 }

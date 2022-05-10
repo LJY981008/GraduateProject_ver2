@@ -5,9 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.databinding.ContactsListItemBinding
-import com.example.schoollifeproject.model.MapContacts
+import com.example.schoollifeproject.model.MapModel
 
-class MapListAdapter(private val itemList: MutableList<MapContacts>) :
+class MapListAdapter(private val itemList: MutableList<MapModel>) :
     RecyclerView.Adapter<MapListAdapter.ContactsMapViewHolder>() {
 
     private val TAG = this.javaClass.toString()
@@ -34,7 +34,7 @@ class MapListAdapter(private val itemList: MutableList<MapContacts>) :
         }
 
         holder.itemView.setOnClickListener {
-            mapListener.onMapClick(holder.itemView, item.mapID)
+            mapListener.onMapClick(holder.itemView, item.getMapID())
         }
     }
 
@@ -45,8 +45,8 @@ class MapListAdapter(private val itemList: MutableList<MapContacts>) :
     class ContactsMapViewHolder(private val binding: ContactsListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         //게시판에 등록될 text, listener
-        fun bind(item: MapContacts) {
-            binding.title.text = "${item.mapID} 님의 로드맵"
+        fun bind(item: MapModel) {
+            binding.title.text = "${item.getMapID()} 님의 로드맵"
         }
     }
 

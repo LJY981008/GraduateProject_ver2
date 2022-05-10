@@ -2,8 +2,8 @@ package com.example.schoollifeproject.model
 
 /**
  * 서버연결을 위한 PHP path object
- * */
-
+ * 작성자 : 이준영, 박동훈
+ */
 object MyApp {
     const val TAG: String = "로그"
 

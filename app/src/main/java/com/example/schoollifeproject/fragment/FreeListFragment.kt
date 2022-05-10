@@ -9,10 +9,11 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.WriteNoticeActivity
 import com.example.schoollifeproject.adapter.ContactsListAdapter
-import com.example.schoollifeproject.databinding.FragmentListBinding
+import com.example.schoollifeproject.databinding.FragmentFreeListBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.Bbs
 import com.example.schoollifeproject.model.Contacts
@@ -21,24 +22,25 @@ import retrofit2.Callback
 import retrofit2.Response
 
 /**
- * 게시판 화면 전환 Fragment
+ * 자유게시판 Fragment
+ * 작성자 : 이준영, 박동훈
  */
-class ListFragment : Fragment() {
+class FreeListFragment : Fragment() {
     private var contactsList: MutableList<Contacts> = mutableListOf()
     private val adapter = ContactsListAdapter(contactsList)
 
     private lateinit var getResult: ActivityResultLauncher<Intent>
-    private lateinit var binding: FragmentListBinding
+    private lateinit var binding: FragmentFreeListBinding
 
     private val api = APIS.create()
     private lateinit var userID: String
     private var countKey: Int = 0
 
-    fun newInstance(userID: String): ListFragment {
+    fun newInstance(userID: String): FreeListFragment {
         val args = Bundle()
         args.putString("userID", userID)
 
-        val listFragment = ListFragment()
+        val listFragment = FreeListFragment()
         listFragment.arguments = args
 
         return listFragment
@@ -48,7 +50,10 @@ class ListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentListBinding.inflate(inflater, container, false)
+        binding = FragmentFreeListBinding.inflate(inflater, container, false)
+
+        val dividerItemDecoration = DividerItemDecoration(context, RecyclerView.VERTICAL)
+        binding.recyclerView.addItemDecoration(dividerItemDecoration)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {})
 
@@ -56,7 +61,6 @@ class ListFragment : Fragment() {
 
         //게시글 목록 호출
         posting()
-
 
         val addNote = binding.addNote
 
@@ -108,16 +112,15 @@ class ListFragment : Fragment() {
                             )
                     list.add(contacts)
                     countKey++
-
                 }
                 contactsList.clear()
                 contactsList.addAll(list)
                 adapter.notifyDataSetChanged()
-
             }
 
-            override fun onFailure(call: Call<List<Bbs>>, t: Throwable) {}
+            override fun onFailure(call: Call<List<Bbs>>, t: Throwable) {
+
+            }
         })
     }
-
 }

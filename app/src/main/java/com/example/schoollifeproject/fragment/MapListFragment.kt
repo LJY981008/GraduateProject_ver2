@@ -6,24 +6,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.adapter.MapListAdapter
 import com.example.schoollifeproject.databinding.FragmentMapListBinding
 import com.example.schoollifeproject.model.APIS
-import com.example.schoollifeproject.model.MapContacts
 import com.example.schoollifeproject.model.MapModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 /**
- * 맵 게시판 Fragment
- * */
+ * 로드맵 추천 게시판 Fragment
+ * 작성자 : 이준영, 박동훈
+ */
 class MapListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
-    private var contactsList: MutableList<MapContacts> = mutableListOf()
-    private val adapter = MapListAdapter(contactsList)
+    private var mapList: MutableList<MapModel> = mutableListOf()
+    private val adapter = MapListAdapter(mapList)
     private lateinit var binding: FragmentMapListBinding
     private lateinit var userID: String
     val api = APIS.create()
@@ -46,6 +47,9 @@ class MapListFragment : Fragment() {
         userID = arguments?.getString("userID").toString()
 
         binding = FragmentMapListBinding.inflate(inflater, container, false)
+
+        val dividerItemDecoration = DividerItemDecoration(context, RecyclerView.VERTICAL)
+        binding.recyclerView.addItemDecoration(dividerItemDecoration)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {})
 
@@ -57,18 +61,20 @@ class MapListFragment : Fragment() {
                 call: Call<List<MapModel>>,
                 response: Response<List<MapModel>>
             ) {
-                val list = mutableListOf<MapContacts>()
+                val list = mutableListOf<MapModel>()
                 for (i in response.body()!!) {
                     val contacts = (
-                            MapContacts(
-                                i.getMapID()
+                            MapModel(
+                                i.getMapID(),
+                                i.getMapHits(),
+                                i.getMapRecommend()
                             )
                             )
                     list.add(contacts)
-                    contactsList.add(contacts)
+                    mapList.add(contacts)
                 }
-                contactsList.clear()
-                contactsList.addAll(list)
+                mapList.clear()
+                mapList.addAll(list)
                 adapter.notifyDataSetChanged()
             }
 

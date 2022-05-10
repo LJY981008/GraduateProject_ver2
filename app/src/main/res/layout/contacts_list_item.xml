@@ -1,26 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
         android:id="@+id/rootView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#FFFFFF"
         android:orientation="vertical"
-        android:background="@drawable/bg_post"
-        android:padding="50dp">
+        android:padding="10sp">
+
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/writer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_width="120sp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/title"
+            android:layout_alignParentLeft="true"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_width="120sp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/title"
+            android:layout_toEndOf="@+id/writer"
+            android:textSize="16sp" />
 
-    </LinearLayout>
+    </RelativeLayout>
 </layout>

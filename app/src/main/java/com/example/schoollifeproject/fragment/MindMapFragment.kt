@@ -50,8 +50,13 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.*
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.RecyclerView.VERTICAL
 
-
+/**
+ * 로드맵 Fragment
+ * 작성자 : 박동훈
+ */
 class MindMapFragment : Fragment() {
     private val TAG = this.javaClass.toString()
     private val api = APIS.create()
@@ -414,7 +419,7 @@ class MindMapFragment : Fragment() {
                     }
                     fileList.clear()
                     fileList.addAll(list)
-                    fileAdapter.notifyDataSetChanged()
+                    fileAdapter.notifyItemRangeChanged(0, response.body()!!.size)
                 }
 
                 override fun onFailure(call: Call<List<FileModel>>, t: Throwable) {
@@ -446,6 +451,9 @@ class MindMapFragment : Fragment() {
         val mLayoutManager: RecyclerView.LayoutManager =
             LinearLayoutManager(mapContext)
         fileListView.setLayoutManager(mLayoutManager)
+
+        val dividerItemDecoration = DividerItemDecoration(mapContext, VERTICAL)
+        fileListView.addItemDecoration(dividerItemDecoration)
 
         fileListView.adapter = fileAdapter
 
