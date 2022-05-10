@@ -9,14 +9,12 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 
-
 /**
  * 서버 DB 연결 Interface
  * */
 
 interface APIS {
-    @FormUrlEncoded
-    @POST(MyApp.Select_url)
+
     @Headers(
         "accept: application/json",
         "content-type: application/x-www-form-urlencoded; charset=utf-8"
@@ -40,21 +38,21 @@ interface APIS {
 
     //공지사항 호출
     @FormUrlEncoded
-    @POST(MyApp.notice_key_search_url)
+    @POST(MyApp.note_load_url)
     fun notice_load(
         @Field("type") type: Int
     ): Call<List<Notice>>
 
     //게시글 호출
     @FormUrlEncoded
-    @POST(MyApp.notice_key_search_url)
+    @POST(MyApp.note_load_url)
     fun bbs_load(
         @Field("type") type: Int
     ): Call<List<Bbs>>
 
     //글작성
     @FormUrlEncoded
-    @POST(MyApp.notice_save_url)
+    @POST(MyApp.note_write_url)
     fun notice_save(
         @Field("noticeTitle") noticeTitle: String,
         @Field("userID") userID: String,
@@ -139,7 +137,7 @@ interface APIS {
 
     companion object { // static 처럼 공유객체로 사용가능함. 모든 인스턴스가 공유하는 객체로서 동작함.
 
-        private const val BASE_URL = "https://hjk709914.cafe24.com/"
+        private const val BASE_URL = "https://hjk709914.cafe24.com"
         fun create(): APIS {
             val gson: Gson = GsonBuilder().setLenient().create();
             return Retrofit.Builder()
