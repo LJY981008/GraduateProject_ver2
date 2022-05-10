@@ -23,6 +23,7 @@ class Bbs(
     @SerializedName("bbsDate")
     private var bbsDate: String,
     @Expose
+
     @SerializedName("bbsContent")
     private var bbsContent: String,
 

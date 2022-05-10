@@ -76,18 +76,17 @@ class MainActivity : AppCompatActivity() {
                     call: Call<PostModel>,
                     response: Response<PostModel>
                 ) {
-                    if (!response.body().toString().isEmpty()) {
-                        //해당 아이디가 로그인상태인지 체크 후 로그인
-                        when {
-                            response.body()?.error.toString() == "error" -> failDialog("isLogin")
-                            pw == response.body()?.userPassword.toString() -> {
-                                intent.putExtra("ID", response.body()?.userID.toString())
-                                intent.putExtra("name", response.body()?.userName.toString())
-                                startActivity(intent)
-                            }
-                            else -> {
-                                failDialog("fail")
-                            }
+                    Log.d("여기: ","${response.body()?.error}")
+                    //해당 아이디가 로그인상태인지 체크 후 로그인
+                    when {
+                        response.body()?.error == "error" -> failDialog("isLogin")
+                        pw == response.body()?.userPassword -> {
+                            intent.putExtra("ID", response.body()?.userID)
+                            intent.putExtra("name", response.body()?.userName)
+                            startActivity(intent)
+                        }
+                        else -> {
+                            failDialog("failed")
                         }
                     }
                 }

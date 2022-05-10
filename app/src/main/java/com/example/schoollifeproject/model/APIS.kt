@@ -21,8 +21,9 @@ interface APIS {
         "accept: application/json",
         "content-type: application/x-www-form-urlencoded; charset=utf-8"
     )
-
     //로그인 정보 호출
+    @FormUrlEncoded
+    @POST(MyApp.Select_url)
     fun login_users(
         @Field("userID") userID: String
     ): Call<PostModel>
