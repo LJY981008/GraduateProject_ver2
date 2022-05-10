@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.WriteNoticeActivity
 import com.example.schoollifeproject.adapter.ContactsListAdapter
-import com.example.schoollifeproject.databinding.FragmentFreeListBinding
+import com.example.schoollifeproject.databinding.FragmentInfoListBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.Bbs
 import com.example.schoollifeproject.model.Contacts
@@ -24,26 +24,26 @@ import retrofit2.Callback
 import retrofit2.Response
 
 /**
- * 자유게시판 Fragment
- * 작성자 : 이준영, 박동훈
+ * 공부게시판 Fragment
+ * 작성자 : 박동훈
  */
-class FreeListFragment : Fragment() {
+class InfoListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
     private var contactsList: MutableList<Contacts> = mutableListOf()
     private val adapter = ContactsListAdapter(contactsList)
 
     private lateinit var getResult: ActivityResultLauncher<Intent>
-    private lateinit var binding: FragmentFreeListBinding
+    private lateinit var binding: FragmentInfoListBinding
 
     private val api = APIS.create()
     private lateinit var userID: String
     private var countKey: Int = 0
 
-    fun newInstance(userID: String): FreeListFragment {
+    fun newInstance(userID: String): InfoListFragment {
         val args = Bundle()
         args.putString("userID", userID)
 
-        val listFragment = FreeListFragment()
+        val listFragment = InfoListFragment()
         listFragment.arguments = args
 
         return listFragment
@@ -53,7 +53,7 @@ class FreeListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentFreeListBinding.inflate(inflater, container, false)
+        binding = FragmentInfoListBinding.inflate(inflater, container, false)
 
         val dividerItemDecoration = DividerItemDecoration(context, RecyclerView.VERTICAL)
         binding.recyclerView.addItemDecoration(dividerItemDecoration)
@@ -100,11 +100,11 @@ class FreeListFragment : Fragment() {
         }
 
         binding.freeView.setOnClickListener {
-            val freeListFragment = FreeListFragment()
+            val infoListFragment = InfoListFragment()
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             Log.d("$TAG", "userIDSend: ${userID}")
 
-            transaction?.replace(R.id.frameLayout, freeListFragment.newInstance(userID))
+            transaction?.replace(R.id.frameLayout, infoListFragment.newInstance(userID))
                 ?.commitAllowingStateLoss()
         }
 

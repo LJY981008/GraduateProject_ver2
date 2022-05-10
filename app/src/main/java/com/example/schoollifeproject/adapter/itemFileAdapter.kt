@@ -52,6 +52,7 @@ class ItemFileAdapter(private val itemList: MutableList<FileModel>) :
             binding.fileNameText.text = item.getFileName()
         }
     }
+
     interface OnFileClickListener {
         fun onFileClick(item: View, fileModel: FileModel)
     }

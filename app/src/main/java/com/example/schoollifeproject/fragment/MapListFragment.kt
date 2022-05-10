@@ -18,7 +18,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 /**
- * 로드맵 추천 게시판 Fragment
+ * 추천 로드맵 게시판 Fragment
  * 작성자 : 이준영, 박동훈
  */
 class MapListFragment : Fragment() {
@@ -89,6 +89,33 @@ class MapListFragment : Fragment() {
             Log.d("$TAG", "userIDSend: ${userID}, ${mapID}")
 
             transaction?.replace(R.id.frameLayout, mindMapFragment.newInstance(userID, mapID))
+                ?.commitAllowingStateLoss()
+        }
+
+        binding.annoView.setOnClickListener {
+            val annoListFragment = AnnoListFragment()
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            Log.d("$TAG", "userIDSend: ${userID}")
+
+            transaction?.replace(R.id.frameLayout, annoListFragment.newInstance(userID))
+                ?.commitAllowingStateLoss()
+        }
+
+        binding.freeView.setOnClickListener {
+            val freeListFragment = FreeListFragment()
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            Log.d("$TAG", "userIDSend: ${userID}")
+
+            transaction?.replace(R.id.frameLayout, freeListFragment.newInstance(userID))
+                ?.commitAllowingStateLoss()
+        }
+
+        binding.sugView.setOnClickListener {
+            val mapListFragment = MapListFragment()
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            Log.d("$TAG", "userIDSend: ${userID}")
+
+            transaction?.replace(R.id.frameLayout, mapListFragment.newInstance(userID))
                 ?.commitAllowingStateLoss()
         }
 

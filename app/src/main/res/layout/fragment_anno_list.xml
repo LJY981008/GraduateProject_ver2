@@ -24,6 +24,7 @@
                 android:paddingTop="14sp"
                 android:paddingBottom="14sp"
                 android:text="공지사항"
+                android:textColor="@color/uninote"
                 android:textSize="20sp" />
 
             <TextView
@@ -46,7 +47,6 @@
                 android:paddingTop="14sp"
                 android:paddingBottom="14sp"
                 android:text="추천로드맵"
-                android:textColor="@color/uninote"
                 android:textSize="20sp" />
 
             <TextView

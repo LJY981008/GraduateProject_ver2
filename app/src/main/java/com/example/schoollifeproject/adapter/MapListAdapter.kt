@@ -46,7 +46,7 @@ class MapListAdapter(private val itemList: MutableList<MapModel>) :
         RecyclerView.ViewHolder(binding.root) {
         //게시판에 등록될 text, listener
         fun bind(item: MapModel) {
-            binding.title.text = "${item.getMapID()} 님의 로드맵"
+            binding.title.text = "${item.getMapID()}님의 로드맵"
         }
     }
 

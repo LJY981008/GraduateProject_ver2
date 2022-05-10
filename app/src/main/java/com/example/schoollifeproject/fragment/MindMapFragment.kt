@@ -21,10 +21,11 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.adapter.ItemAdapter
 import com.example.schoollifeproject.adapter.ItemFileAdapter
@@ -50,8 +51,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.*
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.RecyclerView.VERTICAL
 
 /**
  * 로드맵 Fragment
@@ -385,7 +384,6 @@ class MindMapFragment : Fragment() {
         editor: TreeViewEditor,
         mapEditable: Boolean
     ) {
-        // TODO : 파일 업로드 시 새로고침
         val fileList: MutableList<FileModel> = mutableListOf()
         val fileAdapter = ItemFileAdapter(fileList)
 
@@ -417,9 +415,13 @@ class MindMapFragment : Fragment() {
                                 )
                         list.add(contacts)
                     }
-                    fileList.clear()
                     fileList.addAll(list)
-                    fileAdapter.notifyItemRangeChanged(0, response.body()!!.size)
+
+                    Log.d(
+                        "$TAG",
+                        "item_file_load/filesize: ${fileList.size}"
+                    )
+                    fileAdapter.notifyDataSetChanged()
                 }
 
                 override fun onFailure(call: Call<List<FileModel>>, t: Throwable) {
@@ -604,8 +606,8 @@ class MindMapFragment : Fragment() {
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
-                        saveFileDB(fileNode, editor, adapter.mapEditable)
                     }
+                    saveFileDB(fileNode, editor, adapter.mapEditable)
                 }
             })
 

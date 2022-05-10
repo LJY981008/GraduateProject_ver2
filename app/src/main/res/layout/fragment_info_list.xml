@@ -46,7 +46,6 @@
                 android:paddingTop="14sp"
                 android:paddingBottom="14sp"
                 android:text="추천로드맵"
-                android:textColor="@color/uninote"
                 android:textSize="20sp" />
 
             <TextView
@@ -58,6 +57,7 @@
                 android:paddingTop="14sp"
                 android:paddingBottom="14sp"
                 android:text="공부게시판"
+                android:textColor="@color/uninote"
                 android:textSize="20sp" />
         </LinearLayout>
 
@@ -71,5 +71,12 @@
             app:layout_constraintVertical_bias="1.0"
             tools:layout_editor_absoluteX="0dp" />
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

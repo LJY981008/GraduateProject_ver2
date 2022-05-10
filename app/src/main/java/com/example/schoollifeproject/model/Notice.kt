@@ -28,7 +28,7 @@ class Notice(
 
     @Expose
     @SerializedName("noticeAvailable")
-    private var noticeAvailable: Int,
+    private var noticeAvailable: Int
 ) {
 
     fun getNoticeKey(): Int {

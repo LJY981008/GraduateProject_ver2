@@ -7,7 +7,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.model.AnnoContacts
 import com.example.schoollifeproject.databinding.ContactsAnnoBinding
-import com.example.schoollifeproject.noticeActivity
+import com.example.schoollifeproject.NoticeActivity
 
 /**
  * 메인메뉴 공지 RecyclerView Adapter
@@ -39,7 +39,7 @@ class AnnoListAdapter(private val itemList: List<AnnoContacts>) :
             binding.title.text = item.title
             //공지사항 내용 확인 클릭 리스너
             binding.rView.setOnClickListener {
-                val intent = Intent(itemView.context, noticeActivity::class.java).apply {
+                val intent = Intent(itemView.context, NoticeActivity::class.java).apply {
                     putExtra("key", item.key)
                     putExtra("title", item.title)
                     putExtra("writer", item.writer)

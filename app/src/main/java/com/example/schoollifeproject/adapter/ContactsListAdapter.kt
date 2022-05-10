@@ -7,7 +7,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.model.Contacts
 import com.example.schoollifeproject.databinding.ContactsListItemBinding
-import com.example.schoollifeproject.noticeActivity
+import com.example.schoollifeproject.NoticeActivity
 
 /**
  * 게시판 RecyclerView Adapter
@@ -42,7 +42,7 @@ class ContactsListAdapter(private val itemList: MutableList<Contacts>) :
             binding.date.text = item.date
             //게시글 내용확인 클릭리스너
             binding.rootView.setOnClickListener {
-                val intent = Intent(itemView.context, noticeActivity::class.java).apply {
+                val intent = Intent(itemView.context, NoticeActivity::class.java).apply {
                     putExtra("key", item.key)
                     putExtra("title", item.title)
                     putExtra("writer", item.writer)
