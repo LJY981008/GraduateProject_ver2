@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 /**
  * 공지사항을 JSON파일 타입으로 호출하기위한 Class
  * */
-class Notice(
+class NoticeListModel(
     @Expose
     @SerializedName("noticeID")
     private var noticeID: Int,

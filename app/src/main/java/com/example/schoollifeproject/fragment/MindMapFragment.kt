@@ -32,7 +32,7 @@ import com.example.schoollifeproject.adapter.ItemFileAdapter
 import com.example.schoollifeproject.databinding.FragmentMindMapBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.FileModel
-import com.example.schoollifeproject.model.ItemInfo
+import com.example.schoollifeproject.model.ItemModel
 import com.example.schoollifeproject.model.PostModel
 import com.gyso.treeview.TreeViewEditor
 import com.gyso.treeview.layout.CompactHorizonLeftAndRightLayoutManager
@@ -56,6 +56,7 @@ import java.io.*
  * 로드맵 Fragment
  * 작성자 : 박동훈
  */
+
 class MindMapFragment : Fragment() {
     private val TAG = this.javaClass.toString()
     private val api = APIS.create()
@@ -109,38 +110,12 @@ class MindMapFragment : Fragment() {
 
         itemMaxNum = 0
 
+        publicCheck()
         initWidgets()
         return binding.root
     }
 
-    private fun initWidgets() {
-        val treeLayoutManager = getTreeLayoutManager()
-
-        binding.mapView.adapter = adapter
-        binding.mapView.setTreeLayoutManager(treeLayoutManager)
-
-        /**
-         * 마인드맵 기본 구성
-         */
-        val root: NodeModel<ItemInfo> = NodeModel<ItemInfo>(ItemInfo("root", "root", null, null))
-        val mapView: TreeModel<ItemInfo> = TreeModel(root)
-
-        val grade1: NodeModel<ItemInfo> = NodeModel<ItemInfo>(ItemInfo("grade1", "1학년", null, null))
-        grade1.value.setPosition(true)
-        val grade2: NodeModel<ItemInfo> = NodeModel<ItemInfo>(ItemInfo("grade2", "2학년", null, null))
-        grade2.value.setPosition(true)
-        val grade3: NodeModel<ItemInfo> = NodeModel<ItemInfo>(ItemInfo("grade3", "3학년", null, null))
-        grade3.value.setPosition(false)
-        val grade4: NodeModel<ItemInfo> = NodeModel<ItemInfo>(ItemInfo("grade4", "4학년", null, null))
-        grade4.value.setPosition(false)
-        mapView.addNode(root, grade3, grade4, grade1, grade2)
-        adapter.treeModel = mapView
-
-        /**
-         * 마인드맵 추가/제거 관련 객체
-         */
-        val editor: TreeViewEditor = binding.mapView.editor
-
+    private fun publicCheck() {
         /**
          * mapID 체크해 DB에서 마인드맵 공개여부 확인
          */
@@ -148,7 +123,7 @@ class MindMapFragment : Fragment() {
             override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
                 Log.d(
                     "$TAG",
-                    "map_public: 리스폰 성공 ${response.body()?.error.toString()}"
+                    "map_public: 리스폰 성공 ${response.body()?.error.toString()}, ${adapter.mapEditable}"
                 )
                 if (response.body()?.error.toString() == "failed") {
                     mapPublic = true
@@ -157,6 +132,11 @@ class MindMapFragment : Fragment() {
                         mapPassword = response.body()?.mapPassword.toString()
                         binding.publicButton.setImageResource(R.drawable.ic_mindmap_private)
                         mapPublic = false
+
+                        if(!adapter.mapEditable) {
+                            binding.mapView.visibility = View.INVISIBLE
+                            publicSet(false)
+                        }
                     } else {
                         mapPublic = true
                     }
@@ -168,15 +148,46 @@ class MindMapFragment : Fragment() {
             }
         })
 
+    }
+
+
+    private fun initWidgets() {
+        val treeLayoutManager = getTreeLayoutManager()
+
+        binding.mapView.adapter = adapter
+        binding.mapView.setTreeLayoutManager(treeLayoutManager)
+
+        /**
+         * 마인드맵 기본 구성
+         */
+        val root: NodeModel<ItemModel> = NodeModel<ItemModel>(ItemModel("root", "root", null, null))
+        val mapView: TreeModel<ItemModel> = TreeModel(root)
+
+        val grade1: NodeModel<ItemModel> = NodeModel<ItemModel>(ItemModel("grade1", "1학년", null, null))
+        grade1.value.setPosition(true)
+        val grade2: NodeModel<ItemModel> = NodeModel<ItemModel>(ItemModel("grade2", "2학년", null, null))
+        grade2.value.setPosition(true)
+        val grade3: NodeModel<ItemModel> = NodeModel<ItemModel>(ItemModel("grade3", "3학년", null, null))
+        grade3.value.setPosition(false)
+        val grade4: NodeModel<ItemModel> = NodeModel<ItemModel>(ItemModel("grade4", "4학년", null, null))
+        grade4.value.setPosition(false)
+        mapView.addNode(root, grade3, grade4, grade1, grade2)
+        adapter.treeModel = mapView
+
+        /**
+         * 마인드맵 추가/제거 관련 객체
+         */
+        val editor: TreeViewEditor = binding.mapView.editor
+
         /**
          * mapID 체크해 DB에서 마인드맵 노드 불러오기
          */
-        api.item_load(mapID).enqueue(object : Callback<List<ItemInfo>> {
+        api.item_load(mapID).enqueue(object : Callback<List<ItemModel>> {
             override fun onResponse(
-                call: Call<List<ItemInfo>>,
-                response: Response<List<ItemInfo>>
+                call: Call<List<ItemModel>>,
+                response: Response<List<ItemModel>>
             ) {
-                val mapItems = HashMap<String, NodeModel<ItemInfo>>()
+                val mapItems = HashMap<String, NodeModel<ItemModel>>()
                 Log.d("${this.javaClass}", "item_load: 리스폰 성공")
                 if (response.body() != null) {
 
@@ -184,7 +195,7 @@ class MindMapFragment : Fragment() {
                         Log.d("$TAG", "item_load/itemID: ${i.getItemID()}")
                         i.setPosition(i.getItemID()[i.getItemID().length - 1].toString() == "L")
                         val last = if (i.getPosition()) "L" else "R"
-                        val item = NodeModel<ItemInfo>(i)
+                        val item = NodeModel<ItemModel>(i)
                         val childID = i.getItemID().split("_")[1].split("$last")[0]
                         mapItems[childID] = item
                     }
@@ -221,7 +232,7 @@ class MindMapFragment : Fragment() {
                 }
             }
 
-            override fun onFailure(call: Call<List<ItemInfo>>, t: Throwable) {
+            override fun onFailure(call: Call<List<ItemModel>>, t: Throwable) {
                 Log.d("$TAG", "item_load: 리스폰 실패 : $t")
             }
         })
@@ -261,7 +272,7 @@ class MindMapFragment : Fragment() {
     /**
      * DB에서 마인드맵 노드 삽입/삭제/변경
      */
-    private fun saveDB(item: NodeModel<ItemInfo>, view: View?, mode: String) {
+    private fun saveDB(item: NodeModel<ItemModel>, view: View?, mode: String) {
 
         val itemID = item.value.getItemID()
         val itemTop = "APP"
@@ -312,7 +323,7 @@ class MindMapFragment : Fragment() {
         }
     }
 
-    private fun setItem(node: NodeModel<ItemInfo>, editor: TreeViewEditor, b: Boolean) {
+    private fun setItem(node: NodeModel<ItemModel>, editor: TreeViewEditor, b: Boolean) {
 
         val setWindow: View =
             LayoutInflater.from(mapContext).inflate(R.layout.window_item_set, null)
@@ -380,7 +391,7 @@ class MindMapFragment : Fragment() {
     }
 
     private fun saveFileDB(
-        node: NodeModel<ItemInfo>,
+        node: NodeModel<ItemModel>,
         editor: TreeViewEditor,
         mapEditable: Boolean
     ) {
@@ -557,7 +568,7 @@ class MindMapFragment : Fragment() {
 
         editor.container.isAnimateAdd = true
 
-        lateinit var fileNode: NodeModel<ItemInfo>
+        lateinit var fileNode: NodeModel<ItemModel>
         lateinit var formFile: MultipartBody.Part
 
         /**
@@ -640,9 +651,9 @@ class MindMapFragment : Fragment() {
                                     if (visible) node.value.getItemID()
                                         .split("_")[1].split("$last")[0]
                                     else node.value.getItemID().split("_")[0]
-                                val item: NodeModel<ItemInfo> =
-                                    NodeModel<ItemInfo>(
-                                        ItemInfo(
+                                val item: NodeModel<ItemModel> =
+                                    NodeModel<ItemModel>(
+                                        ItemModel(
                                             "${parent}_item${itemMaxNum}$last",
                                             "ChildNode",
                                             itemMaxNum++,
@@ -760,78 +771,7 @@ class MindMapFragment : Fragment() {
          */
         binding.publicButton.setOnClickListener {
             // TODO : public 버튼 오류
-            val setWindow: View =
-                LayoutInflater.from(mapContext).inflate(R.layout.window_map_public_set, null)
-            val publicSetWindow = PopupWindow(
-                setWindow,
-                ((requireContext().resources.displayMetrics.widthPixels) * 0.6).toInt(),
-                WindowManager.LayoutParams.WRAP_CONTENT
-            )
-
-            publicSetWindow.isFocusable = true
-            publicSetWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-            publicSetWindow.update()
-            publicSetWindow.showAtLocation(setWindow, Gravity.CENTER, 0, 0)
-
-            publicSetWindow.isOutsideTouchable = true
-            publicSetWindow.setTouchInterceptor { _, motionEvent ->
-                if (motionEvent.action == MotionEvent.ACTION_OUTSIDE) {
-                    publicSetWindow.dismiss()
-                }
-                false
-            }
-
-            val setPublicText: TextView = setWindow.findViewById(R.id.passwordText)
-            val setPublicButton: Button = setWindow.findViewById(R.id.pwButton)
-            val setPassword: EditText = setWindow.findViewById(R.id.setPassword)
-
-            if (mapPublic) {
-                setPublicText.text = "패스워드를 입력하세요.(10자)"
-            } else {
-                setPassword.visibility = View.GONE
-                setPublicText.text = "공개로 전환하시겠습니까?"
-            }
-
-            fun savePublic(i: Int, password: String) {
-                api.map_update(userID, i, password).enqueue(object : Callback<PostModel> {
-                    override fun onResponse(
-                        call: Call<PostModel>,
-                        response: Response<PostModel>
-                    ) {
-                        Log.d("$TAG", "map_update: 리스폰 성공 ")
-                    }
-
-                    override fun onFailure(call: Call<PostModel>, t: Throwable) {
-                        Log.d("$TAG", "map_update: 리스폰 실패 : $t")
-                    }
-                })
-            }
-
-            setPublicButton.setOnClickListener {
-                val password = setPassword.text.toString()
-                if (mapPublic) {
-                    when {
-                        password != "" -> {
-                            mapPassword = password
-                            savePublic(0, password)
-                            mapPublic = false
-                            binding.publicButton.setImageResource(R.drawable.ic_mindmap_private)
-                            publicSetWindow.dismiss()
-                        }
-                        else -> {
-                            Toast.makeText(
-                                mapContext, "패스워드가 비어있습니다.", Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                } else {
-                    mapPassword = password
-                    savePublic(1, "")
-                    mapPublic = true
-                    binding.publicButton.setImageResource(R.drawable.ic_mindmap_public)
-                    publicSetWindow.dismiss()
-                }
-            }
+            publicSet(this.adapter.mapEditable)
         }
 
         //treeView control listener
@@ -871,8 +811,8 @@ class MindMapFragment : Fragment() {
                 if (draggingNode != null && hittingNode != null) {
                     Log.d(
                         "$TAG",
-                        "onDragMoveNodesHit: draging[${(draggingNode.value as ItemInfo).getItemID()}]" +
-                                "hittingNode[${(hittingNode.value as ItemInfo).getItemID()}]"
+                        "onDragMoveNodesHit: draging[${(draggingNode.value as ItemModel).getItemID()}]" +
+                                "hittingNode[${(hittingNode.value as ItemModel).getItemID()}]"
                     )
                 }
             }
@@ -886,13 +826,13 @@ class MindMapFragment : Fragment() {
                 if (draggingNode != null && hittingNode != null) {
                     Log.d(
                         "$TAG",
-                        "onDragMoveNodesEnd: draging[${(draggingNode.value as ItemInfo).getItemID()}]" +
-                                "hittingNode[${(hittingNode.value as ItemInfo).getItemID()}]"
+                        "onDragMoveNodesEnd: draging[${(draggingNode.value as ItemModel).getItemID()}]" +
+                                "hittingNode[${(hittingNode.value as ItemModel).getItemID()}]"
                     )
-                    val dNode = draggingNode.value as ItemInfo
-                    val hNode = hittingNode.value as ItemInfo
+                    val dNode = draggingNode.value as ItemModel
+                    val hNode = hittingNode.value as ItemModel
 
-                    val hLast = if ((hittingNode.value as ItemInfo).getPosition()) "L" else "R"
+                    val hLast = if ((hittingNode.value as ItemModel).getPosition()) "L" else "R"
                     targetItemID = dNode.getItemID()
                     val parent =
                         if (hNode.getItemID() != "root" && hNode.getItemID() != "grade1" && hNode.getItemID() != "grade2" &&
@@ -911,7 +851,7 @@ class MindMapFragment : Fragment() {
                     Log.d("$TAG", "dNodeItemID: ${dNode.getItemID()}")
                     if (draggingView != null) {
                         Log.d("$TAG", "dNodeItemID/targetItemID: ${targetItemID}")
-                        saveDB(draggingNode as NodeModel<ItemInfo>, draggingView, "update")
+                        saveDB(draggingNode as NodeModel<ItemModel>, draggingView, "update")
                     }
                 }
             }
@@ -959,6 +899,99 @@ class MindMapFragment : Fragment() {
                     Log.d("$TAG", "map_like: 리스폰 실패 : $t")
                 }
             })
+        }
+    }
+
+    private fun publicSet(b: Boolean) {
+        val setWindow: View =
+            LayoutInflater.from(mapContext).inflate(R.layout.window_map_public_set, null)
+        val publicSetWindow = PopupWindow(
+            setWindow,
+            ((requireContext().resources.displayMetrics.widthPixels) * 0.6).toInt(),
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
+
+        publicSetWindow.isFocusable = true
+        publicSetWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+
+        publicSetWindow.update()
+        publicSetWindow.showAtLocation(setWindow, Gravity.CENTER, 0, 0)
+
+        publicSetWindow.isOutsideTouchable = true
+        publicSetWindow.setTouchInterceptor { _, motionEvent ->
+            if (motionEvent.action == MotionEvent.ACTION_OUTSIDE) {
+                publicSetWindow.dismiss()
+            }
+            false
+        }
+
+        val setPublicText: TextView = setWindow.findViewById(R.id.passwordText)
+        val setPublicButton: Button = setWindow.findViewById(R.id.pwButton)
+        val setPassword: EditText = setWindow.findViewById(R.id.setPassword)
+
+        if (!mapPublic && b) {
+            setPassword.visibility = View.GONE
+            setPublicText.text = "공개로 전환하시겠습니까?"
+        } else {
+            setPublicText.text = "패스워드를 입력하세요.(10자)"
+        }
+
+        fun savePublic(i: Int, password: String) {
+            api.map_update(userID, i, password).enqueue(object : Callback<PostModel> {
+                override fun onResponse(
+                    call: Call<PostModel>,
+                    response: Response<PostModel>
+                ) {
+                    Log.d("$TAG", "map_update: 리스폰 성공 ${response.body()!!.error}")
+                }
+
+                override fun onFailure(call: Call<PostModel>, t: Throwable) {
+                    Log.d("$TAG", "map_update: 리스폰 실패 : $t")
+                }
+            })
+        }
+
+        setPublicButton.setOnClickListener {
+            val password = setPassword.text.toString()
+            if(b) {
+                if (mapPublic) {
+                    when {
+                        password != "" -> {
+                            mapPassword = password
+                            savePublic(0, password)
+                            mapPublic = false
+                            binding.publicButton.setImageResource(R.drawable.ic_mindmap_private)
+                            publicSetWindow.dismiss()
+                        }
+                        else -> {
+                            Toast.makeText(
+                                mapContext, "패스워드가 비어있습니다.", Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                } else {
+                    mapPassword = password
+                    savePublic(1, "")
+                    mapPublic = true
+                    binding.publicButton.setImageResource(R.drawable.ic_mindmap_public)
+                    publicSetWindow.dismiss()
+                }
+            } else {
+                when {
+                    password != mapPassword || password == "" -> {
+                        Toast.makeText(
+                            mapContext, "비밀번호가 틀렸습니다.", Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> {
+                        Toast.makeText(
+                            mapContext, "패스워드 입력을 완료했습니다.", Toast.LENGTH_SHORT
+                        ).show()
+                        binding.mapView.visibility = View.VISIBLE
+                        publicSetWindow.dismiss()
+                    }
+                }
+            }
         }
     }
 

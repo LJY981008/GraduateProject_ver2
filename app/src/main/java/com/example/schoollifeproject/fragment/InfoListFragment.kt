@@ -14,11 +14,10 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.WriteNoticeActivity
-import com.example.schoollifeproject.adapter.ContactsListAdapter
+import com.example.schoollifeproject.adapter.InfoFragmentAdapter
 import com.example.schoollifeproject.databinding.FragmentInfoListBinding
 import com.example.schoollifeproject.model.APIS
-import com.example.schoollifeproject.model.Bbs
-import com.example.schoollifeproject.model.Contacts
+import com.example.schoollifeproject.model.InfoListModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -29,8 +28,8 @@ import retrofit2.Response
  */
 class InfoListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
-    private var contactsList: MutableList<Bbs> = mutableListOf()
-    private val adapter = ContactsListAdapter(contactsList)
+    private var contactsList: MutableList<InfoListModel> = mutableListOf()
+    private val adapter = InfoFragmentAdapter(contactsList)
 
     private lateinit var getResult: ActivityResultLauncher<Intent>
     private lateinit var binding: FragmentInfoListBinding
@@ -100,11 +99,11 @@ class InfoListFragment : Fragment() {
         }
 
         binding.freeView.setOnClickListener {
-            val infoListFragment = InfoListFragment()
+            val freeListFragment = FreeListFragment()
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             Log.d("$TAG", "userIDSend: ${userID}")
 
-            transaction?.replace(R.id.frameLayout, infoListFragment.newInstance(userID))
+            transaction?.replace(R.id.frameLayout, freeListFragment.newInstance(userID))
                 ?.commitAllowingStateLoss()
         }
 
@@ -117,6 +116,15 @@ class InfoListFragment : Fragment() {
                 ?.commitAllowingStateLoss()
         }
 
+        binding.infoView.setOnClickListener {
+            val infoListFragment = InfoListFragment()
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            Log.d("$TAG", "userIDSend: $userID")
+
+            transaction?.replace(R.id.frameLayout, infoListFragment.newInstance(userID))
+                ?.commitAllowingStateLoss()
+        }
+
         return binding.root
     }
 
@@ -124,34 +132,31 @@ class InfoListFragment : Fragment() {
      * RecyclerView에 포스팅할 아이템들 DB에서 호출
      * */
     private fun posting() {
-        api.bbs_load(
-            0   //type 0 = 일반 포스팅, type 1 = 공지 포스팅
-        ).enqueue(object : Callback<List<Bbs>> {
-            override fun onResponse(call: Call<List<Bbs>>, response: Response<List<Bbs>>) {
-                val list = mutableListOf<Bbs>()
-                //아이템 개수만큼 호출, 연결
+        api.info_load(1).enqueue(object : Callback<List<InfoListModel>> {
+            override fun onResponse(
+                call: Call<List<InfoListModel>>,
+                response: Response<List<InfoListModel>>
+            ) {
                 for (i in response.body()!!) {
                     val contacts = (
-                            Bbs(
-                                i.getBbsKey(),
-                                i.getBbsTitle(),
-                                i.getBbsWriter(),
-                                i.getBbsDate(),
-                                i.getBbsContent(),
-                                i.getBbsAvailable()
+                            InfoListModel(
+                                i.getStudyKey(),
+                                i.getStudyTitle(),
+                                i.getStudyWriter(),
+                                i.getStudyDate(),
+                                i.getStudyContent(),
+                                i.getStudyAvailable()
                             )
                             )
-                    list.add(contacts)
-                    countKey++
+                    contactsList.add(contacts)
+                    adapter.notifyDataSetChanged()
                 }
-                contactsList.clear()
-                contactsList.addAll(list)
-                adapter.notifyDataSetChanged()
             }
 
-            override fun onFailure(call: Call<List<Bbs>>, t: Throwable) {
+            override fun onFailure(call: Call<List<InfoListModel>>, t: Throwable) {
 
             }
+
         })
     }
 }

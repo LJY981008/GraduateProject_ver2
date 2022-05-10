@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.R
-import com.example.schoollifeproject.adapter.AnnoListAdapter
+import com.example.schoollifeproject.adapter.AnnoFragmentAdapter
 import com.example.schoollifeproject.databinding.FragmentAnnoListBinding
 import com.example.schoollifeproject.model.*
 import retrofit2.Call
@@ -24,8 +24,8 @@ import retrofit2.Response
  */
 class AnnoListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
-    private var annoList: MutableList<Notice> = mutableListOf()
-    private val adapter = AnnoListAdapter(annoList)
+    private var annoList: MutableList<NoticeListModel> = mutableListOf()
+    private val adapter = AnnoFragmentAdapter(annoList)
 
     private lateinit var getResult: ActivityResultLauncher<Intent>
     private lateinit var binding: FragmentAnnoListBinding
@@ -60,16 +60,16 @@ class AnnoListFragment : Fragment() {
         //게시글 목록 호출
         api.notice_load(
             1       //type 0 = 일반 포스팅, type 1 = 공지 포스팅
-        ).enqueue(object : Callback<List<Notice>> {
+        ).enqueue(object : Callback<List<NoticeListModel>> {
             override fun onResponse(
-                call: Call<List<Notice>>,
-                response: Response<List<Notice>>
+                call: Call<List<NoticeListModel>>,
+                response: Response<List<NoticeListModel>>
             ) {
-                val list = mutableListOf<Notice>()
+                val list = mutableListOf<NoticeListModel>()
                 //공지사항의 개수만큼 호출, 연결
                 for (i in response.body()!!) {
                     val contacts = (
-                            Notice(
+                            NoticeListModel(
                                 i.getNoticeKey(),
                                 i.getNoticeTitle(),
                                 i.getNoticeWriter(),
@@ -86,7 +86,7 @@ class AnnoListFragment : Fragment() {
                 adapter.notifyDataSetChanged()
             }
 
-            override fun onFailure(call: Call<List<Notice>>, t: Throwable) {}
+            override fun onFailure(call: Call<List<NoticeListModel>>, t: Throwable) {}
 
         })
 
@@ -114,6 +114,15 @@ class AnnoListFragment : Fragment() {
             Log.d("$TAG", "userIDSend: ${userID}")
 
             transaction?.replace(R.id.frameLayout, mapListFragment.newInstance(userID))
+                ?.commitAllowingStateLoss()
+        }
+
+        binding.infoView.setOnClickListener {
+            val infoListFragment = InfoListFragment()
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            Log.d("$TAG", "userIDSend: $userID")
+
+            transaction?.replace(R.id.frameLayout, infoListFragment.newInstance(userID))
                 ?.commitAllowingStateLoss()
         }
 

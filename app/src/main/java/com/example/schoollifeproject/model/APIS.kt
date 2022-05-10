@@ -12,7 +12,6 @@ import retrofit2.http.*
 /**
  * 서버 DB 연결 Interface
  * */
-
 interface APIS {
 
     @Headers(
@@ -41,14 +40,21 @@ interface APIS {
     @POST(MyApp.notice_load_url)
     fun notice_load(
         @Field("dum") dum: Int
-    ): Call<List<Notice>>
+    ): Call<List<NoticeListModel>>
 
     //게시글 호출
     @FormUrlEncoded
     @POST(MyApp.bbs_load_url)
     fun bbs_load(
         @Field("dum") dum: Int
-    ): Call<List<Bbs>>
+    ): Call<List<FreeListModel>>
+
+    //공부게시판 호출
+    @FormUrlEncoded
+    @POST(MyApp.info_load_url)
+    fun info_load(
+        @Field("dum") dum: Int
+    ): Call<List<InfoListModel>>
 
     //글작성
     @FormUrlEncoded
@@ -80,7 +86,7 @@ interface APIS {
     @POST(MyApp.item_load_url)
     fun item_load(
         @Field("userID") userID: String
-    ): Call<List<ItemInfo>>
+    ): Call<List<ItemModel>>
 
     @FormUrlEncoded
     @POST(MyApp.map_public_url)
@@ -133,7 +139,7 @@ interface APIS {
     @POST(MyApp.map_list_url)
     fun map_list(
         @Field("dum") dum: Int
-    ): Call<List<MapModel>>
+    ): Call<List<MapListModel>>
 
     companion object { // static 처럼 공유객체로 사용가능함. 모든 인스턴스가 공유하는 객체로서 동작함.
 

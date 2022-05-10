@@ -14,10 +14,6 @@
         android:title="게시판" />
     <item
         android:id="@+id/mainMenu4"
-        android:icon="@drawable/ic_main_map_list"
-        android:title="추천" />
-    <item
-        android:id="@+id/mainMenu5"
         android:icon="@drawable/ic_main_settings"
         android:title="설정" />
 </menu>

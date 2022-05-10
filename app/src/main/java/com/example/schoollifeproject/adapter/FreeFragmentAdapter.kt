@@ -5,16 +5,16 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.example.schoollifeproject.model.Contacts
 import com.example.schoollifeproject.databinding.ContactsListItemBinding
 import com.example.schoollifeproject.NoticeActivity
-import com.example.schoollifeproject.model.Bbs
+import com.example.schoollifeproject.model.FreeListModel
 
 /**
- * 게시판 RecyclerView Adapter
+ * 자유 게시판 RecyclerView Adapter
+ * 작성자 : 이준영
  * */
-class ContactsListAdapter(private val itemList: MutableList<Bbs>) :
-    RecyclerView.Adapter<ContactsListAdapter.ContactsViewHolder>() {
+class FreeFragmentAdapter(private val itemList: MutableList<FreeListModel>) :
+    RecyclerView.Adapter<FreeFragmentAdapter.ContactsViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactsViewHolder {
         val binding =
@@ -37,7 +37,7 @@ class ContactsListAdapter(private val itemList: MutableList<Bbs>) :
     class ContactsViewHolder(private val binding: ContactsListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         //게시판에 등록될 text, listener
-        fun bind(item: Bbs) {
+        fun bind(item: FreeListModel) {
             binding.title.text = item.getBbsTitle()
             binding.writer.text = item.getBbsWriter()
             binding.date.text = item.getBbsDate()

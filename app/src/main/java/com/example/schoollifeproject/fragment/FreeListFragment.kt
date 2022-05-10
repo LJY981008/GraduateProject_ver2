@@ -1,27 +1,23 @@
 package com.example.schoollifeproject.fragment
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.WriteNoticeActivity
-import com.example.schoollifeproject.adapter.ContactsListAdapter
+import com.example.schoollifeproject.adapter.FreeFragmentAdapter
 import com.example.schoollifeproject.databinding.FragmentFreeListBinding
 import com.example.schoollifeproject.model.APIS
-import com.example.schoollifeproject.model.Bbs
-import com.example.schoollifeproject.model.Contacts
+import com.example.schoollifeproject.model.FreeListModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -32,8 +28,8 @@ import retrofit2.Response
  */
 class FreeListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
-    private var contactsList: MutableList<Bbs> = mutableListOf()
-    private val adapter = ContactsListAdapter(contactsList)
+    private var contactsList: MutableList<FreeListModel> = mutableListOf()
+    private val adapter = FreeFragmentAdapter(contactsList)
 
     private lateinit var getResult: ActivityResultLauncher<Intent>
     private lateinit var binding: FragmentFreeListBinding
@@ -121,6 +117,15 @@ class FreeListFragment : Fragment() {
                 ?.commitAllowingStateLoss()
         }
 
+        binding.infoView.setOnClickListener {
+            val infoListFragment = InfoListFragment()
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            Log.d("$TAG", "userIDSend: $userID")
+
+            transaction?.replace(R.id.frameLayout, infoListFragment.newInstance(userID))
+                ?.commitAllowingStateLoss()
+        }
+
         return binding.root
     }
 
@@ -130,14 +135,14 @@ class FreeListFragment : Fragment() {
     private fun posting() {
         api.bbs_load(
             0   //type 0 = 일반 포스팅, type 1 = 공지 포스팅
-        ).enqueue(object : Callback<List<Bbs>> {
-            override fun onResponse(call: Call<List<Bbs>>, response: Response<List<Bbs>>) {
-                val list = mutableListOf<Bbs>()
+        ).enqueue(object : Callback<List<FreeListModel>> {
+            override fun onResponse(call: Call<List<FreeListModel>>, response: Response<List<FreeListModel>>) {
+                val list = mutableListOf<FreeListModel>()
                 //아이템 개수만큼 호출, 연결
                 for (i in response.body()!!) {
                     Log.d("자게","${i.getBbsTitle()}")
                     val contacts = (
-                            Bbs(
+                            FreeListModel(
                                 i.getBbsKey(),
                                 i.getBbsTitle(),
                                 i.getBbsWriter(),
@@ -153,7 +158,7 @@ class FreeListFragment : Fragment() {
                 adapter.notifyDataSetChanged()
             }
 
-            override fun onFailure(call: Call<List<Bbs>>, t: Throwable) {
+            override fun onFailure(call: Call<List<FreeListModel>>, t: Throwable) {
                 Log.d("페일", "${t.message}")
             }
         })

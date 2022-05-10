@@ -5,23 +5,23 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.example.schoollifeproject.databinding.ContactsMainBoardBinding
+import com.example.schoollifeproject.databinding.ContactsListItemBinding
 import com.example.schoollifeproject.NoticeActivity
 import com.example.schoollifeproject.model.NoticeListModel
 
 /**
  * 메인메뉴 공지 RecyclerView Adapter
- * 작성자 : 이준영
+ * 작성자 : 박동훈
  * */
-class AnnoListAdapter(private val itemList: List<NoticeListModel>) :
-    RecyclerView.Adapter<AnnoListAdapter.AnnoViewHolder>() {
+class AnnoFragmentAdapter(private val itemList: List<NoticeListModel>) :
+    RecyclerView.Adapter<AnnoFragmentAdapter.AnnoViewHolder>() {
     override fun getItemCount(): Int {
         return itemList.size
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AnnoViewHolder {
         val binding =
-            ContactsMainBoardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            ContactsListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return AnnoViewHolder(binding)
     }
 
@@ -32,13 +32,13 @@ class AnnoListAdapter(private val itemList: List<NoticeListModel>) :
         }
     }
 
-    class AnnoViewHolder(private val binding: ContactsMainBoardBinding) :
+    class AnnoViewHolder(private val binding: ContactsListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         //메인 메뉴 공지사항에 등록될 text, listener
         fun bind(item: NoticeListModel) {
             binding.title.text = item.getNoticeTitle()
             //공지사항 내용 확인 클릭 리스너
-            binding.rView.setOnClickListener {
+            binding.rootView.setOnClickListener {
                 val intent = Intent(itemView.context, NoticeActivity::class.java).apply {
                     putExtra("key", item.getNoticeKey())
                     putExtra("title", item.getNoticeTitle())

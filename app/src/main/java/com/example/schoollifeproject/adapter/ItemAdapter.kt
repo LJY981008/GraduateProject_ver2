@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.databinding.ContactsMapNodeBinding
-import com.example.schoollifeproject.model.ItemInfo
+import com.example.schoollifeproject.model.ItemModel
 import com.gyso.treeview.adapter.DrawInfo
 import com.gyso.treeview.adapter.TreeViewAdapter
 import com.gyso.treeview.adapter.TreeViewHolder
@@ -18,31 +18,31 @@ import com.gyso.treeview.line.DashLine
 import com.gyso.treeview.model.NodeModel
 
 
-class ItemAdapter : TreeViewAdapter<ItemInfo>() {
+class ItemAdapter : TreeViewAdapter<ItemModel>() {
     private val dashLine = DashLine(Color.parseColor("#F06292"), 6)
     private lateinit var listener: OnItemClickListener
     private lateinit var longClickListener: OnItemLongClickListener
     private lateinit var doubleClicklistener: OnItemDoubleClickListener
     var mapEditable = true
-    fun setOnItemListener(listener: (View, NodeModel<ItemInfo>) -> Unit) {
+    fun setOnItemListener(listener: (View, NodeModel<ItemModel>) -> Unit) {
         this.listener = object : OnItemClickListener {
-            override fun onItemClick(item: View, node: NodeModel<ItemInfo>) {
+            override fun onItemClick(item: View, node: NodeModel<ItemModel>) {
                 listener(item, node)
             }
         }
     }
 
-    fun setOnItemLongListener(longClickListener: (View, NodeModel<ItemInfo>) -> Unit) {
+    fun setOnItemLongListener(longClickListener: (View, NodeModel<ItemModel>) -> Unit) {
         this.longClickListener = object : OnItemLongClickListener {
-            override fun onItemLongClick(item: View, node: NodeModel<ItemInfo>) {
+            override fun onItemLongClick(item: View, node: NodeModel<ItemModel>) {
                 longClickListener(item, node)
             }
         }
     }
 
-    fun setOnItemDoubleListener(doubleClickListener: (View, NodeModel<ItemInfo>, b: Boolean) -> Unit) {
+    fun setOnItemDoubleListener(doubleClickListener: (View, NodeModel<ItemModel>, b: Boolean) -> Unit) {
         this.doubleClicklistener = object : OnItemDoubleClickListener {
-            override fun onItemDoubleClick(item: View, node: NodeModel<ItemInfo>, b: Boolean) {
+            override fun onItemDoubleClick(item: View, node: NodeModel<ItemModel>, b: Boolean) {
                 doubleClickListener(item, node, b)
             }
         }
@@ -50,19 +50,19 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
 
     override fun onCreateViewHolder(
         viewGroup: ViewGroup,
-        node: NodeModel<ItemInfo>,
-    ): TreeViewHolder<ItemInfo> {
+        node: NodeModel<ItemModel>,
+    ): TreeViewHolder<ItemModel> {
         val nodeBinding: ContactsMapNodeBinding =
             ContactsMapNodeBinding.inflate(LayoutInflater.from(viewGroup.context), viewGroup, false)
         return TreeViewHolder(nodeBinding.root, node)
     }
 
-    override fun onBindViewHolder(holder: TreeViewHolder<ItemInfo>) {
+    override fun onBindViewHolder(holder: TreeViewHolder<ItemModel>) {
         val itemView = holder.view
-        val node: NodeModel<ItemInfo> = holder.node
+        val node: NodeModel<ItemModel> = holder.node
         val nodeBack = itemView.findViewById<ConstraintLayout>(R.id.item_back)
         val contentView = itemView.findViewById<TextView>(R.id.content)
-        val item: ItemInfo = node.value
+        val item: ItemModel = node.value
         var i = 0
         contentView.text = item.getContent()
 
@@ -99,15 +99,15 @@ class ItemAdapter : TreeViewAdapter<ItemInfo>() {
     }
 
     interface OnItemClickListener {
-        fun onItemClick(item: View, node: NodeModel<ItemInfo>)
+        fun onItemClick(item: View, node: NodeModel<ItemModel>)
     }
 
     interface OnItemLongClickListener {
-        fun onItemLongClick(item: View, node: NodeModel<ItemInfo>)
+        fun onItemLongClick(item: View, node: NodeModel<ItemModel>)
     }
 
     interface OnItemDoubleClickListener {
-        fun onItemDoubleClick(item: View, node: NodeModel<ItemInfo>, b: Boolean)
+        fun onItemDoubleClick(item: View, node: NodeModel<ItemModel>, b: Boolean)
     }
 }
 

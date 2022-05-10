@@ -4,19 +4,16 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.adapter.AnnoListAdapter
 import com.example.schoollifeproject.adapter.FreeListAdapter
-import com.example.schoollifeproject.adapter.SugListAdapter
+import com.example.schoollifeproject.adapter.InfoListAdapter
+import com.example.schoollifeproject.adapter.MapListAdapter
 import com.example.schoollifeproject.databinding.ActivityMenuBinding
-import com.example.schoollifeproject.fragment.AnnoListFragment
-import com.example.schoollifeproject.fragment.FreeListFragment
-import com.example.schoollifeproject.fragment.MapListFragment
-import com.example.schoollifeproject.fragment.MindMapFragment
+import com.example.schoollifeproject.fragment.*
 import com.example.schoollifeproject.model.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -26,14 +23,19 @@ import retrofit2.Response
  * 로그인 후 메뉴 Activity
  * 작성자 : 이준영, 박동훈
  */
-class MenuActivity : AppCompatActivity() {
-    private val annoContactslist: MutableList<Notice> = mutableListOf()
-    private val sugContactslist: MutableList<MapModel> = mutableListOf()
-    private val freeContactslist: MutableList<Bbs> = mutableListOf()
 
-    private val annoAdapter = AnnoListAdapter(annoContactslist)
-    private val sugAdapter = SugListAdapter(sugContactslist)
+// TODO : menu-자유게시판, contacts_main_board.xml, Fragment-공지사항/공부게시판, 디자인
+class MenuActivity : AppCompatActivity() {
+    private val TAG = this.javaClass.toString()
+    private val annoContactsList: MutableList<NoticeListModel> = mutableListOf()
+    private val mapContactsList: MutableList<MapListModel> = mutableListOf()
+    private val freeContactslist: MutableList<FreeListModel> = mutableListOf()
+    private val infoContactsList: MutableList<InfoListModel> = mutableListOf()
+
+    private val annoAdapter = AnnoListAdapter(annoContactsList)
+    private val mapAdapter = MapListAdapter(mapContactsList)
     private val freeAdapter = FreeListAdapter(freeContactslist)
+    private val infoAdapter = InfoListAdapter(infoContactsList)
 
     private lateinit var userID: String
     private lateinit var userName: String
@@ -55,8 +57,9 @@ class MenuActivity : AppCompatActivity() {
         binding.infoRecycler.addItemDecoration(dividerItemDecoration)
 
         binding.annoRecycler.adapter = annoAdapter
-        binding.sugRecycler.adapter = sugAdapter
+        binding.sugRecycler.adapter = mapAdapter
         binding.freeRecycler.adapter = freeAdapter
+        binding.infoRecycler.adapter = infoAdapter
 
         userID = intent.getStringExtra("ID").toString()
         userName = intent.getStringExtra("name").toString()
@@ -65,6 +68,8 @@ class MenuActivity : AppCompatActivity() {
         val annoText = binding.annoPost
         val sugText = binding.sugPost
         val freeText = binding.freePost
+        val infoText = binding.infoPost
+
         annoText.setOnClickListener {
             val transaction = supportFragmentManager.beginTransaction()
             val annoListFragment = AnnoListFragment()
@@ -86,43 +91,63 @@ class MenuActivity : AppCompatActivity() {
                 .commitAllowingStateLoss()
             menuMainVisible(false)
         }
+        infoText.setOnClickListener {
+            val transaction = supportFragmentManager.beginTransaction()
+            val infoListFragment = InfoListFragment()
+            transaction.replace(R.id.frameLayout, infoListFragment.newInstance(userID))
+                .commitAllowingStateLoss()
+            menuMainVisible(false)
+        }
+        mapAdapter.setOnMapItemListener { view, mapID ->
+            val mindMapFragment = MindMapFragment()
+            val transaction = supportFragmentManager.beginTransaction()
+            Log.d("$TAG", "userIDSend: ${userID}, $mapID")
+
+            menuMainVisible(false)
+
+            transaction?.replace(R.id.frameLayout, mindMapFragment.newInstance(userID, mapID))
+                ?.commitAllowingStateLoss()
+        }
 
         /**
          * 메인메뉴의 공지사항 DB 불러오기
          * */
         //type 0 = 일반 포스팅, type 1 = 공지 포스팅
         api.notice_load(1).enqueue(
-            object : Callback<List<Notice>> {
-            override fun onResponse(
-                call: Call<List<Notice>>,
-                response: Response<List<Notice>>
-            ) {
-                //공지사항의 개수만큼 호출, 연결
-                for (i in response.body()!!) {
-                    val contacts = (
-                            Notice(
-                                i.getNoticeKey(),
-                                i.getNoticeTitle(),
-                                i.getNoticeWriter(),
-                                i.getNoticeDate(),
-                                i.getNoticeContent(),
-                                i.getNoticeAvailable()
-                            )
-                            )
-                    annoContactslist.add(contacts)
-                    annoAdapter.notifyDataSetChanged()
+            object : Callback<List<NoticeListModel>> {
+                override fun onResponse(
+                    call: Call<List<NoticeListModel>>,
+                    response: Response<List<NoticeListModel>>
+                ) {
+                    //공지사항의 개수만큼 호출, 연결
+                    for (i in response.body()!!) {
+                        val contacts = (
+                                NoticeListModel(
+                                    i.getNoticeKey(),
+                                    i.getNoticeTitle(),
+                                    i.getNoticeWriter(),
+                                    i.getNoticeDate(),
+                                    i.getNoticeContent(),
+                                    i.getNoticeAvailable()
+                                )
+                                )
+                        annoContactsList.add(contacts)
+                        annoAdapter.notifyDataSetChanged()
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<List<Notice>>, t: Throwable) {}
+                override fun onFailure(call: Call<List<NoticeListModel>>, t: Throwable) {}
 
-        })
+            })
 
-        api.bbs_load(1).enqueue(object : Callback<List<Bbs>>{
-            override fun onResponse(call: Call<List<Bbs>>, response: Response<List<Bbs>>) {
+        api.bbs_load(1).enqueue(object : Callback<List<FreeListModel>> {
+            override fun onResponse(
+                call: Call<List<FreeListModel>>,
+                response: Response<List<FreeListModel>>
+            ) {
                 for (i in response.body()!!) {
                     val contacts = (
-                            Bbs(
+                            FreeListModel(
                                 i.getBbsKey(),
                                 i.getBbsTitle(),
                                 i.getBbsWriter(),
@@ -136,32 +161,59 @@ class MenuActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<List<Bbs>>, t: Throwable) {
+            override fun onFailure(call: Call<List<FreeListModel>>, t: Throwable) {
+
+            }
+
+        })
+
+        api.info_load(1).enqueue(object : Callback<List<InfoListModel>> {
+            override fun onResponse(
+                call: Call<List<InfoListModel>>,
+                response: Response<List<InfoListModel>>
+            ) {
+                for (i in response.body()!!) {
+                    val contacts = (
+                            InfoListModel(
+                                i.getStudyKey(),
+                                i.getStudyTitle(),
+                                i.getStudyWriter(),
+                                i.getStudyDate(),
+                                i.getStudyContent(),
+                                i.getStudyAvailable()
+                            )
+                            )
+                    infoContactsList.add(contacts)
+                    infoAdapter.notifyDataSetChanged()
+                }
+            }
+
+            override fun onFailure(call: Call<List<InfoListModel>>, t: Throwable) {
 
             }
 
         })
 
         api.map_list(1).enqueue(
-            object : Callback<List<MapModel>> {
+            object : Callback<List<MapListModel>> {
                 override fun onResponse(
-                    call: Call<List<MapModel>>,
-                    response: Response<List<MapModel>>
+                    call: Call<List<MapListModel>>,
+                    response: Response<List<MapListModel>>
                 ) {
                     for (i in response.body()!!) {
                         val contacts = (
-                                MapModel(
+                                MapListModel(
                                     i.getMapID(),
                                     i.getMapHits(),
                                     i.getMapRecommend()
                                 )
                                 )
-                        sugContactslist.add(contacts)
-                        sugAdapter.notifyDataSetChanged()
+                        mapContactsList.add(contacts)
+                        mapAdapter.notifyDataSetChanged()
                     }
                 }
 
-                override fun onFailure(call: Call<List<MapModel>>, t: Throwable) {
+                override fun onFailure(call: Call<List<MapListModel>>, t: Throwable) {
                 }
 
             })
