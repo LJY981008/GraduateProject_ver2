@@ -21,9 +21,9 @@ interface APIS {
     )
     //로그인 정보 호출
     @FormUrlEncoded
-    @POST(MyApp.Select_url)
+    @POST(MyApp.login_url)
     fun login_users(
-        @Field("userID") userID: String
+        @Field("ID") userID: String
     ): Call<PostModel>
 
     //회원가입 정보 호출

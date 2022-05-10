@@ -94,7 +94,6 @@ class MainActivity : AppCompatActivity() {
                 override fun onFailure(p0: Call<PostModel>, t: Throwable) {
                     failDialog("fail")
                 }
-
             })
         }
 
