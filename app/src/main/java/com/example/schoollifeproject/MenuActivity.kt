@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.adapter.AnnoListAdapter
+import com.example.schoollifeproject.adapter.FreeListAdapter
 import com.example.schoollifeproject.adapter.SugListAdapter
 import com.example.schoollifeproject.databinding.ActivityMenuBinding
 import com.example.schoollifeproject.fragment.AnnoListFragment
@@ -28,9 +29,11 @@ import retrofit2.Response
 class MenuActivity : AppCompatActivity() {
     private val annoContactslist: MutableList<Notice> = mutableListOf()
     private val sugContactslist: MutableList<MapModel> = mutableListOf()
+    private val freeContactslist: MutableList<Bbs> = mutableListOf()
 
     private val annoAdapter = AnnoListAdapter(annoContactslist)
     private val sugAdapter = SugListAdapter(sugContactslist)
+    private val freeAdapter = FreeListAdapter(freeContactslist)
 
     private lateinit var userID: String
     private lateinit var userName: String
@@ -53,6 +56,7 @@ class MenuActivity : AppCompatActivity() {
 
         binding.annoRecycler.adapter = annoAdapter
         binding.sugRecycler.adapter = sugAdapter
+        binding.freeRecycler.adapter = freeAdapter
 
         userID = intent.getStringExtra("ID").toString()
         userName = intent.getStringExtra("name").toString()
@@ -60,17 +64,25 @@ class MenuActivity : AppCompatActivity() {
 
         val annoText = binding.annoPost
         val sugText = binding.sugPost
+        val freeText = binding.freePost
         annoText.setOnClickListener {
             val transaction = supportFragmentManager.beginTransaction()
-            val AnnoListFragment = AnnoListFragment()
-            transaction.replace(R.id.frameLayout, AnnoListFragment.newInstance(userID))
+            val annoListFragment = AnnoListFragment()
+            transaction.replace(R.id.frameLayout, annoListFragment.newInstance(userID))
                 .commitAllowingStateLoss()
             menuMainVisible(false)
         }
         sugText.setOnClickListener {
             val transaction = supportFragmentManager.beginTransaction()
-            val MapListFragment = MapListFragment()
-            transaction.replace(R.id.frameLayout, MapListFragment.newInstance(userID))
+            val mapListFragment = MapListFragment()
+            transaction.replace(R.id.frameLayout, mapListFragment.newInstance(userID))
+                .commitAllowingStateLoss()
+            menuMainVisible(false)
+        }
+        freeText.setOnClickListener {
+            val transaction = supportFragmentManager.beginTransaction()
+            val freeListFragment = FreeListFragment()
+            transaction.replace(R.id.frameLayout, freeListFragment.newInstance(userID))
                 .commitAllowingStateLoss()
             menuMainVisible(false)
         }
@@ -103,6 +115,30 @@ class MenuActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<List<Notice>>, t: Throwable) {}
+
+        })
+
+        api.bbs_load(1).enqueue(object : Callback<List<Bbs>>{
+            override fun onResponse(call: Call<List<Bbs>>, response: Response<List<Bbs>>) {
+                for (i in response.body()!!) {
+                    val contacts = (
+                            Bbs(
+                                i.getBbsKey(),
+                                i.getBbsTitle(),
+                                i.getBbsWriter(),
+                                i.getBbsDate(),
+                                i.getBbsContent(),
+                                i.getBbsAvailable()
+                            )
+                            )
+                    freeContactslist.add(contacts)
+                    freeAdapter.notifyDataSetChanged()
+                }
+            }
+
+            override fun onFailure(call: Call<List<Bbs>>, t: Throwable) {
+
+            }
 
         })
 

@@ -1,13 +1,16 @@
 package com.example.schoollifeproject.fragment
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -62,49 +65,23 @@ class FreeListFragment : Fragment() {
         userID = arguments?.getString("ID").toString()
 
         //게시글 목록 호출
-        api.bbs_load(
-            0   //type 0 = 일반 포스팅, type 1 = 공지 포스팅
-        ).enqueue(object : Callback<List<Bbs>> {
-            override fun onResponse(call: Call<List<Bbs>>, response: Response<List<Bbs>>) {
-                val list = mutableListOf<Bbs>()
-                //아이템 개수만큼 호출, 연결
-                for (i in response.body()!!) {
-                    Log.d("자게","${i.getBbsTitle()}")
-                    val contacts = (
-                            Bbs(
-                                i.getBbsKey(),
-                                i.getBbsTitle(),
-                                i.getBbsWriter(),
-                                i.getBbsDate(),
-                                i.getBbsContent(),
-                                i.getBbsAvailable()
-                            )
-                            )
-                    list.add(contacts)
-                }
-                contactsList.clear()
-                contactsList.addAll(list)
-                adapter.notifyDataSetChanged()
-            }
-
-            override fun onFailure(call: Call<List<Bbs>>, t: Throwable) {
-                Log.d("페일", "${t.message}")
-            }
-        })
+        posting()
 
         val addNote = binding.addNote
 
         //비회원 글작성버튼 삭제
-        if (userID == "비회원") addNote.visibility = View.GONE
-        else addNote.visibility = View.VISIBLE
-
         //글작성 버튼 클릭
         addNote.setOnClickListener {
-            val intent = Intent(context, WriteNoticeActivity::class.java)
-            intent.apply {
-                putExtra("ID", id)
+            if(userID == "비회원"){
+                //TODO:이용불가알람만들기
             }
-            getResult.launch(intent)
+            else {
+                val intent = Intent(context, WriteNoticeActivity::class.java)
+                intent.apply {
+                    putExtra("ID", id)
+                }
+                getResult.launch(intent)
+            }
         }
 
         //글작성 후 게시글 갱신
@@ -151,6 +128,34 @@ class FreeListFragment : Fragment() {
      * RecyclerView에 포스팅할 아이템들 DB에서 호출
      * */
     private fun posting() {
+        api.bbs_load(
+            0   //type 0 = 일반 포스팅, type 1 = 공지 포스팅
+        ).enqueue(object : Callback<List<Bbs>> {
+            override fun onResponse(call: Call<List<Bbs>>, response: Response<List<Bbs>>) {
+                val list = mutableListOf<Bbs>()
+                //아이템 개수만큼 호출, 연결
+                for (i in response.body()!!) {
+                    Log.d("자게","${i.getBbsTitle()}")
+                    val contacts = (
+                            Bbs(
+                                i.getBbsKey(),
+                                i.getBbsTitle(),
+                                i.getBbsWriter(),
+                                i.getBbsDate(),
+                                i.getBbsContent(),
+                                i.getBbsAvailable()
+                            )
+                            )
+                    list.add(contacts)
+                }
+                contactsList.clear()
+                contactsList.addAll(list)
+                adapter.notifyDataSetChanged()
+            }
 
+            override fun onFailure(call: Call<List<Bbs>>, t: Throwable) {
+                Log.d("페일", "${t.message}")
+            }
+        })
     }
 }
