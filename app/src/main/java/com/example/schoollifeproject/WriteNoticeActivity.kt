@@ -6,29 +6,30 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.os.HandlerCompat.postDelayed
 import com.example.schoollifeproject.databinding.ActivityWriteNoticeBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.PostModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.time.LocalDate
+import java.text.SimpleDateFormat
 
 /**
  * 글작성 Fab 클릭 실행 Activity
  * */
 
 class WriteNoticeActivity : AppCompatActivity() {
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityWriteNoticeBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val api = APIS.create()
-        val date: String = LocalDate.now().toString()
+        val current =  System.currentTimeMillis()
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        val date: String = formatter.format(current)
         val addNotice = binding.addNotice
         val btnCancel = binding.btnCancel
 
