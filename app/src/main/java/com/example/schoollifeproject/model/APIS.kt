@@ -130,6 +130,12 @@ interface APIS {
         @Field("itemID") itemID: String
     ): Call<List<FileModel>>
 
+    @FormUrlEncoded
+    @POST(MyApp.note_delete_url)
+    fun note_delete(
+        @Field("mapID") mapID: Int
+    ): Call<PostModel>
+
     @GET
     fun item_file_down(
         @Url filePath: String

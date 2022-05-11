@@ -8,12 +8,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.databinding.ContactsListItemBinding
 import com.example.schoollifeproject.NoticeActivity
 import com.example.schoollifeproject.model.FreeListModel
+import com.example.schoollifeproject.model.NoteListModel
 
 /**
  * 자유 게시판 RecyclerView Adapter
  * 작성자 : 이준영
  * */
-class FreeFragmentAdapter(private val itemList: MutableList<FreeListModel>) :
+class FreeFragmentAdapter(private val itemList: MutableList<NoteListModel>) :
     RecyclerView.Adapter<FreeFragmentAdapter.ContactsViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactsViewHolder {
@@ -37,18 +38,20 @@ class FreeFragmentAdapter(private val itemList: MutableList<FreeListModel>) :
     class ContactsViewHolder(private val binding: ContactsListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         //게시판에 등록될 text, listener
-        fun bind(item: FreeListModel) {
-            binding.title.text = item.getBbsTitle()
-            binding.writer.text = item.getBbsWriter()
-            binding.date.text = item.getBbsDate()
+        fun bind(item: NoteListModel) {
+            binding.title.text = item.noteTitle
+            binding.writer.text = item.userID
+            binding.date.text = item.noteDate
             //게시글 내용확인 클릭리스너
             binding.rootView.setOnClickListener {
                 val intent = Intent(itemView.context, NoticeActivity::class.java).apply {
-                    putExtra("key", item.getBbsKey())
-                    putExtra("title", item.getBbsTitle())
-                    putExtra("writer", item.getBbsWriter())
-                    putExtra("date", item.getBbsDate())
-                    putExtra("content", item.getBbsContent())
+                    putExtra("userID", item.loginID)
+                    putExtra("key", item.noteID)
+                    putExtra("title", item.noteTitle)
+                    putExtra("writer", item.userID)
+                    putExtra("date", item.noteDate)
+                    putExtra("content", item.noteContent)
+                    putExtra("Avail", item.noteAvailable)
 
                 }
                 startActivity(itemView.context, intent, null)

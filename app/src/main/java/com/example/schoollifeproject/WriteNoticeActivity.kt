@@ -4,8 +4,11 @@ import android.app.Activity
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.os.HandlerCompat.postDelayed
 import com.example.schoollifeproject.databinding.ActivityWriteNoticeBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.PostModel
@@ -51,8 +54,10 @@ class WriteNoticeActivity : AppCompatActivity() {
                 }
 
             })
-            setResult(Activity.RESULT_OK, intent)
-            finish()
+            Handler().postDelayed({
+                setResult(Activity.RESULT_OK, intent)
+                finish()
+            },1000)
         }
 
     }

@@ -59,7 +59,7 @@ class InfoListFragment : Fragment() {
         binding.recyclerView.adapter = adapter
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {})
 
-        userID = arguments?.getString("ID").toString()
+        userID = arguments?.getString("userID").toString()
 
         //게시글 목록 호출
         posting()

@@ -1,8 +1,10 @@
 package com.example.schoollifeproject
 
+import android.app.Activity
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -29,12 +31,24 @@ class NoticeActivity : AppCompatActivity() {
         val binding = ActivityNoticeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val api = APIS.create()
+
         binding.noteReadRecyclerView.adapter = readAdapter
+        val btnDelete = binding.btnDelete
+        val btnClose = binding.btnClose
 
         val title = intent.getStringExtra("title").toString()
         val writer = intent.getStringExtra("writer").toString()
         val date = intent.getStringExtra("date").toString()
         val content = intent.getStringExtra("content").toString()
+        val userID = intent.getStringExtra("userID").toString()
+        val avail = intent.getIntExtra("avail", 0)
+        val key = intent.getIntExtra("key", 99999)
+
+        if (writer != userID) {
+            btnDelete.visibility = View.INVISIBLE
+        }
+
 
         val contact = (
                 NoteReadContacts(
@@ -47,7 +61,25 @@ class NoticeActivity : AppCompatActivity() {
         readList.add(contact)
         readAdapter.notifyDataSetChanged()
 
+        btnClose.setOnClickListener {
+            finish()
+        }
 
+        btnDelete.setOnClickListener {
+            api.note_delete(key).enqueue(object : Callback<PostModel> {
+                override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
+                    Log.d("성공: ", "글삭제")
+                }
+
+                override fun onFailure(call: Call<PostModel>, t: Throwable) {
+                    Log.d("페일(노트): ", "${t.message}")
+                }
+            })
+            Handler().postDelayed({
+                finish()
+            }, 2000)
+
+        }
         //val views = 100
         //해당 글의 키를 가져와 표시
 

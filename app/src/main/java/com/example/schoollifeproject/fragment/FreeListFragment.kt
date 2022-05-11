@@ -18,6 +18,7 @@ import com.example.schoollifeproject.adapter.FreeFragmentAdapter
 import com.example.schoollifeproject.databinding.FragmentFreeListBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.FreeListModel
+import com.example.schoollifeproject.model.NoteListModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -28,7 +29,7 @@ import retrofit2.Response
  */
 class FreeListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
-    private var contactsList: MutableList<FreeListModel> = mutableListOf()
+    private var contactsList: MutableList<NoteListModel> = mutableListOf()
     private val adapter = FreeFragmentAdapter(contactsList)
 
     private lateinit var getResult: ActivityResultLauncher<Intent>
@@ -58,8 +59,8 @@ class FreeListFragment : Fragment() {
         binding.recyclerView.adapter = adapter
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {})
 
-        userID = arguments?.getString("ID").toString()
-
+        userID = arguments?.getString("userID").toString()
+        Log.d("아이디: ","$userID")
         //게시글 목록 호출
         posting()
 
@@ -74,7 +75,7 @@ class FreeListFragment : Fragment() {
             else {
                 val intent = Intent(context, WriteNoticeActivity::class.java)
                 intent.apply {
-                    putExtra("ID", id)
+                    putExtra("ID", userID)
                 }
                 getResult.launch(intent)
             }
@@ -84,9 +85,12 @@ class FreeListFragment : Fragment() {
         getResult = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
+            Log.d("아이디2: ","$userID")
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
+                Log.d("겟리","ok")
                 posting()
             }
+
             adapter.notifyDataSetChanged()
         }
 
@@ -129,6 +133,11 @@ class FreeListFragment : Fragment() {
         return binding.root
     }
 
+    override fun onResume() {
+        super.onResume()
+        posting()
+    }
+
     /**
      * RecyclerView에 포스팅할 아이템들 DB에서 호출
      * */
@@ -137,21 +146,24 @@ class FreeListFragment : Fragment() {
             0   //type 0 = 일반 포스팅, type 1 = 공지 포스팅
         ).enqueue(object : Callback<List<FreeListModel>> {
             override fun onResponse(call: Call<List<FreeListModel>>, response: Response<List<FreeListModel>>) {
-                val list = mutableListOf<FreeListModel>()
+                val list = mutableListOf<NoteListModel>()
                 //아이템 개수만큼 호출, 연결
                 for (i in response.body()!!) {
                     Log.d("자게","${i.getBbsTitle()}")
-                    val contacts = (
-                            FreeListModel(
-                                i.getBbsKey(),
-                                i.getBbsTitle(),
-                                i.getBbsWriter(),
-                                i.getBbsDate(),
-                                i.getBbsContent(),
-                                i.getBbsAvailable()
-                            )
-                            )
-                    list.add(contacts)
+                    if(i.getBbsAvailable() == 1) {
+                        val contacts = (
+                                NoteListModel(
+                                    userID,
+                                    i.getBbsKey(),
+                                    i.getBbsTitle(),
+                                    i.getBbsWriter(),
+                                    i.getBbsDate(),
+                                    i.getBbsContent(),
+                                    i.getBbsAvailable()
+                                )
+                                )
+                        list.add(contacts)
+                    }
                 }
                 contactsList.clear()
                 contactsList.addAll(list)

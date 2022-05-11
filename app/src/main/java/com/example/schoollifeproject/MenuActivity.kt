@@ -146,18 +146,20 @@ class MenuActivity : AppCompatActivity() {
                 response: Response<List<FreeListModel>>
             ) {
                 for (i in response.body()!!) {
-                    val contacts = (
-                            FreeListModel(
-                                i.getBbsKey(),
-                                i.getBbsTitle(),
-                                i.getBbsWriter(),
-                                i.getBbsDate(),
-                                i.getBbsContent(),
-                                i.getBbsAvailable()
-                            )
-                            )
-                    freeContactslist.add(contacts)
-                    freeAdapter.notifyDataSetChanged()
+                    if(i.getBbsAvailable() == 1) {
+                        val contacts = (
+                                FreeListModel(
+                                    i.getBbsKey(),
+                                    i.getBbsTitle(),
+                                    i.getBbsWriter(),
+                                    i.getBbsDate(),
+                                    i.getBbsContent(),
+                                    i.getBbsAvailable()
+                                )
+                                )
+                        freeContactslist.add(contacts)
+                        freeAdapter.notifyDataSetChanged()
+                    }
                 }
             }
 
