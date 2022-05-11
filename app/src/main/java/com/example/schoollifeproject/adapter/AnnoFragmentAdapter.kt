@@ -38,6 +38,8 @@ class AnnoFragmentAdapter(private val itemList: List<NoteListModel>) :
         //메인 메뉴 공지사항에 등록될 text, listener
         fun bind(item: NoteListModel) {
             binding.title.text = item.noteTitle
+            binding.writer.text = item.userID
+            binding.date.text = item.noteDate
             //공지사항 내용 확인 클릭 리스너
             binding.rootView.setOnClickListener {
                 val intent = Intent(itemView.context, NoticeActivity::class.java).apply {

@@ -14,7 +14,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:textSize="20sp" />
+            android:layout_marginTop="4sp"
+            android:fontFamily="@font/title_font2"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/writer"
@@ -22,15 +24,20 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/title"
             android:layout_alignParentLeft="true"
-            android:textSize="16sp" />
+            android:layout_marginTop="10sp"
+            android:fontFamily="@font/title_font1"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/date"
-            android:layout_width="120sp"
+            android:layout_width="160sp"
             android:layout_height="wrap_content"
             android:layout_below="@+id/title"
+            android:layout_marginLeft="10sp"
+            android:layout_marginTop="10sp"
             android:layout_toEndOf="@+id/writer"
-            android:textSize="16sp" />
+            android:fontFamily="@font/title_font1"
+            android:textSize="14sp" />
 
     </RelativeLayout>
 </layout>

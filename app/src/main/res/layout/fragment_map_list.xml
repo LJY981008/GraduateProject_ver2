@@ -23,7 +23,7 @@
                 android:paddingStart="14sp"
                 android:paddingTop="14sp"
                 android:paddingBottom="14sp"
-                android:text="공지사항"
+                android:text="공지"
                 android:textSize="20sp" />
 
             <TextView
@@ -34,7 +34,7 @@
                 android:paddingStart="14sp"
                 android:paddingTop="14sp"
                 android:paddingBottom="14sp"
-                android:text="자유게시판"
+                android:text="자유"
                 android:textSize="20sp" />
 
             <TextView
@@ -45,7 +45,7 @@
                 android:paddingStart="14sp"
                 android:paddingTop="14sp"
                 android:paddingBottom="14sp"
-                android:text="추천로드맵"
+                android:text="추천"
                 android:textColor="@color/uninote"
                 android:textSize="20sp" />
 
@@ -57,7 +57,7 @@
                 android:paddingStart="14sp"
                 android:paddingTop="14sp"
                 android:paddingBottom="14sp"
-                android:text="공부게시판"
+                android:text="공부"
                 android:textSize="20sp" />
         </LinearLayout>
 

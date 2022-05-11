@@ -4,7 +4,7 @@
     <item>
         <bitmap
             android:layout_height="wrap_content"
-            android:gravity="center|fill"
+            android:gravity="fill"
             android:src="@drawable/uni_back" />
     </item>
 </layer-list>

@@ -250,6 +250,7 @@ class MenuActivity : AppCompatActivity() {
             val mindMapFragment = MindMapFragment()
             val freeListFragment = FreeListFragment()
             val mapListFragment = MapListFragment()
+            val settingsFragment = SettingsFragment()
 
             setOnItemSelectedListener { item ->
                 val transaction = supportFragmentManager.beginTransaction()
@@ -282,7 +283,7 @@ class MenuActivity : AppCompatActivity() {
                         true
                     }
                     else -> {
-                        transaction.replace(R.id.frameLayout, mapListFragment.newInstance(userID))
+                        transaction.replace(R.id.frameLayout, settingsFragment.newInstance(userID))
                             .commitAllowingStateLoss()
                         menuMainVisible(false)
                         true
@@ -315,11 +316,14 @@ class MenuActivity : AppCompatActivity() {
             binding.freeLayout.visibility = View.VISIBLE
             binding.sugLayout.visibility = View.VISIBLE
             binding.infoLayout.visibility = View.VISIBLE
+            binding.logo.visibility = View.VISIBLE
         } else {
             binding.annoLayout.visibility = View.GONE
             binding.freeLayout.visibility = View.GONE
             binding.sugLayout.visibility = View.GONE
             binding.infoLayout.visibility = View.GONE
+            binding.infoLayout.visibility = View.GONE
+            binding.logo.visibility = View.GONE
         }
     }
 

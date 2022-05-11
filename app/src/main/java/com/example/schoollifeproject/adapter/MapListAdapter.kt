@@ -9,8 +9,8 @@ import com.example.schoollifeproject.model.MapListModel
 
 /**
  * 메인메뉴 추천맵 RecyclerView Adapter
+ * 작성자 : 이준영, 박동훈
  * */
-
 class MapListAdapter(private val itemList: List<MapListModel>) :
     RecyclerView.Adapter<MapListAdapter.SugViewHolder>() {
 

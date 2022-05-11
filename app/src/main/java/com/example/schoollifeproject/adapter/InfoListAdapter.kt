@@ -38,7 +38,7 @@ class InfoListAdapter(private val itemList: List<InfoListModel>) :
         fun bind(item: InfoListModel) {
             binding.title.text = item.getStudyTitle()
             //공지사항 내용 확인 클릭 리스너
-            binding.rView.setOnClickListener {
+            binding.rootView.setOnClickListener {
                 val intent = Intent(itemView.context, NoticeActivity::class.java).apply {
                     putExtra("key", item.getStudyKey())
                     putExtra("title", item.getStudyTitle())

@@ -11,7 +11,7 @@ import com.example.schoollifeproject.model.FreeListModel
 
 /**
  * 자유 게시판 RecyclerView Adapter
- * 작성자 : 이준영
+ * 작성자 : 이준영, 박동훈
  * */
 class FreeListAdapter(private val itemList: MutableList<FreeListModel>) :
     RecyclerView.Adapter<FreeListAdapter.ContactsViewHolder>() {
@@ -40,7 +40,7 @@ class FreeListAdapter(private val itemList: MutableList<FreeListModel>) :
         fun bind(item: FreeListModel) {
             binding.title.text = item.getBbsTitle()
             //게시글 내용확인 클릭리스너
-            binding.rView.setOnClickListener {
+            binding.rootView.setOnClickListener {
                 val intent = Intent(itemView.context, NoticeActivity::class.java).apply {
                     putExtra("key", item.getBbsKey())
                     putExtra("title", item.getBbsTitle())

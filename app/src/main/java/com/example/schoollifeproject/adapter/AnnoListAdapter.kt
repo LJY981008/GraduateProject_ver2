@@ -5,8 +5,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.example.schoollifeproject.databinding.ContactsMainBoardBinding
 import com.example.schoollifeproject.NoticeActivity
+import com.example.schoollifeproject.databinding.ContactsMainBoardBinding
 import com.example.schoollifeproject.model.NoticeListModel
 
 /**
@@ -38,7 +38,7 @@ class AnnoListAdapter(private val itemList: List<NoticeListModel>) :
         fun bind(item: NoticeListModel) {
             binding.title.text = item.getNoticeTitle()
             //공지사항 내용 확인 클릭 리스너
-            binding.rView.setOnClickListener {
+            binding.rootView.setOnClickListener {
                 val intent = Intent(itemView.context, NoticeActivity::class.java).apply {
                     putExtra("key", item.getNoticeKey())
                     putExtra("title", item.getNoticeTitle())
