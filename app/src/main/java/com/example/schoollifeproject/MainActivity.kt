@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import com.example.schoollifeproject.databinding.ActivityMainBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.PostModel
+import com.example.schoollifeproject.shared.Shared
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -24,7 +25,7 @@ import kotlin.system.exitProcess
  * 작성자 : 이준영
  */
 class MainActivity : AppCompatActivity() {
-
+    val api = APIS.create()
     val TAG: String = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val binding = ActivityMainBinding.inflate(layoutInflater)
-        val api = APIS.create()
+
         setContentView(binding.root)
 
         val btnDestroy = binding.btnDestroy
@@ -64,39 +65,7 @@ class MainActivity : AppCompatActivity() {
         btnLogin.setOnClickListener {
             val id = binding.editId.text.toString()
             val pw = binding.editPw.text.toString()
-            val intent = Intent(this, MenuActivity::class.java)
-
-            /**
-             * 레트로핏 서버 접근 id value를 이용해 DB에서 pw호출
-             * id, pw를 비교 일치하는지 확인
-             * */
-            api.login_users(
-                id
-            ).enqueue(object : Callback<PostModel> {
-                //접근성공
-                override fun onResponse(
-                    call: Call<PostModel>,
-                    response: Response<PostModel>
-                ) {
-                    Log.d("여기: ","${response.body()?.error}")
-                    //해당 아이디가 로그인상태인지 체크 후 로그인
-                    when {
-                        response.body()?.error == "error" -> failDialog("isLogin")
-                        pw == response.body()?.userPassword -> {
-                            intent.putExtra("ID", response.body()?.userID)
-                            intent.putExtra("name", response.body()?.userName)
-                            startActivity(intent)
-                        }
-                        else -> {
-                            failDialog("failed")
-                        }
-                    }
-                }
-
-                override fun onFailure(p0: Call<PostModel>, t: Throwable) {
-                    failDialog("fail")
-                }
-            })
+            login(id, pw, 0)
         }
 
         /**
@@ -120,12 +89,54 @@ class MainActivity : AppCompatActivity() {
             exitProcess(0)
         }
 
+        if(Shared.prefs.getString("id", "nothing") != "nothing"){
+            val id = Shared.prefs.getString("id", "nothing")
+            val pw = Shared.prefs.getString("pw", "nothing")
+            Log.d("자동로그인","$id, $pw")
+            login(id, pw,1) // 타입 1 = 자동로그인
+        }
+    }
+
+
+    /**
+     * 레트로핏 서버 접근 id value를 이용해 DB에서 pw호출
+     * id, pw를 비교 일치하는지 확인
+     * */
+    fun login(id: String, pw: String, type: Int) {
+        val intent = Intent(this, MenuActivity::class.java)
+        api.login_users(
+            type, id
+        ).enqueue(object : Callback<PostModel> {
+            //접근성공
+            override fun onResponse(
+                call: Call<PostModel>,
+                response: Response<PostModel>
+            ) {
+                Log.d("여기: ", "${response.body()?.error}")
+                //해당 아이디가 로그인상태인지 체크 후 로그인
+                when {
+                    response.body()?.error == "error" -> failDialog("isLogin")
+                    pw == response.body()?.userPassword -> {
+                        intent.putExtra("ID", response.body()?.userID)
+                        intent.putExtra("name", response.body()?.userName)
+                        intent.putExtra("PW", response.body()?.userPassword)
+                        startActivity(intent)
+                    }
+                    else -> {
+                        failDialog("failed")
+                    }
+                }
+            }
+
+            override fun onFailure(p0: Call<PostModel>, t: Throwable) {
+                failDialog("fail")
+            }
+        })
     }
 
     /**
      * 로그인 실패 Dialog
      * */
-
     fun failDialog(error: String) {
         var dialog = AlertDialog.Builder(this)
 

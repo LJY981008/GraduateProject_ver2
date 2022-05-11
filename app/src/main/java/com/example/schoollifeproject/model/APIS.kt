@@ -22,6 +22,7 @@ interface APIS {
     @FormUrlEncoded
     @POST(MyApp.login_url)
     fun login_users(
+        @Field("type") type: Int,
         @Field("ID") userID: String
     ): Call<PostModel>
 

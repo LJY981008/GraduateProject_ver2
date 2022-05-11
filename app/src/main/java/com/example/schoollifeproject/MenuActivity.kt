@@ -16,6 +16,7 @@ import com.example.schoollifeproject.adapter.MapListAdapter
 import com.example.schoollifeproject.databinding.ActivityMenuBinding
 import com.example.schoollifeproject.fragment.*
 import com.example.schoollifeproject.model.*
+import com.example.schoollifeproject.shared.Shared
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -40,6 +41,7 @@ class MenuActivity : AppCompatActivity() {
     private val infoAdapter = InfoListAdapter(infoContactsList)
 
     private lateinit var userID: String
+    private lateinit var userPW: String
     private lateinit var userName: String
     private var loginCK: Int = 0
 
@@ -49,10 +51,8 @@ class MenuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        startService(Intent(this, ForecdTerminationService::class.java))
 
         val api = APIS.create()
-
         val dividerItemDecoration = DividerItemDecoration(applicationContext, RecyclerView.VERTICAL)
         binding.annoRecycler.addItemDecoration(dividerItemDecoration)
         binding.sugRecycler.addItemDecoration(dividerItemDecoration)
@@ -65,6 +65,7 @@ class MenuActivity : AppCompatActivity() {
         binding.infoRecycler.adapter = infoAdapter
 
         userID = intent.getStringExtra("ID").toString()
+        userPW = intent.getStringExtra("PW").toString()
         userName = intent.getStringExtra("name").toString()
         loginCK = intent.getIntExtra("loginCheck", 0)
 
@@ -73,6 +74,18 @@ class MenuActivity : AppCompatActivity() {
         val sugText = binding.sugPost
         val freeText = binding.freePost
         val infoText = binding.infoPost
+
+        //로그인 백업
+        if(userID != "비회원") {
+            Shared.prefs.setString("id", userID)
+            Shared.prefs.setString("pw", userPW)
+        }else{
+            Shared.prefs.setString("id", "nothing")
+            Shared.prefs.setString("pw", "nothing")
+        }
+
+
+
 
         annoText.setOnClickListener {
             val transaction = supportFragmentManager.beginTransaction()
@@ -315,6 +328,9 @@ class MenuActivity : AppCompatActivity() {
         Log.d("종료함0","ㅂㅂㅂ")
         if(userID != "비회원") {
             val api = APIS.create()
+            Shared.prefs.setString("id", "nothing")
+            Shared.prefs.setString("pw", "nothing")
+
             api.logout(userID).enqueue(object : Callback<PostModel> {
                 override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
                 }
