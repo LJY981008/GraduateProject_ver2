@@ -18,6 +18,7 @@ import com.example.schoollifeproject.adapter.InfoFragmentAdapter
 import com.example.schoollifeproject.databinding.FragmentInfoListBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.InfoListModel
+import com.example.schoollifeproject.model.NoteListModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -28,10 +29,10 @@ import retrofit2.Response
  */
 class InfoListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
-    private var contactsList: MutableList<InfoListModel> = mutableListOf()
+    private var contactsList: MutableList<NoteListModel> = mutableListOf()
     private val adapter = InfoFragmentAdapter(contactsList)
 
-    private lateinit var getResult: ActivityResultLauncher<Intent>
+    private lateinit var getResult2: ActivityResultLauncher<Intent>
     private lateinit var binding: FragmentInfoListBinding
 
     private val api = APIS.create()
@@ -67,20 +68,22 @@ class InfoListFragment : Fragment() {
         val addNote = binding.addNote
 
         //비회원 글작성버튼 삭제
-        if (userID == "비회원") addNote.visibility = View.GONE
-        else addNote.visibility = View.VISIBLE
-
-        //글작성 버튼 클릭
         addNote.setOnClickListener {
-            val intent = Intent(context, WriteNoticeActivity::class.java)
-            intent.apply {
-                putExtra("ID", id)
+            if (userID == "비회원") {
+                //TODO:이용불가알람만들기
+                Log.d("비회원글쓰기", "ㅂ")
+            } else {
+                val intent = Intent(context, WriteNoticeActivity::class.java)
+                intent.apply {
+                    putExtra("type", 2)
+                    putExtra("ID", userID)
+                }
+                getResult2.launch(intent)
             }
-            getResult.launch(intent)
         }
 
         //글작성 후 게시글 갱신
-        getResult = registerForActivityResult(
+        getResult2 = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
@@ -137,9 +140,11 @@ class InfoListFragment : Fragment() {
                 call: Call<List<InfoListModel>>,
                 response: Response<List<InfoListModel>>
             ) {
+                val list = mutableListOf<NoteListModel>()
                 for (i in response.body()!!) {
                     val contacts = (
-                            InfoListModel(
+                            NoteListModel(
+                                userID,
                                 i.getStudyKey(),
                                 i.getStudyTitle(),
                                 i.getStudyWriter(),
@@ -148,9 +153,11 @@ class InfoListFragment : Fragment() {
                                 i.getStudyAvailable()
                             )
                             )
-                    contactsList.add(contacts)
-                    adapter.notifyDataSetChanged()
+                    list.add(contacts)
                 }
+                contactsList.clear()
+                contactsList.addAll(list)
+                adapter.notifyDataSetChanged()
             }
 
             override fun onFailure(call: Call<List<InfoListModel>>, t: Throwable) {

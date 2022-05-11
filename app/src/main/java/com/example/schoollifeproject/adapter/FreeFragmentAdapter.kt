@@ -51,7 +51,7 @@ class FreeFragmentAdapter(private val itemList: MutableList<NoteListModel>) :
                     putExtra("writer", item.userID)
                     putExtra("date", item.noteDate)
                     putExtra("content", item.noteContent)
-                    putExtra("Avail", item.noteAvailable)
+                    putExtra("type", 1)
 
                 }
                 startActivity(itemView.context, intent, null)

@@ -42,7 +42,7 @@ class NoticeActivity : AppCompatActivity() {
         val date = intent.getStringExtra("date").toString()
         val content = intent.getStringExtra("content").toString()
         val userID = intent.getStringExtra("userID").toString()
-        val avail = intent.getIntExtra("avail", 0)
+        val type = intent.getIntExtra("type", 1)
         val key = intent.getIntExtra("key", 99999)
 
         if (writer != userID) {
@@ -66,7 +66,7 @@ class NoticeActivity : AppCompatActivity() {
         }
 
         btnDelete.setOnClickListener {
-            api.note_delete(key).enqueue(object : Callback<PostModel> {
+            api.note_delete(type ,key).enqueue(object : Callback<PostModel> {
                 override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
                     Log.d("성공: ", "글삭제")
                 }

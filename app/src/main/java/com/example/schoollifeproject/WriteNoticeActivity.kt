@@ -30,12 +30,19 @@ class WriteNoticeActivity : AppCompatActivity() {
         val api = APIS.create()
         val date: String = LocalDate.now().toString()
         val addNotice = binding.addNotice
+        val btnCancel = binding.btnCancel
+
+        btnCancel.setOnClickListener {
+            finish()
+        }
+
         addNotice.setOnClickListener {
             val editTitle = binding.editTitle.text.toString()
             val editContents = binding.editNotice.text.toString()
             val available = 0
-
+            val type = intent.getIntExtra("type", 1111)
             api.notice_save(
+                type,
                 editTitle,
                 intent.getStringExtra("ID").toString(),
                 date,
@@ -45,7 +52,7 @@ class WriteNoticeActivity : AppCompatActivity() {
                     Log.d("dbTestNoBody", response.toString())
                     Log.d(
                         "onResponse",
-                        "저장성공: ${response.body()?.key}, ${intent.getStringExtra("ID")},$editTitle, $editContents, $date, $available"
+                        "저장성공: ${response.body()?.type}, ${response.body()?.key}, ${intent.getStringExtra("ID")},$editTitle, $editContents, $date, $available"
                     )
                 }
 

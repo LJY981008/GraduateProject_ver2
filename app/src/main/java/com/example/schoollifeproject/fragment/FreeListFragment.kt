@@ -75,6 +75,7 @@ class FreeListFragment : Fragment() {
             else {
                 val intent = Intent(context, WriteNoticeActivity::class.java)
                 intent.apply {
+                    putExtra("type", 1)
                     putExtra("ID", userID)
                 }
                 getResult.launch(intent)

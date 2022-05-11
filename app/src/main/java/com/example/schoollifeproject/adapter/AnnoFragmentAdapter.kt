@@ -7,13 +7,14 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.databinding.ContactsListItemBinding
 import com.example.schoollifeproject.NoticeActivity
+import com.example.schoollifeproject.model.NoteListModel
 import com.example.schoollifeproject.model.NoticeListModel
 
 /**
  * 메인메뉴 공지 RecyclerView Adapter
  * 작성자 : 박동훈
  * */
-class AnnoFragmentAdapter(private val itemList: List<NoticeListModel>) :
+class AnnoFragmentAdapter(private val itemList: List<NoteListModel>) :
     RecyclerView.Adapter<AnnoFragmentAdapter.AnnoViewHolder>() {
     override fun getItemCount(): Int {
         return itemList.size
@@ -35,16 +36,18 @@ class AnnoFragmentAdapter(private val itemList: List<NoticeListModel>) :
     class AnnoViewHolder(private val binding: ContactsListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         //메인 메뉴 공지사항에 등록될 text, listener
-        fun bind(item: NoticeListModel) {
-            binding.title.text = item.getNoticeTitle()
+        fun bind(item: NoteListModel) {
+            binding.title.text = item.noteTitle
             //공지사항 내용 확인 클릭 리스너
             binding.rootView.setOnClickListener {
                 val intent = Intent(itemView.context, NoticeActivity::class.java).apply {
-                    putExtra("key", item.getNoticeKey())
-                    putExtra("title", item.getNoticeTitle())
-                    putExtra("writer", item.getNoticeWriter())
-                    putExtra("date", item.getNoticeDate())
-                    putExtra("content", item.getNoticeContent())
+                    putExtra("userID", item.loginID)
+                    putExtra("key", item.noteID)
+                    putExtra("title", item.noteTitle)
+                    putExtra("writer", item.userID)
+                    putExtra("date", item.noteDate)
+                    putExtra("content", item.noteContent)
+                    putExtra("type", 0)
                 }
                 startActivity(itemView.context, intent, null)
             }

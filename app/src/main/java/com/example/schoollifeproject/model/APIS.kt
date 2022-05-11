@@ -60,6 +60,7 @@ interface APIS {
     @FormUrlEncoded
     @POST(MyApp.note_write_url)
     fun notice_save(
+        @Field("type") type: Int,
         @Field("noticeTitle") noticeTitle: String,
         @Field("userID") userID: String,
         @Field("date") date: String,
@@ -133,6 +134,7 @@ interface APIS {
     @FormUrlEncoded
     @POST(MyApp.note_delete_url)
     fun note_delete(
+        @Field("type") type: Int,
         @Field("mapID") mapID: Int
     ): Call<PostModel>
 

@@ -312,12 +312,16 @@ class MenuActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        val api = APIS.create()
-        api.logout(userID).enqueue(object:Callback<PostModel>{
-            override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
-            }
-            override fun onFailure(call: Call<PostModel>, t: Throwable) {
-            }
-        })
+        Log.d("종료함0","ㅂㅂㅂ")
+        if(userID != "비회원") {
+            val api = APIS.create()
+            api.logout(userID).enqueue(object : Callback<PostModel> {
+                override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
+                }
+
+                override fun onFailure(call: Call<PostModel>, t: Throwable) {
+                }
+            })
+        }
     }
 }
