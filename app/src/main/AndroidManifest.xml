@@ -16,6 +16,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TitleBar"
         android:usesCleartextTraffic="true">
+        <service android:name=".ForecdTerminationService"
+            android:stopWithTask="false"/>
         <activity
             android:name=".NoticeActivity"
             android:exported="true" />

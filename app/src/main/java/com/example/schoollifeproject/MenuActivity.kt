@@ -1,6 +1,7 @@
 package com.example.schoollifeproject
 
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -18,6 +19,7 @@ import com.example.schoollifeproject.model.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.system.exitProcess
 
 /**
  * 로그인 후 메뉴 Activity
@@ -47,6 +49,7 @@ class MenuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        startService(Intent(this, ForecdTerminationService::class.java))
 
         val api = APIS.create()
 
@@ -65,6 +68,7 @@ class MenuActivity : AppCompatActivity() {
         userName = intent.getStringExtra("name").toString()
         loginCK = intent.getIntExtra("loginCheck", 0)
 
+        val btnDestroy = binding.btnDestroy
         val annoText = binding.annoPost
         val sugText = binding.sugPost
         val freeText = binding.freePost
@@ -146,7 +150,7 @@ class MenuActivity : AppCompatActivity() {
                 response: Response<List<FreeListModel>>
             ) {
                 for (i in response.body()!!) {
-                    if(i.getBbsAvailable() == 1) {
+                    if (i.getBbsAvailable() == 1) {
                         val contacts = (
                                 FreeListModel(
                                     i.getBbsKey(),
@@ -219,7 +223,9 @@ class MenuActivity : AppCompatActivity() {
                 }
 
             })
-
+        btnDestroy.setOnClickListener {
+            finish()
+        }
         /**
          * 프래그먼트 하단바
          * 메뉴1 - 메인화면
@@ -302,5 +308,16 @@ class MenuActivity : AppCompatActivity() {
             binding.sugLayout.visibility = View.GONE
             binding.infoLayout.visibility = View.GONE
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val api = APIS.create()
+        api.logout(userID).enqueue(object:Callback<PostModel>{
+            override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
+            }
+            override fun onFailure(call: Call<PostModel>, t: Throwable) {
+            }
+        })
     }
 }

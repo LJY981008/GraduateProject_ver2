@@ -1,6 +1,7 @@
 package com.example.schoollifeproject
 
 import android.Manifest
+import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,6 +17,7 @@ import com.example.schoollifeproject.model.PostModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.system.exitProcess
 
 /**
  * 어플 실행 로그인 Activity
@@ -27,7 +29,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         /**
          * 파일관리자 접근 권한 설정
          */
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         val api = APIS.create()
         setContentView(binding.root)
 
+        val btnDestroy = binding.btnDestroy
         val btnLogin = binding.btnLogin
         val btnRegister = binding.btnRegister
         val btnNonLogin = binding.btnNonlogin
@@ -112,6 +114,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
 
         }
+
+        btnDestroy.setOnClickListener {
+            finishAffinity()
+            exitProcess(0)
+        }
+
     }
 
     /**

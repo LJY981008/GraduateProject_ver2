@@ -136,6 +136,12 @@ interface APIS {
         @Field("mapID") mapID: Int
     ): Call<PostModel>
 
+    @FormUrlEncoded
+    @POST(MyApp.logout_url)
+    fun logout(
+        @Field("userID") userID: String
+    ): Call<PostModel>
+
     @GET
     fun item_file_down(
         @Url filePath: String
