@@ -31,6 +31,21 @@ class SettingsFragment : Fragment() {
         userID = arguments?.getString("userID").toString()
         binding.loginInfo.text = userID
 
+        val btnLogout = binding.btnLogout
+        if (userID == "비회원") {
+            btnLogout.text = "로그인"
+        } else {
+            btnLogout.text = "로그아웃"
+        }
+        btnLogout.setOnClickListener {
+            activity?.supportFragmentManager
+                ?.beginTransaction()
+                ?.remove(this)
+                ?.commit()
+            activity?.finish()
+        }
+
+
         return binding.root
     }
 

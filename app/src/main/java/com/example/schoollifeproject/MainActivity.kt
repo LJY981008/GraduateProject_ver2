@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -15,6 +16,7 @@ import com.example.schoollifeproject.databinding.ActivityMainBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.PostModel
 import com.example.schoollifeproject.shared.Shared
+import com.google.android.material.snackbar.Snackbar
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,9 +29,11 @@ import kotlin.system.exitProcess
 class MainActivity : AppCompatActivity() {
     val api = APIS.create()
     val TAG: String = "MainActivity"
-
+    var backWait: Long = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
         /**
          * 파일관리자 접근 권한 설정
          */
@@ -89,11 +93,11 @@ class MainActivity : AppCompatActivity() {
             exitProcess(0)
         }
 
-        if(Shared.prefs.getString("id", "nothing") != "nothing"){
+        if (Shared.prefs.getString("id", "nothing") != "nothing") {
             val id = Shared.prefs.getString("id", "nothing")
             val pw = Shared.prefs.getString("pw", "nothing")
-            Log.d("자동로그인","$id, $pw")
-            login(id, pw,1) // 타입 1 = 자동로그인
+            Log.d("자동로그인", "$id, $pw")
+            login(id, pw, 1) // 타입 1 = 자동로그인
         }
     }
 
@@ -157,5 +161,14 @@ class MainActivity : AppCompatActivity() {
 
         dialog.setPositiveButton("확인", dialog_listener)
         dialog.show()
+    }
+
+    override fun onBackPressed() {
+        if (System.currentTimeMillis() - backWait < 2000) {
+            finishAffinity()
+            exitProcess(0)
+        }
+        backWait = System.currentTimeMillis()
+        Toast.makeText(this, "한번 더 입력시 종료됩니다.", Toast.LENGTH_SHORT).show()
     }
 }

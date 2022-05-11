@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -40,6 +41,7 @@ class MenuActivity : AppCompatActivity() {
     private val freeAdapter = FreeListAdapter(freeContactslist)
     private val infoAdapter = InfoListAdapter(infoContactsList)
 
+    private var backWait: Long = 0
     private lateinit var userID: String
     private lateinit var userPW: String
     private lateinit var userName: String
@@ -69,17 +71,16 @@ class MenuActivity : AppCompatActivity() {
         userName = intent.getStringExtra("name").toString()
         loginCK = intent.getIntExtra("loginCheck", 0)
 
-        val btnDestroy = binding.btnDestroy
         val annoText = binding.annoPost
         val sugText = binding.sugPost
         val freeText = binding.freePost
         val infoText = binding.infoPost
 
         //로그인 백업
-        if(userID != "비회원") {
+        if (userID != "비회원") {
             Shared.prefs.setString("id", userID)
             Shared.prefs.setString("pw", userPW)
-        }else{
+        } else {
             Shared.prefs.setString("id", "nothing")
             Shared.prefs.setString("pw", "nothing")
         }
@@ -236,9 +237,7 @@ class MenuActivity : AppCompatActivity() {
                 }
 
             })
-        btnDestroy.setOnClickListener {
-            finish()
-        }
+
         /**
          * 프래그먼트 하단바
          * 메뉴1 - 메인화면
@@ -329,8 +328,8 @@ class MenuActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("종료함0","ㅂㅂㅂ")
-        if(userID != "비회원") {
+        Log.d("종료함0", "ㅂㅂㅂ")
+        if (userID != "비회원") {
             val api = APIS.create()
             Shared.prefs.setString("id", "nothing")
             Shared.prefs.setString("pw", "nothing")
@@ -343,5 +342,14 @@ class MenuActivity : AppCompatActivity() {
                 }
             })
         }
+    }
+
+    override fun onBackPressed() {
+        if (System.currentTimeMillis() - backWait < 2000) {
+            finishAffinity()
+            exitProcess(0)
+        }
+        backWait = System.currentTimeMillis()
+        Toast.makeText(this, "한번 더 입력시 종료됩니다.", Toast.LENGTH_SHORT).show()
     }
 }
