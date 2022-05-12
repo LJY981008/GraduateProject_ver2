@@ -20,7 +20,20 @@
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/settingView" />
-
+    <Button
+        android:id="@+id/btnDeleteInfo"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="140sp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/title_font1"
+        android:gravity="center|left"
+        android:text="회원탈퇴"
+        app:layout_goneMarginTop="20sp"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/btnLogout"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
     <TextView
         android:id="@+id/settingView"
         android:layout_width="wrap_content"

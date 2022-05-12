@@ -154,6 +154,7 @@ class InfoListFragment : Fragment() {
                             )
                             )
                     list.add(contacts)
+                    Log.d(TAG,"$list")
                 }
                 contactsList.clear()
                 contactsList.addAll(list)
@@ -161,7 +162,6 @@ class InfoListFragment : Fragment() {
             }
 
             override fun onFailure(call: Call<List<InfoListModel>>, t: Throwable) {
-
             }
 
         })
