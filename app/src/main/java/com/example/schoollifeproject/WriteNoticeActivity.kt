@@ -16,7 +16,7 @@ import retrofit2.Response
 import java.text.SimpleDateFormat
 
 /**
- * 글작성 Fab 클릭 실행 Activity
+ * 글작성 클릭 실행 Activity
  * */
 
 class WriteNoticeActivity : AppCompatActivity() {
@@ -40,7 +40,6 @@ class WriteNoticeActivity : AppCompatActivity() {
         addNotice.setOnClickListener {
             val editTitle = binding.editTitle.text.toString()
             val editContents = binding.editNotice.text.toString()
-            val available = 0
             val type = intent.getIntExtra("type", 1111)
             api.notice_save(
                 type,
@@ -50,15 +49,9 @@ class WriteNoticeActivity : AppCompatActivity() {
                 editContents
             ).enqueue(object : Callback<PostModel> {
                 override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
-                    Log.d("dbTestNoBody", response.toString())
-                    Log.d(
-                        "onResponse",
-                        "저장성공: ${response.body()?.type}, ${response.body()?.key}, ${intent.getStringExtra("ID")},$editTitle, $editContents, $date, $available"
-                    )
                 }
 
                 override fun onFailure(p0: Call<PostModel>, t: Throwable) {
-                    Log.d("onFailure", "저장실패 : " + t.message.toString())
                 }
 
             })

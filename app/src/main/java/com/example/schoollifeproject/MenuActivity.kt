@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -30,7 +32,6 @@ import kotlin.system.exitProcess
 
 // TODO : menu-자유게시판, contacts_main_board.xml, Fragment-공지사항/공부게시판, 디자인
 class MenuActivity : AppCompatActivity() {
-    private val TAG = this.javaClass.toString()
     private val annoContactsList: MutableList<NoticeListModel> = mutableListOf()
     private val mapContactsList: MutableList<MapListModel> = mutableListOf()
     private val freeContactslist: MutableList<FreeListModel> = mutableListOf()
@@ -42,19 +43,25 @@ class MenuActivity : AppCompatActivity() {
     private val infoAdapter = InfoListAdapter(infoContactsList)
 
     private var backWait: Long = 0
+    private var loginCK: Int = 0
     private lateinit var userID: String
     private lateinit var userPW: String
     private lateinit var userName: String
-    private var loginCK: Int = 0
+
+    private lateinit var annoText: TextView
+    private lateinit var sugText: TextView
+    private lateinit var freeText: TextView
+    private lateinit var infoText: TextView
 
     private lateinit var binding: ActivityMenuBinding
+    private val api = APIS.create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val api = APIS.create()
+
         val dividerItemDecoration = DividerItemDecoration(applicationContext, RecyclerView.VERTICAL)
         binding.annoRecycler.addItemDecoration(dividerItemDecoration)
         binding.sugRecycler.addItemDecoration(dividerItemDecoration)
@@ -71,12 +78,14 @@ class MenuActivity : AppCompatActivity() {
         userName = intent.getStringExtra("name").toString()
         loginCK = intent.getIntExtra("loginCheck", 0)
 
-        val annoText = binding.annoPost
-        val sugText = binding.sugPost
-        val freeText = binding.freePost
-        val infoText = binding.infoPost
+        annoText = binding.annoPost
+        sugText = binding.sugPost
+        freeText = binding.freePost
+        infoText = binding.infoPost
 
-        //로그인 백업
+        /**
+         * 로그인 백업
+         */
         if (userID != "비회원") {
             Shared.prefs.setString("id", userID)
             Shared.prefs.setString("pw", userPW)
@@ -85,9 +94,9 @@ class MenuActivity : AppCompatActivity() {
             Shared.prefs.setString("pw", "nothing")
         }
 
-
-
-
+        /**
+         * 메인메뉴 게시판 제목 클릭 이벤트
+         */
         annoText.setOnClickListener {
             val transaction = supportFragmentManager.beginTransaction()
             val annoListFragment = AnnoListFragment()
@@ -116,19 +125,20 @@ class MenuActivity : AppCompatActivity() {
                 .commitAllowingStateLoss()
             menuMainVisible(false)
         }
-        mapAdapter.setOnMapItemListener { view, mapID ->
-            val mindMapFragment = MindMapFragment()
+        mapAdapter.setOnMapItemListener { _, mapID ->
             val transaction = supportFragmentManager.beginTransaction()
-            Log.d("$TAG", "userIDSend: ${userID}, $mapID")
-
-            menuMainVisible(false)
-
+            val mindMapFragment = MindMapFragment()
             transaction?.replace(R.id.frameLayout, mindMapFragment.newInstance(userID, mapID))
                 ?.commitAllowingStateLoss()
+            menuMainVisible(false)
         }
 
         /**
-         * 메인메뉴의 공지사항 DB 불러오기
+         * 메인메뉴 게시판 DB 불러오기
+         * notice = 공지사항
+         * bbs = 자유게시판
+         * info = 스터디
+         * maplist = 추천로드맵
          * */
         //type 0 = 일반 포스팅, type 1 = 공지 포스팅
         api.notice_load(1).enqueue(
@@ -248,7 +258,6 @@ class MenuActivity : AppCompatActivity() {
         binding.bottomNavigationView.run {
             val mindMapFragment = MindMapFragment()
             val freeListFragment = FreeListFragment()
-            val mapListFragment = MapListFragment()
             val settingsFragment = SettingsFragment()
 
             setOnItemSelectedListener { item ->
@@ -263,8 +272,7 @@ class MenuActivity : AppCompatActivity() {
                         true
                     }
                     R.id.mainMenu2 -> {
-                        if (userID == "비회원")
-                            failDialog()
+                        if (userID == "비회원") failDialog()
                         else {
                             transaction.replace(
                                 R.id.frameLayout,
@@ -288,9 +296,10 @@ class MenuActivity : AppCompatActivity() {
                         true
                     }
                 }
-
             }
         }
+
+
     }
 
     private fun removeFragment() {
@@ -328,6 +337,9 @@ class MenuActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        /**
+         * 정상적인 종료시 로그인 정보 삭제
+         */
         Log.d("종료함0", "ㅂㅂㅂ")
         if (userID != "비회원") {
             val api = APIS.create()

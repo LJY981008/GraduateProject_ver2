@@ -7,14 +7,13 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.databinding.ContactsListItemBinding
 import com.example.schoollifeproject.NoticeActivity
-import com.example.schoollifeproject.model.FreeListModel
-import com.example.schoollifeproject.model.NoteListModel
+import com.example.schoollifeproject.model.NoteListContacts
 
 /**
  * 자유 게시판 RecyclerView Adapter
  * 작성자 : 이준영, 박동훈
  * */
-class FreeFragmentAdapter(private val itemList: MutableList<NoteListModel>) :
+class FreeFragmentAdapter(private val itemList: MutableList<NoteListContacts>) :
     RecyclerView.Adapter<FreeFragmentAdapter.ContactsViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactsViewHolder {
@@ -38,7 +37,7 @@ class FreeFragmentAdapter(private val itemList: MutableList<NoteListModel>) :
     class ContactsViewHolder(private val binding: ContactsListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         //게시판에 등록될 text, listener
-        fun bind(item: NoteListModel) {
+        fun bind(item: NoteListContacts) {
             binding.title.text = item.noteTitle
             binding.writer.text = item.userID
             binding.date.text = item.noteDate

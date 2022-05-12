@@ -7,14 +7,13 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.databinding.ContactsListItemBinding
 import com.example.schoollifeproject.NoticeActivity
-import com.example.schoollifeproject.model.InfoListModel
-import com.example.schoollifeproject.model.NoteListModel
+import com.example.schoollifeproject.model.NoteListContacts
 
 /**
  * 공부게시판 RecyclerView Adapter
  * 작성자 : 박동훈
  * */
-class InfoFragmentAdapter(private val itemList: List<NoteListModel>) :
+class InfoFragmentAdapter(private val itemList: List<NoteListContacts>) :
     RecyclerView.Adapter<InfoFragmentAdapter.InfoViewHolder>() {
     override fun getItemCount(): Int {
         return itemList.size
@@ -36,7 +35,7 @@ class InfoFragmentAdapter(private val itemList: List<NoteListModel>) :
     class InfoViewHolder(private val binding: ContactsListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         //메인 메뉴 공지사항에 등록될 text, listener
-        fun bind(item: NoteListModel) {
+        fun bind(item: NoteListContacts) {
             binding.title.text = item.noteTitle
             binding.writer.text = item.userID
             binding.date.text = item.noteDate

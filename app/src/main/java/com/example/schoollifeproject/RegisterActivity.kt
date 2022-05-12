@@ -43,6 +43,7 @@ class RegisterActivity : AppCompatActivity() {
             if (id.isBlank() || pw.isBlank() || rePw.isBlank() || name.isBlank() || email.isBlank()) {
                 isExistBlank = true
             } else {
+                //비밀번호 확인
                 if (pw == rePw) isPWSame = true
             }
 

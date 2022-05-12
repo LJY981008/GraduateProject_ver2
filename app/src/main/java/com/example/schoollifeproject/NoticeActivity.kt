@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.view.isGone
@@ -25,6 +26,9 @@ class NoticeActivity : AppCompatActivity() {
     private var readList: MutableList<NoteReadContacts> = mutableListOf()
     private val readAdapter = NoteReadListAdapter(readList)
 
+    private lateinit var btnDelete: Button
+    private lateinit var btnClose: Button
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,8 +38,9 @@ class NoticeActivity : AppCompatActivity() {
         val api = APIS.create()
 
         binding.noteReadRecyclerView.adapter = readAdapter
-        val btnDelete = binding.btnDelete
-        val btnClose = binding.btnClose
+
+        btnDelete = binding.btnDelete
+        btnClose = binding.btnClose
 
         val title = intent.getStringExtra("title").toString()
         val writer = intent.getStringExtra("writer").toString()
@@ -45,11 +50,17 @@ class NoticeActivity : AppCompatActivity() {
         val type = intent.getIntExtra("type", 1)
         val key = intent.getIntExtra("key", 99999)
 
+
+        /**
+         * 로그인아이디와 글쓴이가 같지 않을경우 글삭제 비활성화
+         */
         if (writer != userID) {
             btnDelete.visibility = View.INVISIBLE
         }
 
-
+        /**
+         * 받은 값을 포스팅
+         */
         val contact = (
                 NoteReadContacts(
                     title,
@@ -65,6 +76,9 @@ class NoticeActivity : AppCompatActivity() {
             finish()
         }
 
+        /**
+         * 글삭제 기능
+         */
         btnDelete.setOnClickListener {
             api.note_delete(type ,key).enqueue(object : Callback<PostModel> {
                 override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {

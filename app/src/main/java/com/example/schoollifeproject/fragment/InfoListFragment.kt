@@ -18,7 +18,7 @@ import com.example.schoollifeproject.adapter.InfoFragmentAdapter
 import com.example.schoollifeproject.databinding.FragmentInfoListBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.InfoListModel
-import com.example.schoollifeproject.model.NoteListModel
+import com.example.schoollifeproject.model.NoteListContacts
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -29,7 +29,7 @@ import retrofit2.Response
  */
 class InfoListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
-    private var contactsList: MutableList<NoteListModel> = mutableListOf()
+    private var contactsList: MutableList<NoteListContacts> = mutableListOf()
     private val adapter = InfoFragmentAdapter(contactsList)
 
     private lateinit var getResult2: ActivityResultLauncher<Intent>
@@ -140,10 +140,10 @@ class InfoListFragment : Fragment() {
                 call: Call<List<InfoListModel>>,
                 response: Response<List<InfoListModel>>
             ) {
-                val list = mutableListOf<NoteListModel>()
+                val list = mutableListOf<NoteListContacts>()
                 for (i in response.body()!!) {
                     val contacts = (
-                            NoteListModel(
+                            NoteListContacts(
                                 userID,
                                 i.getStudyKey(),
                                 i.getStudyTitle(),

@@ -3,7 +3,7 @@ package com.example.schoollifeproject.model
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-class NoteListModel(
+class NoteListContacts(
     var loginID: String,
     var noteID: Int,
     var noteTitle: String,

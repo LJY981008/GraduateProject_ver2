@@ -27,7 +27,7 @@ import retrofit2.Response
  */
 class AnnoListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
-    private var annoList: MutableList<NoteListModel> = mutableListOf()
+    private var annoList: MutableList<NoteListContacts> = mutableListOf()
     private val adapter = AnnoFragmentAdapter(annoList)
 
     private lateinit var getResult0: ActivityResultLauncher<Intent>
@@ -145,11 +145,11 @@ class AnnoListFragment : Fragment() {
                 call: Call<List<NoticeListModel>>,
                 response: Response<List<NoticeListModel>>
             ) {
-                val list = mutableListOf<NoteListModel>()
+                val list = mutableListOf<NoteListContacts>()
                 //공지사항의 개수만큼 호출, 연결
                 for (i in response.body()!!) {
                     val contacts = (
-                            NoteListModel(
+                            NoteListContacts(
                                 userID,
                                 i.getNoticeKey(),
                                 i.getNoticeTitle(),

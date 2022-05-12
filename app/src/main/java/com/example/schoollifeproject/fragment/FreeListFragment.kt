@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +19,7 @@ import com.example.schoollifeproject.adapter.FreeFragmentAdapter
 import com.example.schoollifeproject.databinding.FragmentFreeListBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.FreeListModel
-import com.example.schoollifeproject.model.NoteListModel
+import com.example.schoollifeproject.model.NoteListContacts
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -29,7 +30,7 @@ import retrofit2.Response
  */
 class FreeListFragment : Fragment() {
     private val TAG = this.javaClass.toString()
-    private var contactsList: MutableList<NoteListModel> = mutableListOf()
+    private var contactsList: MutableList<NoteListContacts> = mutableListOf()
     private val adapter = FreeFragmentAdapter(contactsList)
 
     private lateinit var getResult: ActivityResultLauncher<Intent>
@@ -60,19 +61,21 @@ class FreeListFragment : Fragment() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {})
 
         userID = arguments?.getString("userID").toString()
-        Log.d("아이디: ","$userID")
+        Log.d("아이디: ", "$userID")
         //게시글 목록 호출
         posting()
 
         val addNote = binding.addNote
 
-        //비회원 글작성버튼 삭제
-        //글작성 버튼 클릭
+
+        /**
+         * 글작성 버튼
+         * 비회원은 사용불가
+         */
         addNote.setOnClickListener {
-            if(userID == "비회원"){
-                //TODO:이용불가알람만들기
-            }
-            else {
+            if (userID == "비회원") {
+                Toast.makeText(this.context, "비회원은 이용이 불가능합니다.", Toast.LENGTH_SHORT).show()
+            } else {
                 val intent = Intent(context, WriteNoticeActivity::class.java)
                 intent.apply {
                     putExtra("type", 1)
@@ -82,13 +85,13 @@ class FreeListFragment : Fragment() {
             }
         }
 
-        //글작성 후 게시글 갱신
+        /**
+         * 글작성 후 리턴받은 result를 실행
+         */
         getResult = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
-            Log.d("아이디2: ","$userID")
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
-                Log.d("겟리","ok")
                 posting()
             }
 
@@ -146,14 +149,15 @@ class FreeListFragment : Fragment() {
         api.bbs_load(
             0   //type 0 = 일반 포스팅, type 1 = 공지 포스팅
         ).enqueue(object : Callback<List<FreeListModel>> {
-            override fun onResponse(call: Call<List<FreeListModel>>, response: Response<List<FreeListModel>>) {
-                val list = mutableListOf<NoteListModel>()
+            override fun onResponse(
+                call: Call<List<FreeListModel>>, response: Response<List<FreeListModel>>
+            ) {
+                val list = mutableListOf<NoteListContacts>()
                 //아이템 개수만큼 호출, 연결
                 for (i in response.body()!!) {
-                    Log.d("자게","${i.getBbsTitle()}")
-                    if(i.getBbsAvailable() == 1) {
+                    if (i.getBbsAvailable() == 1) {
                         val contacts = (
-                                NoteListModel(
+                                NoteListContacts(
                                     userID,
                                     i.getBbsKey(),
                                     i.getBbsTitle(),
@@ -171,9 +175,7 @@ class FreeListFragment : Fragment() {
                 adapter.notifyDataSetChanged()
             }
 
-            override fun onFailure(call: Call<List<FreeListModel>>, t: Throwable) {
-                Log.d("페일", "${t.message}")
-            }
+            override fun onFailure(call: Call<List<FreeListModel>>, t: Throwable) {}
         })
     }
 }
