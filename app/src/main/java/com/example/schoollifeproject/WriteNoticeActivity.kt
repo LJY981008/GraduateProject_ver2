@@ -38,10 +38,16 @@ class WriteNoticeActivity : AppCompatActivity() {
         var key = 0
         var userID = intent.getStringExtra("ID").toString()
 
+
+
         val editType = intent.getIntExtra("edit", 0) //수정인지 체크
         if (editType == 1) {
             addNotice.text = "수정"
             key = intent.getIntExtra("key", 99999)
+            val thisTitle = intent.getStringExtra("thisTitle").toString()
+            val thisContents = intent.getStringExtra("thisContents").toString()
+            binding.editTitle.setText(thisTitle)
+            binding.editNotice.setText(thisContents)
         }
 
 

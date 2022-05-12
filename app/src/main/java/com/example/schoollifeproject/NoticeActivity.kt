@@ -108,6 +108,8 @@ class NoticeActivity : AppCompatActivity() {
                 putExtra("ID", userID)
                 putExtra("type", type)
                 putExtra("key", key)
+                putExtra("thisTitle", title)
+                putExtra("thisContent", content)
             }
             getResult.launch(intent)
 
