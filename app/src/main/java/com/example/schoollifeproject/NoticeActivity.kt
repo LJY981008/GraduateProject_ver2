@@ -1,6 +1,7 @@
 package com.example.schoollifeproject
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,6 +10,8 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.view.isGone
 import com.example.schoollifeproject.adapter.NoteReadListAdapter
@@ -28,6 +31,9 @@ class NoticeActivity : AppCompatActivity() {
 
     private lateinit var btnDelete: Button
     private lateinit var btnClose: Button
+    private lateinit var btnUpdate: Button
+
+    private lateinit var getResult: ActivityResultLauncher<Intent>
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +47,7 @@ class NoticeActivity : AppCompatActivity() {
 
         btnDelete = binding.btnDelete
         btnClose = binding.btnClose
+        btnUpdate = binding.btnUpdate
 
         val title = intent.getStringExtra("title").toString()
         val writer = intent.getStringExtra("writer").toString()
@@ -56,6 +63,7 @@ class NoticeActivity : AppCompatActivity() {
          */
         if (writer != userID) {
             btnDelete.visibility = View.INVISIBLE
+            btnUpdate.visibility = View.INVISIBLE
         }
 
         /**
@@ -92,8 +100,38 @@ class NoticeActivity : AppCompatActivity() {
             Handler().postDelayed({
                 finish()
             }, 2000)
+        }
+
+        btnUpdate.setOnClickListener {
+            val intent = Intent(this.applicationContext, WriteNoticeActivity::class.java).apply {
+                putExtra("edit", 1)
+                putExtra("ID", userID)
+                putExtra("type", type)
+                putExtra("key", key)
+            }
+            getResult.launch(intent)
 
         }
+
+        getResult = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) {
+            if (it.resultCode == RESULT_OK) {
+                readList.clear()
+                val contact = (
+                        NoteReadContacts(
+                            it.data?.getStringExtra("title").toString(),
+                            writer,
+                            date,
+                            it.data?.getStringExtra("contents").toString()
+                        )
+                        )
+                readList.add(contact)
+                readAdapter.notifyDataSetChanged()
+            }
+        }
+
+
         //val views = 100
         //해당 글의 키를 가져와 표시
 

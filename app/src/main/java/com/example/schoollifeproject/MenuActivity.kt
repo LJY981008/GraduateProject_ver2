@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.adapter.AnnoListAdapter
 import com.example.schoollifeproject.adapter.FreeListAdapter
@@ -63,10 +64,26 @@ class MenuActivity : AppCompatActivity() {
 
 
         val dividerItemDecoration = DividerItemDecoration(applicationContext, RecyclerView.VERTICAL)
+        val freeManager = LinearLayoutManager(applicationContext)
+        freeManager.reverseLayout = true
+        freeManager.stackFromEnd = true
+        val annoManager = LinearLayoutManager(applicationContext)
+        annoManager.reverseLayout = true
+        annoManager.stackFromEnd = true
+        val infoManager = LinearLayoutManager(applicationContext)
+        infoManager.reverseLayout = true
+        infoManager.stackFromEnd = true
+
+        binding.annoRecycler.layoutManager = annoManager
+        binding.infoRecycler.layoutManager = infoManager
+        binding.freeRecycler.layoutManager = freeManager
+
         binding.annoRecycler.addItemDecoration(dividerItemDecoration)
         binding.sugRecycler.addItemDecoration(dividerItemDecoration)
         binding.freeRecycler.addItemDecoration(dividerItemDecoration)
         binding.infoRecycler.addItemDecoration(dividerItemDecoration)
+
+
 
         binding.annoRecycler.adapter = annoAdapter
         binding.sugRecycler.adapter = mapAdapter

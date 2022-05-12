@@ -45,6 +45,11 @@ class SettingsFragment : Fragment() {
         val btnLogout = binding.btnLogout
         val btnDelete = binding.btnDeleteInfo
 
+
+        if(userID == "Admin" || userID == "비회원"){
+            btnDelete.visibility = View.INVISIBLE
+        }
+
         if (userID == "비회원") {
             btnLogout.text = "로그인"
         } else {

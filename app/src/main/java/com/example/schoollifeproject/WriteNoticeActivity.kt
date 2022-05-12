@@ -21,17 +21,29 @@ import java.text.SimpleDateFormat
 
 class WriteNoticeActivity : AppCompatActivity() {
 
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityWriteNoticeBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val api = APIS.create()
-        val current =  System.currentTimeMillis()
+        val current = System.currentTimeMillis()
         val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         val date: String = formatter.format(current)
         val addNotice = binding.addNotice
         val btnCancel = binding.btnCancel
+
+        var type = intent.getIntExtra("type", 99999)
+        var key = 0
+        var userID = intent.getStringExtra("ID").toString()
+
+        val editType = intent.getIntExtra("edit", 0) //수정인지 체크
+        if (editType == 1) {
+            addNotice.text = "수정"
+            key = intent.getIntExtra("key", 99999)
+        }
+
 
         btnCancel.setOnClickListener {
             finish()
@@ -40,26 +52,48 @@ class WriteNoticeActivity : AppCompatActivity() {
         addNotice.setOnClickListener {
             val editTitle = binding.editTitle.text.toString()
             val editContents = binding.editNotice.text.toString()
-            val type = intent.getIntExtra("type", 1111)
-            api.notice_save(
-                type,
-                editTitle,
-                intent.getStringExtra("ID").toString(),
-                date,
-                editContents
-            ).enqueue(object : Callback<PostModel> {
-                override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
-                }
+            if (editType == 1) {
+                api.notice_update(
+                    type,
+                    key,
+                    editTitle,
+                    editContents
+                ).enqueue(object : Callback<PostModel> {
+                    override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
+                    }
 
-                override fun onFailure(p0: Call<PostModel>, t: Throwable) {
-                }
+                    override fun onFailure(call: Call<PostModel>, t: Throwable) {
+                    }
 
-            })
-            Handler().postDelayed({
-                setResult(Activity.RESULT_OK, intent)
-                finish()
-            },1000)
+                })
+                Handler().postDelayed({
+                    intent.apply {
+                        putExtra("title", editTitle)
+                        putExtra("contents", editContents)
+                    }
+                    setResult(Activity.RESULT_OK, intent)
+                    finish()
+                }, 1000)
+            } else {
+                api.notice_save(
+                    type,
+                    editTitle,
+                    userID,
+                    date,
+                    editContents
+                ).enqueue(object : Callback<PostModel> {
+                    override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
+                    }
+
+                    override fun onFailure(p0: Call<PostModel>, t: Throwable) {
+                    }
+
+                })
+                Handler().postDelayed({
+                    setResult(Activity.RESULT_OK, intent)
+                    finish()
+                }, 1000)
+            }
         }
-
     }
 }

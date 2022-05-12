@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.WriteNoticeActivity
@@ -54,6 +55,12 @@ class AnnoListFragment : Fragment() {
         binding = FragmentAnnoListBinding.inflate(inflater, container, false)
 
         val dividerItemDecoration = DividerItemDecoration(context, RecyclerView.VERTICAL)
+
+        val manager = LinearLayoutManager(context)
+        manager.reverseLayout = true
+        manager.stackFromEnd = true
+
+        binding.recyclerView.layoutManager = manager
         binding.recyclerView.addItemDecoration(dividerItemDecoration)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {})
@@ -64,7 +71,7 @@ class AnnoListFragment : Fragment() {
 
         val addNote = binding.addNote
 
-        if (userID == "123") {
+        if (userID == "Admin") {
             addNote.visibility = View.VISIBLE
         } else {
             addNote.visibility = View.GONE
@@ -85,9 +92,7 @@ class AnnoListFragment : Fragment() {
         getResult0 = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
-            Log.d("아이디2: ", "$userID")
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
-                Log.d("겟리", "ok")
                 posting()
             }
             adapter.notifyDataSetChanged()

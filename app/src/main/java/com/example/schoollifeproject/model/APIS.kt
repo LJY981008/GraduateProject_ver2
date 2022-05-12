@@ -235,6 +235,19 @@ interface APIS {
         @Field("userID") userID: String
     ): Call<PostModel>
 
+    @Headers(
+        "accept: application/json",
+        "content-type: application/x-www-form-urlencoded; charset=utf-8"
+    )
+    @FormUrlEncoded
+    @POST(MyApp.note_update_url)
+    fun notice_update(
+        @Field("type") type: Int,
+        @Field("key") key: Int,
+        @Field("title") title: String,
+        @Field("contents") contents: String
+    ): Call<PostModel>
+
     companion object { // static 처럼 공유객체로 사용가능함. 모든 인스턴스가 공유하는 객체로서 동작함.
 
         private const val BASE_URL = "https://hjk709914.cafe24.com"

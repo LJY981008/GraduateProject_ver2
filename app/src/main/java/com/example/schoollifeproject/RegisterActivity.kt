@@ -47,7 +47,7 @@ class RegisterActivity : AppCompatActivity() {
                 if (pw == rePw) isPWSame = true
             }
 
-            if (id == "nothing") {
+            if (id == "nothing" || id == "Admin") {
                 dialog("nothingID")
             } else if (!isExistBlank && isPWSame) {
 
