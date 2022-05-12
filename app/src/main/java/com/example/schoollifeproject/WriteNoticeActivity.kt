@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.schoollifeproject.databinding.ActivityWriteNoticeBinding
 import com.example.schoollifeproject.model.APIS
@@ -40,7 +41,7 @@ class WriteNoticeActivity : AppCompatActivity() {
 
 
 
-        val editType = intent.getIntExtra("edit", 0) //수정인지 체크
+        var editType = intent.getIntExtra("edit", 0) //수정인지 체크
         if (editType == 1) {
             addNotice.text = "수정"
             key = intent.getIntExtra("key", 99999)
@@ -58,6 +59,7 @@ class WriteNoticeActivity : AppCompatActivity() {
         addNotice.setOnClickListener {
             val editTitle = binding.editTitle.text.toString()
             val editContents = binding.editNotice.text.toString()
+            if(binding.editTitle.text.isBlank() || binding.editNotice.text.isBlank()) editType = 2
             if (editType == 1) {
                 api.notice_update(
                     type,
@@ -80,7 +82,7 @@ class WriteNoticeActivity : AppCompatActivity() {
                     setResult(Activity.RESULT_OK, intent)
                     finish()
                 }, 1000)
-            } else {
+            } else if(editType == 0){
                 api.notice_save(
                     type,
                     editTitle,
@@ -99,6 +101,8 @@ class WriteNoticeActivity : AppCompatActivity() {
                     setResult(Activity.RESULT_OK, intent)
                     finish()
                 }, 1000)
+            }else{
+                Toast.makeText(this, "빈공간이 없도록 작성해주세요.", Toast.LENGTH_SHORT).show()
             }
         }
     }
