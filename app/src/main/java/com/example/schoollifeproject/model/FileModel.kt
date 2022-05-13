@@ -10,12 +10,15 @@ class FileModel(
     @Expose
     @SerializedName("fileRealName")
     private val fileRealName: String,
-    ext: String
+    private val ext: String
 ) {
     fun getFileName():String {
         return fileName
     }
     fun getFileRealName():String {
         return fileRealName
+    }
+    fun getExt(): String {
+        return ext
     }
 }

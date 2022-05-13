@@ -76,7 +76,6 @@ class InfoListFragment : Fragment() {
         //비회원 글작성버튼 삭제
         addNote.setOnClickListener {
             if (userID == "비회원") {
-                //TODO:이용불가알람만들기
                 Log.d("비회원글쓰기", "ㅂ")
             } else {
                 val intent = Intent(context, WriteNoticeActivity::class.java)

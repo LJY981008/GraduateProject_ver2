@@ -1,6 +1,5 @@
 package com.gyso.treeview;
 
-
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
@@ -45,9 +44,6 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-/**
- * guaishouN 674149099@qq.com
- */
 
 public class TreeViewContainer extends ViewGroup implements TreeViewNotifier {
     private static final String TAG = TreeViewContainer.class.getSimpleName();
@@ -176,8 +172,6 @@ public class TreeViewContainer extends ViewGroup implements TreeViewNotifier {
         scale = Math.max(hr, wr);
         minScale = 1f/scale;
         if(Math.abs(scale-1)>0.01f){
-            //setPivotX((winWidth*scale-viewWidth)/(2*(scale-1)));
-            //setPivotY((winHeight*scale-viewHeight)/(2*(scale-1)));
             setPivotX(0);
             setPivotY(0);
             setScaleX(1f/scale);
@@ -194,8 +188,10 @@ public class TreeViewContainer extends ViewGroup implements TreeViewNotifier {
         values[Matrix.MTRANS_Y]=0f;
         centerMatrix.setValues(values);
         setTouchDelegate();
-        // TODO: 노드 추가하거나 수정할 때 중앙으로 정렬(크기 조절x)
-        focusMidLocation();
+
+        animate().translationX(-viewWidth/2.4f)
+                .translationY(-viewHeight/2.4f)
+                .start();
     }
 
     /**

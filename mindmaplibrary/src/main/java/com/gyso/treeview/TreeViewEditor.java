@@ -10,20 +10,6 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-/**
- * @Author: 怪兽N
- * @Time: 2021/6/9  15:31
- * @Email: 674149099@qq.com
- * @WeChat: guaishouN
- * @Describe: Android developer
- *
- * helper you edit your tree view.
- * Move node by dragging and remove node is support now.
- *
- * Note:
- * 1 An adapter must be set to GysoTreeView before you get an editor
- * 2 If you has set a new adapter, you should get an new editor
- */
 public class TreeViewEditor {
     private final WeakReference<TreeViewAdapter<?>> adapterWeakReference;
     private final WeakReference<TreeViewContainer> containerWeakReference;

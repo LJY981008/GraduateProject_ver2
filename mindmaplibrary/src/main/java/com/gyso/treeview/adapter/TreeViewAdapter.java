@@ -11,11 +11,6 @@ import com.gyso.treeview.model.NodeModel;
 import com.gyso.treeview.model.TreeModel;
 
 /**
- * @Author: 怪兽N
- * @Time: 2021/4/23  15:19
- * @Email: 674149099@qq.com
- * @WeChat: guaishouN
- * @Describe:
  * The view adapter for the {@link com.gyso.treeview.TreeViewContainer}
  */
 public abstract class TreeViewAdapter<T> {
