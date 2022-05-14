@@ -61,6 +61,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
+
         btnDestroy = binding.btnDestroy
         btnLogin = binding.btnLogin
         btnRegister = binding.btnRegister
@@ -168,7 +170,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (System.currentTimeMillis() - backWait < 2000) {
+        if (System.currentTimeMillis() - backWait < 1000) {
             finishAffinity()
             exitProcess(0)
         }

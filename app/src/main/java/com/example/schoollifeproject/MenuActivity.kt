@@ -30,8 +30,6 @@ import kotlin.system.exitProcess
  * 로그인 후 메뉴 Activity
  * 작성자 : 이준영, 박동훈
  */
-
-// TODO : menu-자유게시판, contacts_main_board.xml, Fragment-공지사항/공부게시판, 디자인
 class MenuActivity : AppCompatActivity() {
     private val annoContactsList: MutableList<NoticeListModel> = mutableListOf()
     private val mapContactsList: MutableList<MapListModel> = mutableListOf()
@@ -374,7 +372,7 @@ class MenuActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (System.currentTimeMillis() - backWait < 2000) {
+        if (System.currentTimeMillis() - backWait < 1000) {
             finishAffinity()
             exitProcess(0)
         }

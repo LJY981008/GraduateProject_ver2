@@ -132,35 +132,5 @@ class NoticeActivity : AppCompatActivity() {
                 readAdapter.notifyDataSetChanged()
             }
         }
-
-
-        //val views = 100
-        //해당 글의 키를 가져와 표시
-
-
-        //버튼 기능으로 댓글 작성 및 저장 최신화
-        /*val btn_commitComment = binding.commentBtn
-        var commentBlank = false
-
-        btn_commitComment.setOnClickListener {
-            val comment = binding.commentEdit.text.toString()
-            Log.d("댓글", "눌림 : $comment")
-
-            if (comment.isBlank()) {
-                commentBlank = true
-            }
-
-            if (!commentBlank) {
-                val contacts =
-                    NoteCommentContacts(
-                        writer,
-                        formatted,
-                        comment
-                    )
-                commentContactsList.add(contacts)
-                commentAdapter.notifyDataSetChanged()
-            }
-        }*/
-
     }
 }

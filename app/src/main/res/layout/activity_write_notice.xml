@@ -30,6 +30,7 @@
             android:layout_marginBottom="10dp"
             android:ems="18"
             android:fontFamily="@font/title_font1"
+            android:gravity="top"
             android:hint="내용"
             android:maxLength="18"
             android:maxLines="18"
@@ -55,7 +56,7 @@
                 android:background="@drawable/bg_button"
                 android:fontFamily="@font/title_font1"
                 android:text="저장"
-                android:textSize="16sp" />
+                android:textSize="20sp" />
 
             <Button
                 android:id="@+id/btnCancel"
@@ -65,7 +66,7 @@
                 android:background="@drawable/bg_button"
                 android:fontFamily="@font/title_font1"
                 android:text="취소"
-                android:textSize="16sp" />
+                android:textSize="20sp" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

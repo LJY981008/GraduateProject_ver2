@@ -20,6 +20,7 @@ interface APIS {
         "accept: application/json",
         "content-type: application/x-www-form-urlencoded; charset=utf-8"
     )
+    //로그인 정보 호출
     @FormUrlEncoded
     @POST(MyApp.login_url)
     fun login_users(
@@ -162,10 +163,6 @@ interface APIS {
         @Field("mapID") mapID: String
     ): Call<PostModel>
 
-    @Headers(
-        "accept: application/json",
-        "content-type: application/x-www-form-urlencoded; charset=utf-8"
-    )
     @Multipart // @Multipart 사용 시 @Part로 보내줘야 한다.
     @POST(MyApp.item_file_save_url)
     fun item_file_save(
@@ -174,10 +171,6 @@ interface APIS {
         @Part("itemID") itemID: String
     ): Call<String>
 
-    @Headers(
-        "accept: application/json",
-        "content-type: application/x-www-form-urlencoded; charset=utf-8"
-    )
     @FormUrlEncoded
     @POST(MyApp.item_file_load_url)
     fun item_file_load(
@@ -185,10 +178,19 @@ interface APIS {
         @Field("itemID") itemID: String
     ): Call<List<FileModel>>
 
-    @Headers(
-        "accept: application/json",
-        "content-type: application/x-www-form-urlencoded; charset=utf-8"
-    )
+    @FormUrlEncoded
+    @POST(MyApp.item_file_del_url)
+    fun item_file_del(
+        @Field("userID") userID: String,
+        @Field("itemID") itemID: String,
+        @Field("fileRealName") fileRealName: String
+    ): Call<PostModel>
+
+    @GET
+    fun item_file_down(
+        @Url filePath: String
+    ): Call<ResponseBody>
+
     @FormUrlEncoded
     @POST(MyApp.note_delete_url)
     fun note_delete(
@@ -205,15 +207,6 @@ interface APIS {
     fun logout(
         @Field("userID") userID: String
     ): Call<PostModel>
-
-    @Headers(
-        "accept: application/json",
-        "content-type: application/x-www-form-urlencoded; charset=utf-8"
-    )
-    @GET
-    fun item_file_down(
-        @Url filePath: String
-    ): Call<ResponseBody>
 
     @Headers(
         "accept: application/json",
