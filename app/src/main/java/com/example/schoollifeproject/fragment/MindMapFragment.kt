@@ -158,7 +158,7 @@ class MindMapFragment : Fragment() {
         /**
          * 마인드맵 기본 구성
          */
-        val root: NodeModel<ItemModel> = NodeModel<ItemModel>(ItemModel("root", "root", null, null))
+        val root: NodeModel<ItemModel> = NodeModel<ItemModel>(ItemModel("root", "UNINOTE", null, null))
         val mapView: TreeModel<ItemModel> = TreeModel(root)
 
         val grade1: NodeModel<ItemModel> =
@@ -229,6 +229,7 @@ class MindMapFragment : Fragment() {
                             (if (i.getNum() != null) i.getNum()!! else throw NullPointerException("Expression 'i.getNum()' must not be null"))
                         itemMaxNum++
                         Log.d("$TAG", "item_load/itemMaxNum: ${itemMaxNum}")
+
                         editor.focusMidLocation()
                     }
                 }
@@ -366,19 +367,13 @@ class MindMapFragment : Fragment() {
             val content = setContent.text.toString()
             val note = setNote.text.toString()
 
-            if (content != "") {
-                val view = editor.container.getTreeViewHolder(node).view
-                node.value.setContent(content)
-                node.value.setNote(note)
-                view.findViewById<TextView>(R.id.content).text = content
-                saveDB(node, view, "update")
-                editor.focusMidLocation()
-                itemSetWindow.dismiss()
-            } else {
-                Toast.makeText(
-                    mapContext, "제목(내용)이 비어있습니다.", Toast.LENGTH_SHORT
-                ).show()
-            }
+            val view = editor.container.getTreeViewHolder(node).view
+            node.value.setContent(content)
+            node.value.setNote(note)
+            view.findViewById<TextView>(R.id.content).text = content
+            saveDB(node, view, "update")
+            editor.focusMidLocation()
+            itemSetWindow.dismiss()
         }
 
         backButton.setOnClickListener {
@@ -565,6 +560,7 @@ class MindMapFragment : Fragment() {
                         }
                     })
                 warnSetWindow.dismiss()
+                reload()
             }
             cancelButton.setOnClickListener {
                 warnSetWindow.dismiss()
@@ -724,7 +720,7 @@ class MindMapFragment : Fragment() {
                                     NodeModel<ItemModel>(
                                         ItemModel(
                                             "${parent}_item${itemMaxNum}$last",
-                                            "ChildNode",
+                                            "",
                                             itemMaxNum++,
                                             ""
                                         )
