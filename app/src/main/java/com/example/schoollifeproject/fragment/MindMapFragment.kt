@@ -158,7 +158,8 @@ class MindMapFragment : Fragment() {
         /**
          * 마인드맵 기본 구성
          */
-        val root: NodeModel<ItemModel> = NodeModel<ItemModel>(ItemModel("root", "UNINOTE", null, null))
+        val root: NodeModel<ItemModel> =
+            NodeModel<ItemModel>(ItemModel("root", "UNINOTE", null, null))
         val mapView: TreeModel<ItemModel> = TreeModel(root)
 
         val grade1: NodeModel<ItemModel> =
@@ -180,6 +181,7 @@ class MindMapFragment : Fragment() {
          * 마인드맵 추가/제거 관련 객체
          */
         val editor: TreeViewEditor = binding.mapView.editor
+
 
         /**
          * mapID 체크해 DB에서 마인드맵 노드 불러오기
@@ -229,9 +231,8 @@ class MindMapFragment : Fragment() {
                             (if (i.getNum() != null) i.getNum()!! else throw NullPointerException("Expression 'i.getNum()' must not be null"))
                         itemMaxNum++
                         Log.d("$TAG", "item_load/itemMaxNum: ${itemMaxNum}")
-
-                        editor.focusMidLocation()
                     }
+                    editor.focusMidLocation()
                 }
             }
 
@@ -268,7 +269,11 @@ class MindMapFragment : Fragment() {
                 Log.d("$TAG", "map_popular: 리스폰 실패 : $t")
             }
         })
+        Handler().postDelayed({
+            editor.focusMidLocation()
+        }, 1000)
         itemEvent(editor, adapter)
+
     }
 
     /**
@@ -1114,7 +1119,7 @@ class MindMapFragment : Fragment() {
                             MediaStore.MediaColumns.RELATIVE_PATH + "=?"
                         } else "_id=?"
                         val selectionArgs = arrayOf(Environment.DIRECTORY_DOCUMENTS)
-                        return getDataColumn(con!!, contentUri,selection,selectionArgs)
+                        return getDataColumn(con!!, contentUri, selection, selectionArgs)
                     }
                     val selection = "_id=?"
                     val selectionArgs = arrayOf(split[1])
