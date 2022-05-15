@@ -37,12 +37,8 @@ class NoteReadListAdapter(private val itemList: List<NoteReadContacts>) :
             binding.title.text = item.title
             binding.date.text = item.date
             binding.writer.text = item.writer
-            binding.content.text =
-                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N) {
-                    Html.fromHtml(item.contents)
-                } else {
-                    Html.fromHtml(item.contents, Html.FROM_HTML_MODE_LEGACY);
-                }
+            binding.content.text = Html.fromHtml(item.contents).toString()
+
         }
     }
 }
