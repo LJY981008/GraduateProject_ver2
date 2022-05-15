@@ -627,7 +627,9 @@ public class TreeViewContainer extends ViewGroup implements TreeViewNotifier {
     }
 
     /**
-     * Prepare moving, adding or removing nodes, record the last one node as an anchor node on view port, so that make it looks smooth change
+     * Prepare moving, adding or removing nodes,
+     * record the last one node as an anchor node on view port,
+     * so that make it looks smooth change
      *
      * @param targetNode the target one
      */

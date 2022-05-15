@@ -162,6 +162,7 @@ public class NodeModel<T> implements Serializable {
             stack.addAll(childNodes);
         }
     }
+
     /**
      * traverse all sub node include self
      * @param next callback

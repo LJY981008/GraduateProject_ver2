@@ -66,32 +66,32 @@ class ItemAdapter : TreeViewAdapter<ItemModel>() {
         var i = 0
         contentView.text = item.getContent()
 
-            nodeBack.setOnClickListener { v ->
-                i++
-                val handler = Handler()
-                val r = Runnable { i = 0 }
+        nodeBack.setOnClickListener { v ->
+            i++
+            val handler = Handler()
+            val r = Runnable { i = 0 }
 
-                if (i == 1) {
-                    handler.postDelayed(r, 250);
-                    if (mapEditable) {
-                        listener.onItemClick(v, node)
-                    }
-                } else if (i == 2) {
-                    i = 0;
-                    if (mapEditable) {
-                        doubleClicklistener.onItemDoubleClick(v, node, true)
-                    } else {
-                        doubleClicklistener.onItemDoubleClick(v, node, false)
-                    }
+            if (i == 1) {
+                handler.postDelayed(r, 250);
+                if (mapEditable) {
+                    listener.onItemClick(v, node)
+                }
+            } else if (i == 2) {
+                i = 0;
+                if (mapEditable) {
+                    doubleClicklistener.onItemDoubleClick(v, node, true)
+                } else {
+                    doubleClicklistener.onItemDoubleClick(v, node, false)
                 }
             }
+        }
 
-            nodeBack.setOnLongClickListener { v ->
-                if(mapEditable) {
-                    longClickListener.onItemLongClick(v, node)
-                }
-                true
+        nodeBack.setOnLongClickListener { v ->
+            if (mapEditable) {
+                longClickListener.onItemLongClick(v, node)
             }
+            true
+        }
     }
 
     override fun onDrawLine(drawInfo: DrawInfo): BaseLine? {

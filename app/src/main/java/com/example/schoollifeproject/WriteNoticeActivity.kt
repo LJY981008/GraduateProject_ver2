@@ -2,12 +2,11 @@ package com.example.schoollifeproject
 
 import android.app.Activity
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import com.example.schoollifeproject.databinding.ActivityWriteNoticeBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.PostModel
@@ -21,7 +20,6 @@ import java.text.SimpleDateFormat
  * */
 
 class WriteNoticeActivity : AppCompatActivity() {
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,8 +37,6 @@ class WriteNoticeActivity : AppCompatActivity() {
         var key = 0
         var userID = intent.getStringExtra("ID").toString()
 
-
-
         var editType = intent.getIntExtra("edit", 0) //수정인지 체크
         if (editType == 1) {
             addNotice.text = "수정"
@@ -51,7 +47,6 @@ class WriteNoticeActivity : AppCompatActivity() {
             binding.editNotice.setText(thisContents)
         }
 
-
         btnCancel.setOnClickListener {
             finish()
         }
@@ -59,7 +54,7 @@ class WriteNoticeActivity : AppCompatActivity() {
         addNotice.setOnClickListener {
             val editTitle = binding.editTitle.text.toString()
             val editContents = binding.editNotice.text.toString()
-            if(binding.editTitle.text.isBlank() || binding.editNotice.text.isBlank()) editType = 2
+            if (binding.editTitle.text.isBlank() || binding.editNotice.text.isBlank()) editType = 2
             if (editType == 1) {
                 api.notice_update(
                     type,
@@ -82,7 +77,7 @@ class WriteNoticeActivity : AppCompatActivity() {
                     setResult(Activity.RESULT_OK, intent)
                     finish()
                 }, 1000)
-            } else if(editType == 0){
+            } else if (editType == 0) {
                 api.notice_save(
                     type,
                     editTitle,
@@ -101,8 +96,8 @@ class WriteNoticeActivity : AppCompatActivity() {
                     setResult(Activity.RESULT_OK, intent)
                     finish()
                 }, 1000)
-            }else{
-                Toast.makeText(this, "빈공간이 없도록 작성해주세요.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "제목 또는 내용이 비어있습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }

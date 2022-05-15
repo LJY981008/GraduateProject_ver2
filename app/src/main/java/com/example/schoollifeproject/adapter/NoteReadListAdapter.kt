@@ -1,10 +1,12 @@
 package com.example.schoollifeproject.adapter
 
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schoollifeproject.databinding.ContactsNoticeReadBinding
 import com.example.schoollifeproject.model.NoteReadContacts
+
 /**
  * 게시글 RecyclerView Adapter
  * */
@@ -35,7 +37,12 @@ class NoteReadListAdapter(private val itemList: List<NoteReadContacts>) :
             binding.title.text = item.title
             binding.date.text = item.date
             binding.writer.text = item.writer
-            binding.content.text = item.contents
+            binding.content.text =
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N) {
+                    Html.fromHtml(item.contents)
+                } else {
+                    Html.fromHtml(item.contents, Html.FROM_HTML_MODE_LEGACY);
+                }
         }
     }
 }

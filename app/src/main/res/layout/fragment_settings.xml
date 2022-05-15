@@ -6,8 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".fragment.SettingsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-
     <Button
         android:id="@+id/btnLogout"
         style="@style/Widget.AppCompat.Button.Borderless"

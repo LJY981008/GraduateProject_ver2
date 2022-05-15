@@ -148,7 +148,6 @@ class MindMapFragment : Fragment() {
 
     }
 
-
     private fun initWidgets() {
         val treeLayoutManager = getTreeLayoutManager()
 
@@ -158,8 +157,7 @@ class MindMapFragment : Fragment() {
         /**
          * 마인드맵 기본 구성
          */
-        val root: NodeModel<ItemModel> =
-            NodeModel<ItemModel>(ItemModel("root", "UNINOTE", null, null))
+        val root: NodeModel<ItemModel> = NodeModel<ItemModel>(ItemModel("root", "UNINOTE", null, null))
         val mapView: TreeModel<ItemModel> = TreeModel(root)
 
         val grade1: NodeModel<ItemModel> =
@@ -181,7 +179,6 @@ class MindMapFragment : Fragment() {
          * 마인드맵 추가/제거 관련 객체
          */
         val editor: TreeViewEditor = binding.mapView.editor
-
 
         /**
          * mapID 체크해 DB에서 마인드맵 노드 불러오기
@@ -840,7 +837,6 @@ class MindMapFragment : Fragment() {
          * 공개/비공개 전환 가능, 비공개인 경우 패스워드 입력/설정
          */
         binding.publicButton.setOnClickListener {
-            // TODO : public 버튼 오류
             publicSet(this.adapter.mapEditable)
         }
 
@@ -1067,7 +1063,7 @@ class MindMapFragment : Fragment() {
 
     private fun getTreeLayoutManager(): TreeLayoutManager {
         val space_50dp = 30
-        val space_20dp = 20
+        val space_20dp = 50
         val line = getLine()
         return CompactHorizonLeftAndRightLayoutManager(mapContext, space_50dp, space_20dp, line);
     }
@@ -1119,7 +1115,7 @@ class MindMapFragment : Fragment() {
                             MediaStore.MediaColumns.RELATIVE_PATH + "=?"
                         } else "_id=?"
                         val selectionArgs = arrayOf(Environment.DIRECTORY_DOCUMENTS)
-                        return getDataColumn(con!!, contentUri, selection, selectionArgs)
+                        return getDataColumn(con!!, contentUri,selection,selectionArgs)
                     }
                     val selection = "_id=?"
                     val selectionArgs = arrayOf(split[1])

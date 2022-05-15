@@ -4,7 +4,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
-import com.gyso.treeview.TreeViewContainer;
 import com.gyso.treeview.line.BaseLine;
 import com.gyso.treeview.listener.TreeViewNotifier;
 import com.gyso.treeview.model.NodeModel;
@@ -24,22 +23,25 @@ public abstract class TreeViewAdapter<T> {
 
     /**
      * Get tree model
+     *
      * @return tree model
      */
-    public TreeModel<T> getTreeModel(){
+    public TreeModel<T> getTreeModel() {
         return treeModel;
     }
 
     /**
      * For create view holder by your self
+     *
      * @param viewGroup parent
-     * @param model node
+     * @param model     node
      * @return holder
      */
     public abstract TreeViewHolder<T> onCreateViewHolder(@NonNull ViewGroup viewGroup, NodeModel<T> model);
 
     /**
      * when bind the holder, set up you view
+     *
      * @param holder holder
      */
     public abstract void onBindViewHolder(@NonNull TreeViewHolder<T> holder);
@@ -47,6 +49,7 @@ public abstract class TreeViewAdapter<T> {
     /**
      * Draw line between node and node by you decision.
      * If you return an BaseLine, line will be draw by the return one instead of TreeViewLayoutManager's.
+     *
      * @param drawInfo provides all you need to draw you line
      * @return the line draw you want to use for different nodes
      */
@@ -54,25 +57,26 @@ public abstract class TreeViewAdapter<T> {
 
     /**
      * for recycling holder, exactly for recycling views
+     *
      * @param node
      * @return
      */
-    public int getHolderType(NodeModel<?> node){
+    public int getHolderType(NodeModel<?> node) {
         return 0;
     }
 
-    public void setNotifier(TreeViewNotifier notifier){
+    public void setNotifier(TreeViewNotifier notifier) {
         this.notifier = notifier;
     }
 
-    public void notifyDataSetChange(){
-        if(notifier!=null){
+    public void notifyDataSetChange() {
+        if (notifier != null) {
             notifier.onDataSetChange();
         }
     }
 
-    public void notifyItemViewChange(NodeModel<T> node){
-        if(notifier!=null){
+    public void notifyItemViewChange(NodeModel<T> node) {
+        if (notifier != null) {
             notifier.onItemViewChange(node);
         }
     }
