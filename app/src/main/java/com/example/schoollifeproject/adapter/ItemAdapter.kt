@@ -17,7 +17,10 @@ import com.gyso.treeview.line.BaseLine
 import com.gyso.treeview.line.DashLine
 import com.gyso.treeview.model.NodeModel
 
-
+/**
+ * 로드맵(마인드맵) Item View Adapter
+ * 작성자 : 박동훈
+ */
 class ItemAdapter : TreeViewAdapter<ItemModel>() {
     private val dashLine = DashLine(Color.parseColor("#F06292"), 6)
     private lateinit var listener: OnItemClickListener

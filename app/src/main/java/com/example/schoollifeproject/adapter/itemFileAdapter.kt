@@ -1,6 +1,5 @@
 package com.example.schoollifeproject.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +9,10 @@ import com.example.schoollifeproject.R
 import com.example.schoollifeproject.databinding.ContactsItemFileBinding
 import com.example.schoollifeproject.model.FileModel
 
+/**
+ * 로드맵(마인드맵) File RecyclerView Adapter
+ * 작성자 : 박동훈
+ */
 class ItemFileAdapter(private val itemList: MutableList<FileModel>) :
     RecyclerView.Adapter<ItemFileAdapter.ItemFileViewHolder>() {
 
@@ -48,7 +51,7 @@ class ItemFileAdapter(private val itemList: MutableList<FileModel>) :
         val item = itemList[position]
         holder.apply {
             bind(item)
-            if(!mapEditable)
+            if (!mapEditable)
                 holder.delButton.visibility = View.INVISIBLE
         }
 
@@ -66,11 +69,17 @@ class ItemFileAdapter(private val itemList: MutableList<FileModel>) :
         //게시글에 등록될 Text
         fun bind(item: FileModel) {
             binding.fileNameText.text = item.getFileName()
-            if(item.getExt() == "jpg" || item.getExt() == "png")
+
+            if (item.getExt().compareTo("jpg", true) == 0 ||
+                item.getExt().compareTo("png", true) == 0
+            )
                 binding.fileTypeImage.setImageResource(R.drawable.ic_item_file_image)
-            else if(item.getExt() == "ppt" || item.getExt() == "pptx" || item.getExt() == "hwp")
+            else if (item.getExt().compareTo("ppt", true) == 0 ||
+                item.getExt().compareTo("pptx", true) == 0 ||
+                item.getExt().compareTo("hwp", true) == 0
+            )
                 binding.fileTypeImage.setImageResource(R.drawable.ic_item_file_docs)
-            else if(item.getExt() == "zip")
+            else if (item.getExt().compareTo("zip", true) == 0)
                 binding.fileTypeImage.setImageResource(R.drawable.ic_item_file_zip)
         }
 

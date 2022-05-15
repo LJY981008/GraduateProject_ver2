@@ -17,8 +17,7 @@ import java.text.SimpleDateFormat
 
 /**
  * 글작성 클릭 실행 Activity
- * */
-
+ */
 class WriteNoticeActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -41,10 +40,10 @@ class WriteNoticeActivity : AppCompatActivity() {
         if (editType == 1) {
             addNotice.text = "수정"
             key = intent.getIntExtra("key", 99999)
-            val thisTitle = intent.getStringExtra("thisTitle").toString()
-            val thisContents = intent.getStringExtra("thisContents").toString()
-            binding.editTitle.setText(thisTitle)
-            binding.editNotice.setText(thisContents)
+            val title = intent.getStringExtra("title").toString()
+            val content = intent.getStringExtra("content").toString()
+            binding.editTitle.setText(title)
+            binding.editNotice.setText(content)
         }
 
         btnCancel.setOnClickListener {
@@ -53,14 +52,14 @@ class WriteNoticeActivity : AppCompatActivity() {
 
         addNotice.setOnClickListener {
             val editTitle = binding.editTitle.text.toString()
-            val editContents = binding.editNotice.text.toString()
+            val editcontent = binding.editNotice.text.toString()
             if (binding.editTitle.text.isBlank() || binding.editNotice.text.isBlank()) editType = 2
             if (editType == 1) {
                 api.notice_update(
                     type,
                     key,
                     editTitle,
-                    editContents
+                    editcontent
                 ).enqueue(object : Callback<PostModel> {
                     override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
                     }
@@ -72,7 +71,7 @@ class WriteNoticeActivity : AppCompatActivity() {
                 Handler().postDelayed({
                     intent.apply {
                         putExtra("title", editTitle)
-                        putExtra("contents", editContents)
+                        putExtra("content", editcontent)
                     }
                     setResult(Activity.RESULT_OK, intent)
                     finish()
@@ -83,7 +82,7 @@ class WriteNoticeActivity : AppCompatActivity() {
                     editTitle,
                     userID,
                     date,
-                    editContents
+                    editcontent
                 ).enqueue(object : Callback<PostModel> {
                     override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
                     }

@@ -27,7 +27,7 @@ import retrofit2.Response
 import kotlin.system.exitProcess
 
 /**
- * 로그인 후 메뉴 Activity
+ * MenuActivity
  * 작성자 : 이준영, 박동훈
  */
 class MenuActivity : AppCompatActivity() {
@@ -355,7 +355,6 @@ class MenuActivity : AppCompatActivity() {
         /**
          * 정상적인 종료시 로그인 정보 삭제
          */
-        Log.d("종료함0", "ㅂㅂㅂ")
         if (userID != "비회원") {
             val api = APIS.create()
             Shared.prefs.setString("id", "nothing")

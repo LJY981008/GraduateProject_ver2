@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
-import com.example.schoollifeproject.MenuActivity
 import com.example.schoollifeproject.R
 import com.example.schoollifeproject.adapter.ItemAdapter
 import com.example.schoollifeproject.adapter.ItemFileAdapter
@@ -49,10 +48,9 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.*
-import kotlin.system.exitProcess
 
 /**
- * 로드맵 Fragment
+ * 로드맵(마인드맵) Fragment
  * 작성자 : 박동훈
  */
 class MindMapFragment : Fragment() {
@@ -90,6 +88,9 @@ class MindMapFragment : Fragment() {
         return mindMapFragment
     }
 
+    /**
+     * 접속한 userID와 mapID가 다를 경우 수정 못하게 설정
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -101,6 +102,7 @@ class MindMapFragment : Fragment() {
         userID = arguments?.getString("userID").toString() // menuActivity를 통해 받은 userID
         mapID = arguments?.getString("mapID").toString() // menuActivity를 통해 받은 userID
         Log.d("$TAG", "userID: ${userID}, ${mapID}")
+
         if (userID != mapID) {
             adapter.mapEditable = false
             binding.publicButton.visibility = View.GONE
@@ -113,10 +115,10 @@ class MindMapFragment : Fragment() {
         return binding.root
     }
 
+    /**
+     * mapID 체크해 DB에서 마인드맵 공개여부 확인
+     */
     private fun publicCheck() {
-        /**
-         * mapID 체크해 DB에서 마인드맵 공개여부 확인
-         */
         api.map_public(mapID).enqueue(object : Callback<PostModel> {
             override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
                 Log.d(
@@ -148,6 +150,9 @@ class MindMapFragment : Fragment() {
 
     }
 
+    /**
+     * 로드맵 기본 구성
+     */
     private fun initWidgets() {
         val treeLayoutManager = getTreeLayoutManager()
 
@@ -155,9 +160,10 @@ class MindMapFragment : Fragment() {
         binding.mapView.setTreeLayoutManager(treeLayoutManager)
 
         /**
-         * 마인드맵 기본 구성
+         * 루트와 학년별 아이템 생성
          */
-        val root: NodeModel<ItemModel> = NodeModel<ItemModel>(ItemModel("root", "UNINOTE", null, null))
+        val root: NodeModel<ItemModel> =
+            NodeModel<ItemModel>(ItemModel("root", "UNINOTE", null, null))
         val mapView: TreeModel<ItemModel> = TreeModel(root)
 
         val grade1: NodeModel<ItemModel> =
@@ -176,12 +182,12 @@ class MindMapFragment : Fragment() {
         adapter.treeModel = mapView
 
         /**
-         * 마인드맵 추가/제거 관련 객체
+         * 로드맵 추가/제거 관련 객체
          */
         val editor: TreeViewEditor = binding.mapView.editor
 
         /**
-         * mapID 체크해 DB에서 마인드맵 노드 불러오기
+         * mapID 체크해 DB에서 로드맵 아이템 불러오기
          */
         api.item_load(mapID).enqueue(object : Callback<List<ItemModel>> {
             override fun onResponse(
@@ -327,6 +333,9 @@ class MindMapFragment : Fragment() {
         }
     }
 
+    /**
+     * 로드맵 아이템 정보 수정 (BottomNavigationMenu 2 OR adapter.setOnItemDoubleListener)
+     */
     private fun setItem(node: NodeModel<ItemModel>, editor: TreeViewEditor, b: Boolean) {
 
         val setWindow: View =
@@ -388,6 +397,9 @@ class MindMapFragment : Fragment() {
         }
     }
 
+    /**
+     * 로드맵 아이템 파일 정보 수정
+     */
     private fun saveFileDB(
         node: NodeModel<ItemModel>,
         editor: TreeViewEditor,
@@ -492,6 +504,7 @@ class MindMapFragment : Fragment() {
                         "application/vnd.openxmlformats-officedocument.presentationml.presentation",
                         "application/zip",
                         "image/jpg",
+                        "image/jpeg",
                         "image/png",
                         "application/vnd.hancom.hwp",
                         "application/haansofthwp",
@@ -630,6 +643,9 @@ class MindMapFragment : Fragment() {
         }
     }
 
+    /**
+     * item 관련 이벤트
+     */
     private fun itemEvent(editor: TreeViewEditor, adapter: ItemAdapter) {
 
         editor.container.isAnimateAdd = true
@@ -656,11 +672,14 @@ class MindMapFragment : Fragment() {
                         val ar: List<String> = path!!.split('.')
                         val ext = ar[ar.size - 1]
 
+                        Log.d("$TAG", "resultlauncher??: $ext")
+
+
                         // zip jpg png hwp pptx ppt
-                        if (ext == "zip" || ext == "jpg" || ext == "png"
-                            || ext == "hwp" || ext == "ppt" || ext == "pptx"
+                        if (ext.compareTo("zip", true) == 0 || ext.compareTo("jpg", true) == 0 ||
+                            ext.compareTo("png", true) == 0 || ext.compareTo("hwp", true) == 0 ||
+                            ext.compareTo("ppt", true) == 0 || ext.compareTo("pptx", true) == 0
                         ) {
-                            Log.d("$TAG", "resultlauncher: $ext")
                             api.item_file_save(formFile, userID, targetItemID)
                                 .enqueue(object : Callback<String> {
                                     override fun onResponse(
@@ -883,6 +902,9 @@ class MindMapFragment : Fragment() {
                 }
             }
 
+            /**
+             * Drag & Drop 완료한 두 아이템 정보 확인 후 setItem으로 넘긴다.
+             */
             override fun onDragMoveNodesEnd(
                 draggingNode: NodeModel<*>?,
                 hittingNode: NodeModel<*>?,
@@ -923,11 +945,16 @@ class MindMapFragment : Fragment() {
             }
         })
 
+        /**
+         * 중앙 정렬 버튼
+         */
         binding.focusMidButton.setOnClickListener {
             editor.focusMidLocation()
         }
 
-        // 조회수, 추천수 띄워서 확인
+        /**
+         * 조회수, 추천수 확인 버튼
+         */
         binding.popularLayout.setOnClickListener {
             val visible: Boolean = binding.mapHit.visibility == View.VISIBLE &&
                     binding.mapRecommend.visibility == View.VISIBLE
@@ -943,6 +970,9 @@ class MindMapFragment : Fragment() {
             }
         }
 
+        /**
+         * 추천 버튼
+         */
         binding.recommendButton.setOnClickListener {
             api.map_like(userID, mapID).enqueue(object : Callback<PostModel> {
                 override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
@@ -968,6 +998,9 @@ class MindMapFragment : Fragment() {
         }
     }
 
+    /**
+     * 공개/비공개 설정
+     */
     private fun publicSet(b: Boolean) {
         val setWindow: View =
             LayoutInflater.from(mapContext).inflate(R.layout.window_map_public_set, null)
@@ -1072,6 +1105,9 @@ class MindMapFragment : Fragment() {
         return StraightLine(Color.parseColor("#055287"), 2)
     }
 
+    /**
+     * 안드로이드에서 가져온 파일 URI를 받아 Path값으로 변환해준다.
+     */
     private fun getRealPathFromURI(uri: Uri): String? {
         val con = mapContext
         try {
@@ -1115,7 +1151,7 @@ class MindMapFragment : Fragment() {
                             MediaStore.MediaColumns.RELATIVE_PATH + "=?"
                         } else "_id=?"
                         val selectionArgs = arrayOf(Environment.DIRECTORY_DOCUMENTS)
-                        return getDataColumn(con!!, contentUri,selection,selectionArgs)
+                        return getDataColumn(con!!, contentUri, selection, selectionArgs)
                     }
                     val selection = "_id=?"
                     val selectionArgs = arrayOf(split[1])
@@ -1162,7 +1198,6 @@ class MindMapFragment : Fragment() {
                 selection, selectionArgs, null
             )
             if (cursor != null && cursor.moveToFirst()) {
-                Log.d("resultLauncher", "tq")
                 val index = cursor.getColumnIndexOrThrow(column)
                 return cursor.getString(index)
             }

@@ -9,7 +9,8 @@ import com.example.schoollifeproject.model.NoteReadContacts
 
 /**
  * 게시글 RecyclerView Adapter
- * */
+ * 작성자 : 이준영
+ **/
 class NoteReadListAdapter(private val itemList: List<NoteReadContacts>) :
     RecyclerView.Adapter<NoteReadListAdapter.NoteReadViewHolder>() {
     override fun getItemCount(): Int {
@@ -28,7 +29,6 @@ class NoteReadListAdapter(private val itemList: List<NoteReadContacts>) :
             bind(item)
         }
     }
-
 
     class NoteReadViewHolder(private val binding: ContactsNoticeReadBinding) :
         RecyclerView.ViewHolder(binding.root) {

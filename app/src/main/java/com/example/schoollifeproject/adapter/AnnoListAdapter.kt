@@ -10,7 +10,7 @@ import com.example.schoollifeproject.databinding.ContactsMainBoardBinding
 import com.example.schoollifeproject.model.NoticeListModel
 
 /**
- * 메인메뉴 공지 RecyclerView Adapter
+ * 공지게시판 MenuActivity RecyclerView Adapter
  * 작성자 : 이준영
  * */
 class AnnoListAdapter(private val itemList: List<NoticeListModel>) :

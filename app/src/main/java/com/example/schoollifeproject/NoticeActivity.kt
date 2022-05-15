@@ -1,28 +1,28 @@
 package com.example.schoollifeproject
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.core.view.isGone
+import androidx.appcompat.app.AppCompatActivity
 import com.example.schoollifeproject.adapter.NoteReadListAdapter
 import com.example.schoollifeproject.databinding.ActivityNoticeBinding
-import com.example.schoollifeproject.model.*
+import com.example.schoollifeproject.model.APIS
+import com.example.schoollifeproject.model.NoteReadContacts
+import com.example.schoollifeproject.model.PostModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 /**
  * 게시물 선택 실행 Activity
+ * 작성자 : 이준영
  * */
 
 class NoticeActivity : AppCompatActivity() {
@@ -57,7 +57,6 @@ class NoticeActivity : AppCompatActivity() {
         val type = intent.getIntExtra("type", 1)
         val key = intent.getIntExtra("key", 99999)
 
-
         /**
          * 로그인아이디와 글쓴이가 같지 않을경우 글삭제 비활성화
          */
@@ -88,13 +87,13 @@ class NoticeActivity : AppCompatActivity() {
          * 글삭제 기능
          */
         btnDelete.setOnClickListener {
-            api.note_delete(type ,key).enqueue(object : Callback<PostModel> {
+            api.note_delete(type, key).enqueue(object : Callback<PostModel> {
                 override fun onResponse(call: Call<PostModel>, response: Response<PostModel>) {
-                    Log.d("성공: ", "글삭제")
+                    Log.d("성공: ", "notice_delete_success")
                 }
 
                 override fun onFailure(call: Call<PostModel>, t: Throwable) {
-                    Log.d("페일(노트): ", "${t.message}")
+                    Log.d("페일(노트): ", "notice_delete_fail ${t.message}")
                 }
             })
             Handler().postDelayed({
@@ -108,11 +107,10 @@ class NoticeActivity : AppCompatActivity() {
                 putExtra("ID", userID)
                 putExtra("type", type)
                 putExtra("key", key)
-                putExtra("thisTitle", title)
-                putExtra("thisContent", content)
+                putExtra("title", title)
+                putExtra("content", content)
             }
             getResult.launch(intent)
-
         }
 
         getResult = registerForActivityResult(
@@ -125,7 +123,7 @@ class NoticeActivity : AppCompatActivity() {
                             it.data?.getStringExtra("title").toString(),
                             writer,
                             date,
-                            it.data?.getStringExtra("contents").toString()
+                            it.data?.getStringExtra("content").toString()
                         )
                         )
                 readList.add(contact)

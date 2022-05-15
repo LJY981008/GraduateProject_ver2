@@ -11,6 +11,7 @@ import retrofit2.http.*
 
 /**
  * 서버 DB 연결 Interface
+ * 작성자 : 이준영, 박동훈
  * */
 interface APIS {
 

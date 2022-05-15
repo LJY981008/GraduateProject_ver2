@@ -10,7 +10,7 @@ import com.example.schoollifeproject.NoticeActivity
 import com.example.schoollifeproject.model.FreeListModel
 
 /**
- * 자유 게시판 RecyclerView Adapter
+ * 자유게시판 MenuActivity RecyclerView Adapter
  * 작성자 : 이준영, 박동훈
  * */
 class FreeListAdapter(private val itemList: MutableList<FreeListModel>) :
@@ -47,7 +47,6 @@ class FreeListAdapter(private val itemList: MutableList<FreeListModel>) :
                     putExtra("writer", item.getBbsWriter())
                     putExtra("date", item.getBbsDate())
                     putExtra("content", item.getBbsContent())
-
                 }
                 startActivity(itemView.context, intent, null)
             }

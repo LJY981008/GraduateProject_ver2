@@ -1,7 +1,6 @@
 package com.example.schoollifeproject
 
 import android.Manifest
-import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -17,14 +16,13 @@ import com.example.schoollifeproject.databinding.ActivityMainBinding
 import com.example.schoollifeproject.model.APIS
 import com.example.schoollifeproject.model.PostModel
 import com.example.schoollifeproject.shared.Shared
-import com.google.android.material.snackbar.Snackbar
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import kotlin.system.exitProcess
 
 /**
- * 어플 실행 로그인 Activity
+ * 로그인 MainActivity
  * 작성자 : 이준영
  */
 class MainActivity : AppCompatActivity() {
@@ -60,8 +58,6 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         }
-
-
 
         btnDestroy = binding.btnDestroy
         btnLogin = binding.btnLogin
@@ -106,7 +102,6 @@ class MainActivity : AppCompatActivity() {
             login(id, pw, 1) // 타입 1 = 자동로그인
         }
     }
-
 
     /**
      * 레트로핏 서버 접근 id value를 이용해 DB에서 pw호출
