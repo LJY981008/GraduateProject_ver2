@@ -2,6 +2,7 @@ package com.example.schoollifeproject.adapter
 
 import android.graphics.Color
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -71,7 +72,7 @@ class ItemAdapter : TreeViewAdapter<ItemModel>() {
 
         nodeBack.setOnClickListener { v ->
             i++
-            val handler = Handler()
+            val handler = Handler(Looper.getMainLooper())
             val r = Runnable { i = 0 }
 
             if (i == 1) {

@@ -62,9 +62,9 @@
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/font/logo_font3.xml" value="0.12447916666666667" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/font/title_font1.xml" value="0.1796875" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/font/title_font2.xml" value="0.1796875" />
-        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/activity_main.xml" value="0.4713541666666667" />
+        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/activity_main.xml" value="0.27845303867403315" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/activity_main2.xml" value="0.1403985507246377" />
-        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/activity_menu.xml" value="0.264" />
+        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/activity_menu.xml" value="0.21724137931034482" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/activity_mind_map.xml" value="0.264" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/activity_notice.xml" value="0.1937901498929336" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/activity_register.xml" value="0.2876884422110553" />
@@ -87,7 +87,7 @@
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/fragment_info_list.xml" value="0.2" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/fragment_list.xml" value="0.14583333333333334" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/fragment_map_list.xml" value="0.23802083333333332" />
-        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/fragment_mind_map.xml" value="0.3389121338912134" />
+        <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/fragment_mind_map.xml" value="0.25" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/fragment_setting.xml" value="0.14583333333333334" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/fragment_settings.xml" value="0.4" />
         <entry key="..\:/Users/Laeti/Documents/Android Studio/GraduateProject_ver2/app/src/main/res/layout/item_add_window.xml" value="0.1265625" />

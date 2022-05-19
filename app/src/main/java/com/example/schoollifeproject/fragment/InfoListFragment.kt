@@ -38,7 +38,6 @@ class InfoListFragment : Fragment() {
 
     private val api = APIS.create()
     private lateinit var userID: String
-    private var countKey: Int = 0
 
     fun newInstance(userID: String): InfoListFragment {
         val args = Bundle()

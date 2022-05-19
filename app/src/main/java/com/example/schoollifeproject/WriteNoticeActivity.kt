@@ -1,11 +1,14 @@
 package com.example.schoollifeproject
 
 import android.app.Activity
+import android.content.DialogInterface
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.schoollifeproject.databinding.ActivityWriteNoticeBinding
 import com.example.schoollifeproject.model.APIS
@@ -17,6 +20,7 @@ import java.text.SimpleDateFormat
 
 /**
  * 글작성 클릭 실행 Activity
+ * 작성자 : 이준영
  */
 class WriteNoticeActivity : AppCompatActivity() {
 
@@ -68,7 +72,7 @@ class WriteNoticeActivity : AppCompatActivity() {
                     }
 
                 })
-                Handler().postDelayed({
+                Handler(Looper.getMainLooper()).postDelayed({
                     intent.apply {
                         putExtra("title", editTitle)
                         putExtra("content", editcontent)
@@ -91,7 +95,7 @@ class WriteNoticeActivity : AppCompatActivity() {
                     }
 
                 })
-                Handler().postDelayed({
+                Handler(Looper.getMainLooper()).postDelayed({
                     setResult(Activity.RESULT_OK, intent)
                     finish()
                 }, 1000)
@@ -100,4 +104,5 @@ class WriteNoticeActivity : AppCompatActivity() {
             }
         }
     }
+
 }

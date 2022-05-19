@@ -190,6 +190,7 @@ public class TreeViewContainer extends ViewGroup implements TreeViewNotifier {
         values[Matrix.MTRANS_Y] = 0f;
         centerMatrix.setValues(values);
         setTouchDelegate();
+        Log.d(TAG, "item_save: Container!" + viewWidth + " " + viewHeight);
 
     }
 
@@ -283,7 +284,6 @@ public class TreeViewContainer extends ViewGroup implements TreeViewNotifier {
     }
 
     /**
-     *
      * @param root root node
      */
     private void drawTreeLine(NodeModel<?> root) {

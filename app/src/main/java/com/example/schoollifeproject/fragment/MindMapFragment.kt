@@ -2,22 +2,16 @@ package com.example.schoollifeproject.fragment
 
 import android.app.Activity.RESULT_OK
 import android.app.DownloadManager
-import android.content.ContentUris
-import android.content.Context
 import android.content.Intent
-import android.database.Cursor
 import android.graphics.Color
-import android.net.Uri
 import android.os.*
-import android.provider.DocumentsContract
-import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -39,15 +33,18 @@ import com.gyso.treeview.line.StraightLine
 import com.gyso.treeview.listener.TreeViewControlListener
 import com.gyso.treeview.model.NodeModel
 import com.gyso.treeview.model.TreeModel
+import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
+import okio.BufferedSink
+import okio.source
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.*
+
 
 /**
  * 로드맵(마인드맵) Fragment
@@ -59,8 +56,7 @@ class MindMapFragment : Fragment() {
     val adapter: ItemAdapter = ItemAdapter()
 
     private lateinit var binding: FragmentMindMapBinding
-    private val handler = Handler()
-    var mapContext: Context? = null
+    private val handler = Handler(Looper.getMainLooper())
 
     private lateinit var userID: String // 로그인한 유저 ID
     private lateinit var mapID: String // 선택한 맵의 유저 ID
@@ -73,9 +69,18 @@ class MindMapFragment : Fragment() {
     private lateinit var mapPassword: String
 
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
-    private lateinit var targetItemID: String
+    private lateinit var targetItem: NodeModel<ItemModel>
     private var downloadId: Long = -1L
     private lateinit var downloadManager: DownloadManager
+
+    private lateinit var warnPopupView: View
+    private lateinit var warnPopupWindow: PopupWindow
+    private lateinit var itemPopupView: View
+    private lateinit var itemPopupWindow: PopupWindow
+    private lateinit var filePopupView: View
+    private lateinit var filePopupWindow: PopupWindow
+    private lateinit var publicPopupView: View
+    private lateinit var publicPopupWindow: PopupWindow
 
     fun newInstance(userID: String, mapID: String): MindMapFragment {
         val args = Bundle()
@@ -97,7 +102,6 @@ class MindMapFragment : Fragment() {
     ): View? {
         super.onCreate(savedInstanceState)
         binding = FragmentMindMapBinding.inflate(inflater, container, false)
-        mapContext = context
 
         userID = arguments?.getString("userID").toString() // menuActivity를 통해 받은 userID
         mapID = arguments?.getString("mapID").toString() // menuActivity를 통해 받은 userID
@@ -110,8 +114,47 @@ class MindMapFragment : Fragment() {
 
         itemMaxNum = 1
 
+        /** 팝업 윈도우 관련 설정
+         * itemPopupWindow : 아이템 내용 설정
+         * warnPopupWindow : 아이템 관련 경고
+         * filePopupWindow : 아이템 파일 설정
+         * publicPopupWindow : 공개/비공개 관련 설정
+         */
+        itemPopupView = LayoutInflater.from(context!!).inflate(R.layout.window_item_set, null)
+        warnPopupView = LayoutInflater.from(context!!).inflate(R.layout.window_warning, null)
+        filePopupView = LayoutInflater.from(context!!).inflate(R.layout.window_item_file, null)
+        publicPopupView =
+            LayoutInflater.from(context!!).inflate(R.layout.window_map_public_set, null)
+
+        itemPopupWindow = PopupWindow(
+            itemPopupView,
+            ((context!!.resources.displayMetrics.widthPixels) * 0.9).toInt(),
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
+        warnPopupWindow = PopupWindow(
+            warnPopupView,
+            ((context!!.resources.displayMetrics.widthPixels) * 0.7).toInt(),
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
+        filePopupWindow = PopupWindow(
+            filePopupView,
+            ((context!!.resources.displayMetrics.widthPixels) * 0.9).toInt(),
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
+        publicPopupWindow = PopupWindow(
+            publicPopupView,
+            ((context!!.resources.displayMetrics.widthPixels) * 0.7).toInt(),
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
+
+        itemPopupWindow.isOutsideTouchable = true
+        warnPopupWindow.isOutsideTouchable = true
+        filePopupWindow.isOutsideTouchable = true
+        publicPopupWindow.isOutsideTouchable = true
+
         publicCheck()
         initWidgets()
+
         return binding.root
     }
 
@@ -147,8 +190,8 @@ class MindMapFragment : Fragment() {
                 Log.d("$TAG", "map_public: 리스폰 실패 : $t")
             }
         })
-
     }
+
 
     /**
      * 로드맵 기본 구성
@@ -189,6 +232,7 @@ class MindMapFragment : Fragment() {
         /**
          * mapID 체크해 DB에서 로드맵 아이템 불러오기
          */
+
         api.item_load(mapID).enqueue(object : Callback<List<ItemModel>> {
             override fun onResponse(
                 call: Call<List<ItemModel>>,
@@ -272,11 +316,11 @@ class MindMapFragment : Fragment() {
                 Log.d("$TAG", "map_popular: 리스폰 실패 : $t")
             }
         })
-        Handler().postDelayed({
+        handler.postDelayed({
             editor.focusMidLocation()
         }, 1000)
-        itemEvent(editor, adapter)
 
+        itemEvent(editor, adapter)
     }
 
     /**
@@ -303,7 +347,7 @@ class MindMapFragment : Fragment() {
         if (itemCount != null) {
             api.item_save(
                 itemID,
-                targetItemID,
+                targetItem.value.getItemID(),
                 itemTop,
                 itemLeft,
                 userID,
@@ -338,19 +382,12 @@ class MindMapFragment : Fragment() {
      */
     private fun setItem(node: NodeModel<ItemModel>, editor: TreeViewEditor, b: Boolean) {
 
-        val setWindow: View =
-            LayoutInflater.from(mapContext).inflate(R.layout.window_item_set, null)
-        val itemSetWindow = PopupWindow(
-            setWindow,
-            ((requireContext().resources.displayMetrics.widthPixels) * 0.9).toInt(),
-            WindowManager.LayoutParams.WRAP_CONTENT
-        )
 
-        val setButton: Button = setWindow.findViewById(R.id.itemSetButton)
-        val setContent: EditText = setWindow.findViewById(R.id.setContentView)
-        val setNote: EditText = setWindow.findViewById(R.id.setNoteView)
-        val backButton: ImageButton = setWindow.findViewById(R.id.backButton)
-        val fileButton: Button = setWindow.findViewById(R.id.fileButton)
+        val setButton: Button = itemPopupView.findViewById(R.id.itemSetButton)
+        val setContent: EditText = itemPopupView.findViewById(R.id.setContentView)
+        val setNote: EditText = itemPopupView.findViewById(R.id.setNoteView)
+        val backButton: ImageButton = itemPopupView.findViewById(R.id.backButton)
+        val fileButton: Button = itemPopupView.findViewById(R.id.fileButton)
 
         if (!b) {
             setContent.isEnabled = false
@@ -361,15 +398,14 @@ class MindMapFragment : Fragment() {
         setContent.setText(node.value.getContent())
         setNote.setText(node.value.getNote())
 
-        itemSetWindow.isFocusable = true
-        itemSetWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-        itemSetWindow.update()
-        itemSetWindow.showAtLocation(setWindow, Gravity.CENTER, 0, 0)
+        itemPopupWindow.isFocusable = true
+        itemPopupWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+        itemPopupWindow.update()
+        itemPopupWindow.showAtLocation(itemPopupView, Gravity.CENTER, 0, 0)
 
-        itemSetWindow.isOutsideTouchable = true
-        itemSetWindow.setTouchInterceptor { _, motionEvent ->
+        itemPopupWindow.setTouchInterceptor { _, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_OUTSIDE) {
-                itemSetWindow.dismiss()
+                itemPopupWindow.dismiss()
             }
             false
         }
@@ -384,15 +420,15 @@ class MindMapFragment : Fragment() {
             view.findViewById<TextView>(R.id.content).text = content
             saveDB(node, view, "update")
             editor.focusMidLocation()
-            itemSetWindow.dismiss()
+            itemPopupWindow.dismiss()
         }
 
         backButton.setOnClickListener {
-            itemSetWindow.dismiss()
+            itemPopupWindow.dismiss()
         }
 
         fileButton.setOnClickListener {
-            itemSetWindow.dismiss()
+            itemPopupWindow.dismiss()
             saveFileDB(node, editor, b)
         }
     }
@@ -410,92 +446,84 @@ class MindMapFragment : Fragment() {
         fileAdapter.mapEditable = mapEditable
 
         fun reload() {
-            api.item_file_load(mapID, targetItemID).enqueue(object : Callback<List<FileModel>> {
-                override fun onResponse(
-                    call: Call<List<FileModel>>,
-                    response: Response<List<FileModel>>
-                ) {
-                    Log.d(
-                        "$TAG",
-                        "item_file_load: 리스폰 완료 ${response.body()!!.size}"
-                    )
-                    val list = mutableListOf<FileModel>()
-                    for (i in 0 until response.body()!!.size) {
+            api.item_file_load(mapID, targetItem.value.getItemID())
+                .enqueue(object : Callback<List<FileModel>> {
+                    override fun onResponse(
+                        call: Call<List<FileModel>>,
+                        response: Response<List<FileModel>>
+                    ) {
                         Log.d(
                             "$TAG",
-                            "item_file_load/fileName: ${response.body()!![i].getFileName()}, ${response.body()!![i].getFileRealName()}"
+                            "item_file_load: 리스폰 완료 ${response.body()!!.size}"
                         )
-                        val ar: List<String> = response.body()!![i].getFileName().split('.')
-                        val ext = ar[ar.size - 1]
+                        val list = mutableListOf<FileModel>()
+                        for (i in 0 until response.body()!!.size) {
+                            Log.d(
+                                "$TAG",
+                                "item_file_load/fileName: ${response.body()!![i].getFileName()}, ${response.body()!![i].getFileRealName()}"
+                            )
+                            val ar: List<String> = response.body()!![i].getFileName().split('.')
+                            val ext = ar[ar.size - 1]
 
-                        val contacts = (
-                                FileModel(
-                                    response.body()!![i].getFileName(),
-                                    response.body()!![i].getFileRealName(),
-                                    ext
-                                )
-                                )
-                        list.add(contacts)
+                            val contacts = (
+                                    FileModel(
+                                        response.body()!![i].getFileName(),
+                                        response.body()!![i].getFileRealName(),
+                                        ext
+                                    )
+                                    )
+                            list.add(contacts)
+                        }
+                        fileList.addAll(list)
+
+                        Log.d(
+                            "$TAG",
+                            "item_file_load/filesize: ${fileList.size}"
+                        )
+                        fileAdapter.notifyDataSetChanged()
                     }
-                    fileList.addAll(list)
 
-                    Log.d(
-                        "$TAG",
-                        "item_file_load/filesize: ${fileList.size}"
-                    )
-                    fileAdapter.notifyDataSetChanged()
-                }
-
-                override fun onFailure(call: Call<List<FileModel>>, t: Throwable) {
-                    Log.d("$TAG", "item_file_load: 리스폰 실패")
-                }
-            })
+                    override fun onFailure(call: Call<List<FileModel>>, t: Throwable) {
+                        Log.d("$TAG", "item_file_load: 리스폰 실패")
+                    }
+                })
         }
 
         reload()
 
-        val setWindow: View =
-            LayoutInflater.from(mapContext).inflate(R.layout.window_item_file, null)
-        val fileSetWindow = PopupWindow(
-            setWindow,
-            ((requireContext().resources.displayMetrics.widthPixels) * 0.9).toInt(),
-            WindowManager.LayoutParams.WRAP_CONTENT
-        )
-
-        val fileListView = setWindow.findViewById<RecyclerView>(R.id.fileListView)
-        val fileAddButton = setWindow.findViewById<Button>(R.id.fileAddButton)
-        val backButton = setWindow.findViewById<ImageButton>(R.id.backButton)
-        val infoButton = setWindow.findViewById<Button>(R.id.infoButton)
-        val fileButton = setWindow.findViewById<Button>(R.id.fileButton)
+        val fileListView = filePopupView.findViewById<RecyclerView>(R.id.fileListView)
+        val fileAddButton = filePopupView.findViewById<Button>(R.id.fileAddButton)
+        val backButton = filePopupView.findViewById<ImageButton>(R.id.backButton)
+        val infoButton = filePopupView.findViewById<Button>(R.id.infoButton)
+        val fileButton = filePopupView.findViewById<Button>(R.id.fileButton)
 
         if (!adapter.mapEditable) {
             fileAddButton.visibility = View.GONE
         }
 
         val mLayoutManager: RecyclerView.LayoutManager =
-            LinearLayoutManager(mapContext)
+            LinearLayoutManager(context!!)
         fileListView.setLayoutManager(mLayoutManager)
 
-        val dividerItemDecoration = DividerItemDecoration(mapContext, VERTICAL)
+        val dividerItemDecoration = DividerItemDecoration(context!!, VERTICAL)
         fileListView.addItemDecoration(dividerItemDecoration)
 
         fileListView.adapter = fileAdapter
 
-        fileSetWindow.isFocusable = true
-        fileSetWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-        fileSetWindow.update()
-        fileSetWindow.showAtLocation(setWindow, Gravity.CENTER, 0, 0)
+        filePopupWindow.isFocusable = true
+        filePopupWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+        filePopupWindow.update()
+        filePopupWindow.showAtLocation(filePopupView, Gravity.CENTER, 0, 0)
 
-        fileSetWindow.isOutsideTouchable = true
-        fileSetWindow.setTouchInterceptor { _, motionEvent ->
+        filePopupWindow.setTouchInterceptor { _, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_OUTSIDE) {
-                fileSetWindow.dismiss()
+                filePopupWindow.dismiss()
             }
             false
         }
 
         fileAddButton.setOnClickListener {
-            fileSetWindow.dismiss()
+            filePopupWindow.dismiss()
             resultLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
                 type = "*/*"
                 putExtra(
@@ -517,11 +545,11 @@ class MindMapFragment : Fragment() {
         }
 
         backButton.setOnClickListener {
-            fileSetWindow.dismiss()
+            filePopupWindow.dismiss()
         }
 
         infoButton.setOnClickListener {
-            fileSetWindow.dismiss()
+            filePopupWindow.dismiss()
             setItem(node, editor, mapEditable)
         }
 
@@ -530,38 +558,29 @@ class MindMapFragment : Fragment() {
         }
 
         fileAdapter.setOnFileDelListener { view, fileModel ->
-            val warnWindow: View =
-                LayoutInflater.from(mapContext)
-                    .inflate(R.layout.window_warning, null)
-            val warnSetWindow = PopupWindow(
-                warnWindow,
-                ((requireContext().resources.displayMetrics.widthPixels) * 0.7).toInt(),
-                WindowManager.LayoutParams.WRAP_CONTENT
-            )
 
-            warnSetWindow.isFocusable = true
-            warnSetWindow.softInputMode =
+            warnPopupWindow.isFocusable = true
+            warnPopupWindow.softInputMode =
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-            warnSetWindow.update()
-            warnSetWindow.showAtLocation(warnWindow, Gravity.CENTER, 0, 0)
+            warnPopupWindow.update()
+            warnPopupWindow.showAtLocation(warnPopupView, Gravity.CENTER, 0, 0)
 
-            warnSetWindow.isOutsideTouchable = true
-            warnSetWindow.setTouchInterceptor { _, motionEvent ->
+            warnPopupWindow.setTouchInterceptor { _, motionEvent ->
                 if (motionEvent.action == MotionEvent.ACTION_OUTSIDE) {
-                    warnSetWindow.dismiss()
+                    warnPopupWindow.dismiss()
                 }
                 false
             }
 
-            val delMessage: TextView = warnWindow.findViewById(R.id.warningText)
-            val checkButton: Button = warnWindow.findViewById(R.id.checkButton)
+            val delMessage: TextView = warnPopupView.findViewById(R.id.warningText)
+            val checkButton: Button = warnPopupView.findViewById(R.id.checkButton)
             val cancelButton: Button =
-                warnWindow.findViewById(R.id.cancelButton)
+                warnPopupView.findViewById(R.id.cancelButton)
 
             delMessage.text = "파일을 삭제하시겠습니까?"
 
             checkButton.setOnClickListener {
-                api.item_file_del(userID, targetItemID, fileModel.getFileRealName())
+                api.item_file_del(userID, targetItem.value.getItemID(), fileModel.getFileRealName())
                     .enqueue(object : Callback<PostModel> {
                         override fun onResponse(
                             call: Call<PostModel>,
@@ -574,18 +593,19 @@ class MindMapFragment : Fragment() {
                             Log.d("$TAG", "item_file_del: 리스폰 실패 ${t}")
                         }
                     })
-                warnSetWindow.dismiss()
+                warnPopupWindow.dismiss()
                 reload()
             }
             cancelButton.setOnClickListener {
-                warnSetWindow.dismiss()
+                warnPopupWindow.dismiss()
             }
         }
 
         fileAdapter.setOnFileListener { view, fileModel ->
             Log.d("$TAG", "fileClickListener: ${fileModel.getFileRealName()}")
 
-            val uri = "/upload/$mapID/${targetItemID}/${fileModel.getFileRealName()}"
+            val uri =
+                "/upload/$mapID/${targetItem.value.getItemID()}/${fileModel.getFileRealName()}"
             api.item_file_down(uri).enqueue(object : Callback<ResponseBody> {
                 override fun onResponse(
                     call: Call<ResponseBody>,
@@ -636,7 +656,7 @@ class MindMapFragment : Fragment() {
 
             })
             Toast.makeText(
-                mapContext,
+                context!!,
                 "다운로드가 시작되었습니다.",
                 Toast.LENGTH_SHORT
             ).show()
@@ -647,11 +667,6 @@ class MindMapFragment : Fragment() {
      * item 관련 이벤트
      */
     private fun itemEvent(editor: TreeViewEditor, adapter: ItemAdapter) {
-
-        editor.container.isAnimateAdd = true
-
-        lateinit var fileNode: NodeModel<ItemModel>
-        lateinit var formFile: MultipartBody.Part
 
         /**
          * file intent 설정 초기화
@@ -664,46 +679,71 @@ class MindMapFragment : Fragment() {
                     val uri = intent!!.data
                     Log.d("$TAG", "resultLauncher?: ${uri}")
 
-                    val path = getRealPathFromURI(uri!!)
-                    Log.d("$TAG", "resultLauncher: ${path}")
-                    if (path != "notsupport") {
-                        val file = File(path)
-                        formFile = FormDataUtil.getImageBody("media", file)
-                        val ar: List<String> = path!!.split('.')
-                        val ext = ar[ar.size - 1]
+                    lateinit var multiPartFile: MultipartBody.Part
+                    lateinit var fileName: String
 
-                        Log.d("$TAG", "resultlauncher??: $ext")
+                    context!!.contentResolver.query(uri!!, null, null, null, null)?.let {
+                        if (it.moveToNext()) {
+                            fileName = it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME))
 
+                            val requestBody = object : RequestBody() {
+                                override fun contentType(): MediaType? {
+                                    return context!!.contentResolver.getType(uri)
+                                        ?.toMediaType()
+                                }
 
-                        // zip jpg png hwp pptx ppt
-                        if (ext.compareTo("zip", true) == 0 || ext.compareTo("jpg", true) == 0 ||
-                            ext.compareTo("png", true) == 0 || ext.compareTo("hwp", true) == 0 ||
-                            ext.compareTo("ppt", true) == 0 || ext.compareTo("pptx", true) == 0
-                        ) {
-                            api.item_file_save(formFile, userID, targetItemID)
-                                .enqueue(object : Callback<String> {
-                                    override fun onResponse(
-                                        call: Call<String>,
-                                        response: Response<String>
-                                    ) {
-                                        Log.d(
-                                            "$TAG",
-                                            "item_file_save: 리스폰 완료 ${response.body()}"
-                                        )
-                                        saveFileDB(fileNode, editor, adapter.mapEditable)
-                                    }
-
-                                    override fun onFailure(call: Call<String>, t: Throwable) {
-                                        Log.d("$TAG", "item_file_save: 리스폰 실패 $t")
-                                    }
-                                })
+                                override fun writeTo(sink: BufferedSink) {
+                                    sink.writeAll(
+                                        context!!.contentResolver.openInputStream(uri)
+                                            ?.source()!!
+                                    )
+                                }
+                            }
+                            it.close()
+                            multiPartFile =
+                                MultipartBody.Part.createFormData("media", fileName, requestBody)
                         } else {
-                            Toast.makeText(
-                                mapContext,
-                                "지원하지 않는 파일 형식입니다.\n지원하는 확장명 : .zip .jpg .png .hwp .pptx .ppt",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            it.close()
+                            null
                         }
+                    }
+
+                    Log.d(
+                        "$TAG",
+                        "resultlauncher/fileInfo: $multiPartFile!!.body.contentType() $fileName"
+                    )
+
+                    val ar: List<String> = fileName.split('.')
+                    val ext = ar[ar.size - 1]
+
+                    // zip jpg png hwp pptx ppt
+                    if (ext.compareTo("zip", true) == 0 || ext.compareTo("jpg", true) == 0 ||
+                        ext.compareTo("png", true) == 0 || ext.compareTo("hwp", true) == 0 ||
+                        ext.compareTo("ppt", true) == 0 || ext.compareTo("pptx", true) == 0
+                    ) {
+                        api.item_file_save(multiPartFile, userID, targetItem.value.getItemID())
+                            .enqueue(object : Callback<String> {
+                                override fun onResponse(
+                                    call: Call<String>,
+                                    response: Response<String>
+                                ) {
+                                    Log.d(
+                                        "$TAG",
+                                        "item_file_save: 리스폰 완료 ${response.body()}"
+                                    )
+                                    saveFileDB(targetItem, editor, adapter.mapEditable)
+                                }
+
+                                override fun onFailure(call: Call<String>, t: Throwable) {
+                                    Log.d("$TAG", "item_file_save: 리스폰 실패 $t")
+                                }
+                            })
+                    } else {
+                        Toast.makeText(
+                            context!!,
+                            "지원하지 않는 파일 형식입니다.\n지원하는 확장명 : .zip .jpg .png .hwp .pptx .ppt",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             })
@@ -719,8 +759,7 @@ class MindMapFragment : Fragment() {
             Log.d("$TAG", "setOnItemListener: ${node.value.getItemID()}")
             val id = node.value.getItemID()
             if (id != "root") {
-                fileNode = node
-                targetItemID = node.value.getItemID()
+                targetItem = node
                 val visible =
                     id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4"
                 binding.bottomNavigationView.menu.findItem(R.id.bottomMenu2).isVisible = visible
@@ -762,32 +801,25 @@ class MindMapFragment : Fragment() {
                                 true
                             }
                             R.id.bottomMenu3 -> {
-                                val warnWindow: View =
-                                    LayoutInflater.from(mapContext)
-                                        .inflate(R.layout.window_warning, null)
-                                val warnSetWindow = PopupWindow(
-                                    warnWindow,
-                                    ((requireContext().resources.displayMetrics.widthPixels) * 0.7).toInt(),
-                                    WindowManager.LayoutParams.WRAP_CONTENT
-                                )
 
-                                warnSetWindow.isFocusable = true
-                                warnSetWindow.softInputMode =
+                                warnPopupWindow.isFocusable = true
+                                warnPopupWindow.softInputMode =
                                     WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-                                warnSetWindow.update()
-                                warnSetWindow.showAtLocation(warnWindow, Gravity.CENTER, 0, 0)
+                                warnPopupWindow.update()
+                                warnPopupWindow.showAtLocation(warnPopupView, Gravity.CENTER, 0, 0)
 
-                                warnSetWindow.isOutsideTouchable = true
-                                warnSetWindow.setTouchInterceptor { _, motionEvent ->
+
+                                warnPopupWindow.setTouchInterceptor { _, motionEvent ->
                                     if (motionEvent.action == MotionEvent.ACTION_OUTSIDE) {
-                                        warnSetWindow.dismiss()
+                                        warnPopupWindow.dismiss()
                                     }
                                     false
                                 }
 
-                                val checkButton: Button = warnWindow.findViewById(R.id.checkButton)
+                                val checkButton: Button =
+                                    warnPopupView.findViewById(R.id.checkButton)
                                 val cancelButton: Button =
-                                    warnWindow.findViewById(R.id.cancelButton)
+                                    warnPopupView.findViewById(R.id.cancelButton)
 
                                 checkButton.setOnClickListener {
                                     val children = node.getChildNodes()
@@ -799,19 +831,24 @@ class MindMapFragment : Fragment() {
                                         )
                                         saveDB(i, null, "delete")
                                     }
-                                    saveDB(node, view, "delete")
-                                    editor.removeNode(node)
+                                    saveDB(node, null, "delete")
+                                    handler.postDelayed({
+                                        editor.removeNode(node)
+                                    }, 1000)
 
-                                    binding.bottomNavigationView.visibility = View.INVISIBLE
-                                    warnSetWindow.dismiss()
+                                    warnPopupWindow.dismiss()
                                 }
                                 cancelButton.setOnClickListener {
-                                    warnSetWindow.dismiss()
+                                    warnPopupWindow.dismiss()
                                 }
                                 binding.bottomNavigationView.visibility = View.GONE
                                 true
                             }
                             R.id.bottomMenu4 -> {
+                                Log.d(
+                                    "$TAG",
+                                    "setOnItemListener/bottomMenu4: ${node} $targetItem"
+                                )
                                 saveFileDB(node, editor, adapter.mapEditable)
                                 binding.bottomNavigationView.visibility = View.GONE
                                 true
@@ -844,7 +881,7 @@ class MindMapFragment : Fragment() {
          * 노드 제목/내용 설정
          */
         adapter.setOnItemDoubleListener { item, node, b ->
-            targetItemID = node.value.getItemID()
+            targetItem = node
             val id = node.value.getItemID()
             if (id != "root" && id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4") {
                 setItem(node, editor, b)
@@ -917,28 +954,31 @@ class MindMapFragment : Fragment() {
                         "onDragMoveNodesEnd: draging[${(draggingNode.value as ItemModel).getItemID()}]" +
                                 "hittingNode[${(hittingNode.value as ItemModel).getItemID()}]"
                     )
-                    val dNode = draggingNode.value as ItemModel
-                    val hNode = hittingNode.value as ItemModel
+                    val dNode = draggingNode as NodeModel<ItemModel>
+                    val hNode = hittingNode as NodeModel<ItemModel>
 
                     val hLast = if ((hittingNode.value as ItemModel).getPosition()) "L" else "R"
-                    targetItemID = dNode.getItemID()
+                    targetItem = dNode
                     val parent =
-                        if (hNode.getItemID() != "root" && hNode.getItemID() != "grade1" && hNode.getItemID() != "grade2" &&
-                            hNode.getItemID() != "grade3" && hNode.getItemID() != "grade4"
+                        if (hNode.value.getItemID() != "root" && hNode.value.getItemID() != "grade1" && hNode.value.getItemID() != "grade2" &&
+                            hNode.value.getItemID() != "grade3" && hNode.value.getItemID() != "grade4"
                         )
-                            hNode.getItemID().split("_")[1].split("$hLast")[0]
-                        else hNode.getItemID().split("_")[0]
-                    dNode.setItemID(
+                            hNode.value.getItemID().split("_")[1].split("$hLast")[0]
+                        else hNode.value.getItemID().split("_")[0]
+                    dNode.value.setItemID(
                         "${parent}_${
-                            dNode.getItemID().split("_")[1].substring(
+                            dNode.value.getItemID().split("_")[1].substring(
                                 0,
-                                dNode.getItemID().split("_")[1].length - 1
+                                dNode.value.getItemID().split("_")[1].length - 1
                             )
                         }$hLast"
                     )
-                    Log.d("$TAG", "dNodeItemID: ${dNode.getItemID()}")
+                    Log.d("$TAG", "dNodeItemID: ${dNode.value.getItemID()}")
                     if (draggingView != null) {
-                        Log.d("$TAG", "dNodeItemID/targetItemID: ${targetItemID}")
+                        Log.d(
+                            "$TAG",
+                            "dNodeItemID/targetItem.value.getItemID(): ${targetItem.value.getItemID()}"
+                        )
                         saveDB(draggingNode as NodeModel<ItemModel>, draggingView, "update")
                     }
                 }
@@ -986,7 +1026,7 @@ class MindMapFragment : Fragment() {
                     }
                     if (response.body()?.error.toString() == "failed") {
                         Toast.makeText(
-                            mapContext, "이미 추천했습니다.", Toast.LENGTH_SHORT
+                            context!!, "이미 추천했습니다.", Toast.LENGTH_SHORT
                         ).show()
                     }
                 }
@@ -1002,31 +1042,23 @@ class MindMapFragment : Fragment() {
      * 공개/비공개 설정
      */
     private fun publicSet(b: Boolean) {
-        val setWindow: View =
-            LayoutInflater.from(mapContext).inflate(R.layout.window_map_public_set, null)
-        val publicSetWindow = PopupWindow(
-            setWindow,
-            ((requireContext().resources.displayMetrics.widthPixels) * 0.7).toInt(),
-            WindowManager.LayoutParams.WRAP_CONTENT
-        )
 
-        publicSetWindow.isFocusable = true
-        publicSetWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+        publicPopupWindow.isFocusable = true
+        publicPopupWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
 
-        publicSetWindow.update()
-        publicSetWindow.showAtLocation(setWindow, Gravity.CENTER, 0, 0)
+        publicPopupWindow.update()
+        publicPopupWindow.showAtLocation(publicPopupView, Gravity.CENTER, 0, 0)
 
-        publicSetWindow.isOutsideTouchable = true
-        publicSetWindow.setTouchInterceptor { _, motionEvent ->
+        publicPopupWindow.setTouchInterceptor { _, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_OUTSIDE) {
-                publicSetWindow.dismiss()
+                publicPopupWindow.dismiss()
             }
             false
         }
 
-        val setPublicText: TextView = setWindow.findViewById(R.id.passwordText)
-        val setPublicButton: Button = setWindow.findViewById(R.id.pwButton)
-        val setPassword: EditText = setWindow.findViewById(R.id.setPassword)
+        val setPublicText: TextView = publicPopupView.findViewById(R.id.passwordText)
+        val setPublicButton: Button = publicPopupView.findViewById(R.id.pwButton)
+        val setPassword: EditText = publicPopupView.findViewById(R.id.setPassword)
 
         if (!mapPublic && b) {
             setPassword.visibility = View.GONE
@@ -1060,11 +1092,11 @@ class MindMapFragment : Fragment() {
                             savePublic(0, password)
                             mapPublic = false
                             binding.publicButton.setImageResource(R.drawable.ic_mindmap_private)
-                            publicSetWindow.dismiss()
+                            publicPopupWindow.dismiss()
                         }
                         else -> {
                             Toast.makeText(
-                                mapContext, "패스워드가 비어있습니다.", Toast.LENGTH_SHORT
+                                context!!, "패스워드가 비어있습니다.", Toast.LENGTH_SHORT
                             ).show()
                         }
                     }
@@ -1073,21 +1105,21 @@ class MindMapFragment : Fragment() {
                     savePublic(1, "")
                     mapPublic = true
                     binding.publicButton.setImageResource(R.drawable.ic_mindmap_public)
-                    publicSetWindow.dismiss()
+                    publicPopupWindow.dismiss()
                 }
             } else {
                 when {
                     password != mapPassword || password == "" -> {
                         Toast.makeText(
-                            mapContext, "비밀번호가 틀렸습니다.", Toast.LENGTH_SHORT
+                            context!!, "비밀번호가 틀렸습니다.", Toast.LENGTH_SHORT
                         ).show()
                     }
                     else -> {
                         Toast.makeText(
-                            mapContext, "패스워드 입력을 완료했습니다.", Toast.LENGTH_SHORT
+                            context!!, "패스워드 입력을 완료했습니다.", Toast.LENGTH_SHORT
                         ).show()
                         binding.mapView.visibility = View.VISIBLE
-                        publicSetWindow.dismiss()
+                        publicPopupWindow.dismiss()
                     }
                 }
             }
@@ -1096,161 +1128,12 @@ class MindMapFragment : Fragment() {
 
     private fun getTreeLayoutManager(): TreeLayoutManager {
         val space_50dp = 30
-        val space_20dp = 50
+        val space_20dp = 80
         val line = getLine()
-        return CompactHorizonLeftAndRightLayoutManager(mapContext, space_50dp, space_20dp, line);
+        return CompactHorizonLeftAndRightLayoutManager(context!!, space_50dp, space_20dp, line)
     }
 
     private fun getLine(): BaseLine {
         return StraightLine(Color.parseColor("#055287"), 2)
-    }
-
-    /**
-     * 안드로이드에서 가져온 파일 URI를 받아 Path값으로 변환해준다.
-     */
-    private fun getRealPathFromURI(uri: Uri): String? {
-        val con = mapContext
-        try {
-            if (DocumentsContract.isDocumentUri(con, uri)) {
-                if (isExternalStorageDocument(uri)) {
-                    val docId = DocumentsContract.getDocumentId(uri)
-                    val split: Array<String?> = docId.split(":".toRegex()).toTypedArray()
-                    val type = split[0]
-                    return if ("primary".equals(type, ignoreCase = true)) {
-                        (Environment.getExternalStorageDirectory().toString() + "/"
-                                + split[1])
-                    } else {
-                        val SDcardpath =
-                            getRemovableSDCardPath(con)?.split("/Android".toRegex())!!
-                                .toTypedArray()[0]
-                        SDcardpath + "/" + split[1]
-                    }
-                } else if (isDownloadsDocument(uri)) {
-                    val id = DocumentsContract.getDocumentId(uri)
-                    val contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"),
-                        java.lang.Long.valueOf(id)
-                    )
-                    return getDataColumn(con!!, contentUri, null, null)
-                } else if (isMediaDocument(uri)) {
-                    val docId = DocumentsContract.getDocumentId(uri)
-                    val split: Array<String?> = docId.split(":".toRegex()).toTypedArray()
-                    val type = split[0]
-                    var contentUri: Uri? = null
-
-                    if ("image" == type) {
-                        contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    } else if ("video" == type) {
-                        contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                    } else if ("audio" == type) {
-                        contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-                    } else {
-                        //non-media files i.e documents and other files
-                        contentUri = MediaStore.Files.getContentUri("external")
-                        val selection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            MediaStore.MediaColumns.RELATIVE_PATH + "=?"
-                        } else "_id=?"
-                        val selectionArgs = arrayOf(Environment.DIRECTORY_DOCUMENTS)
-                        return getDataColumn(con!!, contentUri, selection, selectionArgs)
-                    }
-                    val selection = "_id=?"
-                    val selectionArgs = arrayOf(split[1])
-                    return getDataColumn(
-                        con!!, contentUri, selection,
-                        selectionArgs
-                    )
-                }
-            } else if (uri != null) {
-                if ("content".equals(uri.getScheme(), ignoreCase = true)) {
-                    // Return the remote address
-                    return if (isGooglePhotosUri(uri)) uri.getLastPathSegment() else getDataColumn(
-                        con!!,
-                        uri,
-                        null,
-                        null
-                    )
-                } else if ("file".equals(uri.getScheme(), ignoreCase = true)) {
-                    return uri.getPath()
-                }
-            }
-        } catch (e: IllegalArgumentException) {
-            return "notsupport"
-            throw RuntimeException(e)
-        }
-        return null
-    }
-
-    fun getRemovableSDCardPath(context: Context?): String? {
-        val storages = ContextCompat.getExternalFilesDirs(context!!, null)
-        return if (storages.size > 1 && storages[0] != null && storages[1] != null) storages[1].toString() else ""
-    }
-
-    fun getDataColumn(
-        context: Context, uri: Uri?,
-        selection: String?, selectionArgs: Array<String?>?
-    ): String? {
-        var cursor: Cursor? = null
-        val column = "_data"
-        val projection = arrayOf(column)
-        try {
-            cursor = context.contentResolver.query(
-                uri!!, projection,
-                selection, selectionArgs, null
-            )
-            if (cursor != null && cursor.moveToFirst()) {
-                val index = cursor.getColumnIndexOrThrow(column)
-                return cursor.getString(index)
-            }
-
-        } finally {
-            cursor?.close()
-        }
-        return null
-    }
-
-    fun isExternalStorageDocument(uri: Uri): Boolean {
-        return "com.android.externalstorage.documents" == uri
-            .authority
-    }
-
-
-    fun isDownloadsDocument(uri: Uri): Boolean {
-        return "com.android.providers.downloads.documents" == uri
-            .authority
-    }
-
-
-    fun isMediaDocument(uri: Uri): Boolean {
-        return "com.android.providers.media.documents" == uri
-            .authority
-    }
-
-
-    fun isGooglePhotosUri(uri: Uri): Boolean {
-        return "com.google.android.apps.photos.content" == uri
-            .authority
-    }
-}
-
-object FormDataUtil {
-
-    fun getBody(key: String, value: Any): MultipartBody.Part {
-        return MultipartBody.Part.createFormData(key, value.toString())
-    }
-
-    fun getImageBody(key: String, file: File): MultipartBody.Part {
-        return MultipartBody.Part.createFormData(
-            key,
-            filename = file.name,
-            body = file.asRequestBody("image/*".toMediaType())
-        )
-    }
-
-    fun getDocsBody(key: String, file: File): MultipartBody.Part {
-        return MultipartBody.Part.createFormData(
-            name = key,
-            filename = file.name,
-            body = file.asRequestBody("application/*".toMediaTypeOrNull())
-        )
     }
 }

@@ -99,7 +99,6 @@ class RegisterActivity : AppCompatActivity() {
                 finish()
             }
         }
-
         dialog.setPositiveButton("확인", dialog_litener)
         dialog.show()
     }

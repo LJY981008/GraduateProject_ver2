@@ -158,7 +158,7 @@ public abstract class TreeLayoutManager {
         if (targetNodeTag instanceof NodeModel) {
             currentNodeView.setTag(R.id.node_final_location, finalLocation);
             Log.d("Debug_Log", "TreeLayoutManager/LayoutAnimatePrepare: " +
-                    finalLocation.top + " and " + finalLocation.left);
+                    finalLocation.top + " and " + finalLocation.left+" " +targetNodeTag);
             if (targetNodeTag.equals(currentNode)) {
                 TreeViewLog.e(TAG, "Get target location!");
                 treeViewContainer.setTag(R.id.target_node_final_location, finalLocation);
