@@ -70,6 +70,7 @@ class MindMapFragment : Fragment() {
 
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var targetItem: NodeModel<ItemModel>
+    private lateinit var targetItemID: String
     private var downloadId: Long = -1L
     private lateinit var downloadManager: DownloadManager
 
@@ -347,7 +348,7 @@ class MindMapFragment : Fragment() {
         if (itemCount != null) {
             api.item_save(
                 itemID,
-                targetItem.value.getItemID(),
+                targetItemID,
                 itemTop,
                 itemLeft,
                 userID,
@@ -523,7 +524,6 @@ class MindMapFragment : Fragment() {
         }
 
         fileAddButton.setOnClickListener {
-            filePopupWindow.dismiss()
             resultLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
                 type = "*/*"
                 putExtra(
@@ -716,6 +716,9 @@ class MindMapFragment : Fragment() {
                     val ar: List<String> = fileName.split('.')
                     val ext = ar[ar.size - 1]
 
+                    val progressBar = filePopupView.findViewById<LinearLayout>(R.id.progressBar)
+                    progressBar.visibility = View.VISIBLE
+
                     // zip jpg png hwp pptx ppt
                     if (ext.compareTo("zip", true) == 0 || ext.compareTo("jpg", true) == 0 ||
                         ext.compareTo("png", true) == 0 || ext.compareTo("hwp", true) == 0 ||
@@ -731,11 +734,15 @@ class MindMapFragment : Fragment() {
                                         "$TAG",
                                         "item_file_save: 리스폰 완료 ${response.body()}"
                                     )
+                                    progressBar.visibility = View.GONE
+                                    filePopupWindow.dismiss()
                                     saveFileDB(targetItem, editor, adapter.mapEditable)
                                 }
 
                                 override fun onFailure(call: Call<String>, t: Throwable) {
                                     Log.d("$TAG", "item_file_save: 리스폰 실패 $t")
+                                    filePopupWindow.dismiss()
+                                    progressBar.visibility = View.GONE
                                 }
                             })
                     } else {
@@ -760,6 +767,7 @@ class MindMapFragment : Fragment() {
             val id = node.value.getItemID()
             if (id != "root") {
                 targetItem = node
+                targetItemID = node.value.getItemID()
                 val visible =
                     id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4"
                 binding.bottomNavigationView.menu.findItem(R.id.bottomMenu2).isVisible = visible
@@ -958,7 +966,7 @@ class MindMapFragment : Fragment() {
                     val hNode = hittingNode as NodeModel<ItemModel>
 
                     val hLast = if ((hittingNode.value as ItemModel).getPosition()) "L" else "R"
-                    targetItem = dNode
+                    targetItemID = dNode.value.getItemID()
                     val parent =
                         if (hNode.value.getItemID() != "root" && hNode.value.getItemID() != "grade1" && hNode.value.getItemID() != "grade2" &&
                             hNode.value.getItemID() != "grade3" && hNode.value.getItemID() != "grade4"
@@ -977,9 +985,9 @@ class MindMapFragment : Fragment() {
                     if (draggingView != null) {
                         Log.d(
                             "$TAG",
-                            "dNodeItemID/targetItem.value.getItemID(): ${targetItem.value.getItemID()}"
+                            "dNodeItemID/targetItem.value.getItemID(): ${targetItemID}"
                         )
-                        saveDB(draggingNode as NodeModel<ItemModel>, draggingView, "update")
+                        saveDB(draggingNode, draggingView, "update")
                     }
                 }
             }
