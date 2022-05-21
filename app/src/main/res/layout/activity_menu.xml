@@ -39,7 +39,7 @@
 
             <TextView
                 android:id="@+id/infoPost"
-                android:layout_width="match_parent"
+                android:layout_width="160sp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10sp"
                 android:fontFamily="@font/title_font2"
@@ -50,7 +50,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/infoRecycler"
                 android:layout_width="160sp"
-                android:layout_height="160sp"
+                android:layout_height="180sp"
                 android:layout_marginTop="10sp"
                 android:padding="10sp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -73,7 +73,7 @@
 
             <TextView
                 android:id="@+id/freePost"
-                android:layout_width="match_parent"
+                android:layout_width="160sp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10sp"
                 android:fontFamily="@font/title_font2"
@@ -84,7 +84,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/freeRecycler"
                 android:layout_width="160sp"
-                android:layout_height="160sp"
+                android:layout_height="180sp"
                 android:layout_marginTop="10sp"
                 android:padding="10sp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -94,7 +94,7 @@
 
         <LinearLayout
             android:id="@+id/annoLayout"
-            android:layout_width="160dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="50dp"
@@ -108,7 +108,7 @@
 
             <TextView
                 android:id="@+id/annoPost"
-                android:layout_width="match_parent"
+                android:layout_width="160sp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10sp"
                 android:fontFamily="@font/title_font2"
@@ -119,7 +119,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/annoRecycler"
                 android:layout_width="160sp"
-                android:layout_height="160sp"
+                android:layout_height="180sp"
                 android:layout_marginTop="10sp"
                 android:minHeight="160sp"
                 android:padding="10sp"
@@ -146,7 +146,7 @@
 
             <TextView
                 android:id="@+id/sugPost"
-                android:layout_width="match_parent"
+                android:layout_width="160sp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10sp"
                 android:fontFamily="@font/title_font2"
@@ -157,7 +157,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/sugRecycler"
                 android:layout_width="160sp"
-                android:layout_height="160sp"
+                android:layout_height="180sp"
                 android:layout_marginTop="10sp"
                 android:padding="10sp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
