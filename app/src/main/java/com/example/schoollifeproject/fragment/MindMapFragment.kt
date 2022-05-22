@@ -2,9 +2,11 @@ package com.example.schoollifeproject.fragment
 
 import android.app.Activity.RESULT_OK
 import android.app.DownloadManager
+import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Color
 import android.os.*
+import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
 import android.view.*
@@ -614,41 +616,72 @@ class MindMapFragment : Fragment() {
                     response: Response<ResponseBody>
                 ) {
                     Log.d("$TAG", "item_file_down: 리스폰 성공")
-                    val file = File(
-                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                        "${fileModel.getFileRealName()}"
+
+                    val mimeType = "${fileModel.getFileRealName()}".substring(
+                        "${fileModel.getFileRealName()}".indexOf(".") + 1,
+                        "${fileModel.getFileRealName()}".length
                     )
 
-                    var inputStream: InputStream = response.body()!!.byteStream()
-                    var outputStream: OutputStream = FileOutputStream(file)
-
                     try {
-                        val fileReader = ByteArray(4096)
-                        var fileSizeDownloaded: Long = 0
-
-
-                        while (true) {
-                            val read = inputStream.read(fileReader)
-
-                            if (read == -1) {
-                                break
+                        var inputStream: InputStream? = null
+                        var outputStream: OutputStream? = null
+                        try {
+                            val fileReader = ByteArray(4096)
+                            var fileSizeDownloaded: Long = 0
+                            inputStream = response.body()!!.byteStream()
+                            outputStream =
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                    val resolver = context!!.contentResolver
+                                    val uri = resolver.insert(
+                                        MediaStore.Files.getContentUri("external"),
+                                        ContentValues().apply {
+                                            put(
+                                                MediaStore.MediaColumns.DISPLAY_NAME,
+                                                "${fileModel.getFileRealName()}"
+                                            )
+                                            put(
+                                                MediaStore.MediaColumns.MIME_TYPE,
+                                                "application/$mimeType"
+                                            )
+                                            put(
+                                                MediaStore.MediaColumns.RELATIVE_PATH,
+                                                Environment.DIRECTORY_DOWNLOADS + File.separator + "UNINOTE"
+                                            )
+                                        })
+                                    uri?.let { resolver.openOutputStream(it) }
+                                } else {
+                                    val folderPath =
+                                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path + File.separator + "UNINOTE"
+                                    val folder = File(folderPath)
+                                    if (!folder.exists()) {
+                                        folder.mkdirs()
+                                    }
+                                    val file =
+                                        File(folderPath + File.separator + "${fileModel.getFileRealName()}")
+                                    if (file.exists()) {
+                                        file.delete()
+                                    }
+                                    FileOutputStream(file)
+                                }
+                            if (outputStream != null) {
+                                while (true) {
+                                    val read: Int? = inputStream?.read(fileReader)
+                                    if (read == -1) {
+                                        break
+                                    }
+                                    outputStream?.write(fileReader, 0, read!!)
+                                    fileSizeDownloaded += read?.toLong()!!
+                                }
+                                outputStream?.flush()
                             }
-
-                            outputStream.write(fileReader, 0, read)
-
-                            fileSizeDownloaded += read
+                        } catch (e: IOException) {
+                            Log.d("$TAG", "IOException: ${e.printStackTrace()}")
+                        } finally {
+                            inputStream?.close()
+                            outputStream?.close()
                         }
-
-                        outputStream.flush()
-
                     } catch (e: IOException) {
-                    } finally {
-                        if (inputStream != null) {
-                            inputStream.close()
-                        }
-                        if (outputStream != null) {
-                            outputStream.close()
-                        }
+                        Log.d("$TAG", "IOException: ${e.printStackTrace()}")
                     }
                 }
 
