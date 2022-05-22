@@ -60,8 +60,9 @@ class NoticeActivity : AppCompatActivity() {
         val date = intent.getStringExtra("date").toString()
         val content = intent.getStringExtra("content").toString()
         val userID = intent.getStringExtra("userID").toString()
-        type = intent.getIntExtra("type", 1)
+        type = intent.getIntExtra("type", 9999)
         key = intent.getIntExtra("key", 99999)
+        Log.d("??","$type")
 
         /**
          * 로그인아이디와 글쓴이가 같지 않을경우 글삭제 비활성화
@@ -100,7 +101,7 @@ class NoticeActivity : AppCompatActivity() {
             val intent = Intent(this.applicationContext, WriteNoticeActivity::class.java).apply {
                 putExtra("edit", 1)
                 putExtra("ID", userID)
-                putExtra("type", type)
+                putExtra("type", intent.getIntExtra("type", 99999))
                 putExtra("key", key)
                 putExtra("title", title)
                 putExtra("content", content)
