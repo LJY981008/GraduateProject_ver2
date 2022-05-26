@@ -73,6 +73,7 @@ class MindMapFragment : Fragment() {
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var targetItem: NodeModel<ItemModel>
     private lateinit var targetItemID: String
+    private lateinit var parentItemID: String
     private var downloadId: Long = -1L
     private lateinit var downloadManager: DownloadManager
 
@@ -351,6 +352,7 @@ class MindMapFragment : Fragment() {
             api.item_save(
                 itemID,
                 targetItemID,
+                parentItemID,
                 itemTop,
                 itemLeft,
                 userID,
@@ -802,6 +804,7 @@ class MindMapFragment : Fragment() {
             val id = node.value.getItemID()
             if (id != "root") {
                 targetItem = node
+                parentItemID = node.getParentNode().value.getItemID()
                 targetItemID = node.value.getItemID()
                 val visible =
                     id != "grade1" && id != "grade2" && id != "grade3" && id != "grade4"
@@ -1000,6 +1003,7 @@ class MindMapFragment : Fragment() {
                     val dNode = draggingNode as NodeModel<ItemModel>
                     val hNode = hittingNode as NodeModel<ItemModel>
 
+                    parentItemID = hNode.value.getItemID()
                     val hLast = if ((hittingNode.value as ItemModel).getPosition()) "L" else "R"
                     targetItemID = dNode.value.getItemID()
                     val parent =
