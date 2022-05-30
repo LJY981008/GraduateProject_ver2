@@ -26,8 +26,7 @@ import retrofit2.Response
 /**
  * 게시물 선택 실행 Activity
  * 작성자 : 이준영
- * */
-
+ **/
 class NoticeActivity : AppCompatActivity() {
     private var readList: MutableList<NoteReadContacts> = mutableListOf()
     private val readAdapter = NoteReadListAdapter(readList)
